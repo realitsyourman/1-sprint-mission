@@ -39,8 +39,8 @@ public class JCFChannelService implements ChannelService {
 
 
     @Override
-    public List<Channel> readAllChannels() {
-        return channelList;
+    public void readAllChannels() {
+        channelList.forEach(channel -> readChannelInfo(channel.getChannelName()));
     }
 
     @Override

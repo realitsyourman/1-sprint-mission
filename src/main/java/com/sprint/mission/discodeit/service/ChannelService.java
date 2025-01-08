@@ -10,7 +10,7 @@ public interface ChannelService {
 
     void readChannelInfo(String channelName);
 
-    List<Channel> readAllChannels();
+    void readAllChannels();
 
     Channel updateChannel(Channel channel);
 

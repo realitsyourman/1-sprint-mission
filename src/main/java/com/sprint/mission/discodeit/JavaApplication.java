@@ -14,14 +14,20 @@ public class JavaApplication {
         /**
          * ChannelService 인터페이스를 구현한 JCFChannelService 클래스를 사용
          */
+        List<Channel> channelList = new ArrayList<>();
         User user1 = new User("사용자1", "o134maka@gmail.com", "1234");
         User user2 = new User("사용자2", "dsadsd", "thisispassword");
-        Channel channel1 = new Channel("채널1", user1, Arrays.asList(user1, user2));
-        List<Channel> channelList = new ArrayList<>();
+        Channel codeit = new Channel("코드잇", user1, Arrays.asList(user1, user2));
+        Channel game = new Channel("게임방", user2, Arrays.asList(user2));
 
         ChannelService channelService = new JCFChannelService(channelList);
-        channelService.createChannel(channel1);
-        channelService.readChannelInfo("채널1");
+        channelService.createChannel(codeit);
+        channelService.readChannelInfo("코드잇");
+
+        System.out.println("\n모든 채널 출력");
+        channelService.createChannel(game);
         channelService.readAllChannels();
+
+
     }
 }
