@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ChannelService {
     void createChannel(Channel channel);
@@ -14,5 +15,7 @@ public interface ChannelService {
 
     void updateChannel(Channel exChannel, Channel updateChannel);
 
-    List<Channel> removeChannel(Channel removeChannel);
+    void removeChannel(String removeChannelString);
+
+    void kickUser(User kickUser);
 }

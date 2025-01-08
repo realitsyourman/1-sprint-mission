@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 public class JCFChannelService implements ChannelService {
     private final List<Channel> channelList;
@@ -34,6 +35,7 @@ public class JCFChannelService implements ChannelService {
                     System.out.println("채널 이름: " + readChannel.getChannelName());
                     System.out.println("채널 소유자: " + readChannel.getChannelOwnerUser().getUserName());
                     System.out.println("채널 생성시간: " + createdAt);
+                    System.out.println("채널 UUID: " + readChannel.getChannelId());
                 });
     }
 
@@ -55,9 +57,12 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public List<Channel> removeChannel(Channel removeChannel) {
-        return channelList.stream()
-                .filter(removalChannel -> removalChannel.getChannelId().equals(removeChannel.getChannelId()))
-                .toList();
+    public void removeChannel(String removeChannelName) {
+        channelList.removeIf(removeCh -> removeCh.getChannelName().equals(removeChannelName));
+    }
+
+    @Override
+    public void kickUser(User kickUser) {
+
     }
 }

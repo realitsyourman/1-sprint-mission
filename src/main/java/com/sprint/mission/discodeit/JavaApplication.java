@@ -16,7 +16,7 @@ public class JavaApplication {
          */
         List<Channel> channelList = new ArrayList<>();
         User user1 = new User("사용자1", "o134maka@gmail.com", "1234");
-        User user2 = new User("사용자2", "dsadsd", "thisispassword");
+        User user2 = new User("사용자2", "dsadsd@naver.com", "thisispassword");
         Channel codeit = new Channel("코드잇", user1, Arrays.asList(user1, user2));
         Channel game = new Channel("게임방", user2, Arrays.asList(user2));
 
@@ -33,5 +33,9 @@ public class JavaApplication {
         channelService.updateChannel(game ,updateGame); // 업데이트
         channelService.readAllChannels();
 
+        System.out.println("\n특정 채널 삭제");
+        channelService.removeChannel(updateGame.getChannelName());
+        channelService.readAllChannels();
+        System.out.println();
     }
 }

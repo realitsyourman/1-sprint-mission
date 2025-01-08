@@ -9,5 +9,4 @@ public interface UserService {
     User readUserInfo(User readUser);
     List<User> readAllUsers();
     User updateUser(User updateUser);
-    void kickUser(User kickUser);
 }
