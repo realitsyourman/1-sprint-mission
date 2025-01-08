@@ -28,6 +28,10 @@ public class JavaApplication {
         channelService.createChannel(game);
         channelService.readAllChannels();
 
+        System.out.println("\n특정 채널 수정");
+        Channel updateGame = new Channel("게임 디코방", user1, Arrays.asList(user1)); // 업데이트할 채널
+        channelService.updateChannel(game ,updateGame); // 업데이트
+        channelService.readAllChannels();
 
     }
 }

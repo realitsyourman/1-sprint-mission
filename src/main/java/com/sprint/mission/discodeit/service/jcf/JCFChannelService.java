@@ -44,15 +44,13 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public Channel updateChannel(Channel channel) {
-        return (Channel) channelList.stream()
-                .filter(updateChannel -> updateChannel.getChannelId().equals(channel.getChannelId()))
-                .map(updateChannel -> {
-                    updateChannel.updateChannelName(channel.getChannelName());
-                    updateChannel.updateOwnerUser(channel.getChannelOwnerUser());
-                    updateChannel.updateChannelUsers(channel.getChannelUsers());
-
-                    return updateChannel;
+    public void updateChannel(Channel exChannel ,Channel updateChannel) {
+        channelList.stream()
+                .filter(exCh -> exCh.getChannelId().equals(exChannel.getChannelId()))
+                .forEach(upCh -> {
+                    upCh.updateChannelName(updateChannel.getChannelName());
+                    upCh.updateOwnerUser(updateChannel.getChannelOwnerUser());
+                    upCh.updateChannelUsers(updateChannel.getChannelUsers());
                 });
     }
 

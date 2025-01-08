@@ -12,7 +12,7 @@ public interface ChannelService {
 
     void readAllChannels();
 
-    Channel updateChannel(Channel channel);
+    void updateChannel(Channel exChannel, Channel updateChannel);
 
     List<Channel> removeChannel(Channel removeChannel);
 }

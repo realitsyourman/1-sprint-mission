@@ -31,11 +31,18 @@ public class Channel {
         return this.channelOwnerUser;
     }
 
+    public User addChannelUser(User addChannelUser) {
+        this.channelUsers.add(addChannelUser);
+        this.updatedAt = System.currentTimeMillis();
+        return addChannelUser;
+    }
+
     public List<User> updateChannelUsers(List<User> updateChannelUsers) {
         this.channelUsers = updateChannelUsers;
         this.updatedAt = System.currentTimeMillis();
         return this.channelUsers;
     }
+
 
     public UUID getChannelId() {
         return channelId;
