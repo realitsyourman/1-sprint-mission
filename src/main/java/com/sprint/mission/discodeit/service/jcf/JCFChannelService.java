@@ -7,7 +7,6 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 public class JCFChannelService implements ChannelService {
     private final List<Channel> channelList;
