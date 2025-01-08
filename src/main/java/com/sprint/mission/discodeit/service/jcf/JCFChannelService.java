@@ -1,0 +1,57 @@
+package com.sprint.mission.discodeit.service.jcf;
+
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.service.ChannelService;
+
+import java.util.List;
+
+public class JCFChannelService implements ChannelService {
+    private final List<Channel> channelList;
+
+    public JCFChannelService(List<Channel> channelList) {
+        this.channelList = channelList;
+    }
+
+    @Override
+    public void createChannel(Channel channel) {
+        channelList.add(channel);
+    }
+
+    @Override
+    public void readChannelInfo(String channelName) {
+        channelList.stream()
+                .filter(readChannel -> readChannel.getChannelName().equals(channelName))
+                .forEach(readChannel -> {
+                    System.out.println("채널 이름: " + readChannel.getChannelName());
+                    System.out.println("채널 소유자: " + readChannel.getChannelOwnerUser().getUserName());
+                    System.out.println("채널 생성시간: " + readChannel.getCreatedAt());
+                });
+    }
+
+
+    @Override
+    public List<Channel> readAllChannels() {
+        return channelList;
+    }
+
+    @Override
+    public Channel updateChannel(Channel channel) {
+        return (Channel) channelList.stream()
+                .filter(updateChannel -> updateChannel.getChannelId().equals(channel.getChannelId()))
+                .map(updateChannel -> {
+                    updateChannel.updateChannelName(channel.getChannelName());
+                    updateChannel.updateOwnerUser(channel.getChannelOwnerUser());
+                    updateChannel.updateChannelUsers(channel.getChannelUsers());
+
+                    return updateChannel;
+                });
+    }
+
+    @Override
+    public List<Channel> removeChannel(Channel removeChannel) {
+        return channelList.stream()
+                .filter(removalChannel -> removalChannel.getChannelId().equals(removeChannel.getChannelId()))
+                .toList();
+    }
+}
