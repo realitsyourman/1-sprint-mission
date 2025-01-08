@@ -6,16 +6,24 @@ public class Message {
     private final UUID id;
     private Long createdAt;
     private Long updatedAt;
+    private String messageTitle;
     private String messageContent;
     private User messageSendUser;
     private User messageReceiveUser;
 
-    public Message(String messageContent, User messageSendUser, User messageReceiveUser) {
+    public Message(String title ,String messageContent, User messageSendUser, User messageReceiveUser) {
         this.id = UUID.randomUUID();
+        this.messageTitle = title;
         this.messageContent = messageContent;
         this.messageSendUser = messageSendUser;
         this.messageReceiveUser = messageReceiveUser;
         this.createdAt = System.currentTimeMillis();
+    }
+
+    public String updateMessageTitle(String updateMessageTitle) {
+        this.messageTitle = updateMessageTitle;
+        this.updatedAt = System.currentTimeMillis();
+        return this.messageContent;
     }
 
     public String updateMessageContent(String updateMessageContent) {
@@ -36,6 +44,9 @@ public class Message {
         return this.messageReceiveUser;
     }
 
+    public String getMessageTitle() {
+        return messageTitle;
+    }
 
     public UUID getId() {
         return id;

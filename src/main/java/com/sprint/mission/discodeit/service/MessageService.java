@@ -2,12 +2,14 @@ package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.entity.Message;
 
-import java.util.List;
-
 public interface MessageService {
-    Message createMessage(Message sendMessage);
-    Message readMessage(Message readMessage);
-    List<Message> readAllMessages();
-    Message updateMessage(Message updateMessage);
+    void sendMessage(Message sendMessage);
+
+    void readMessage(Message readMessage);
+
+    void readAllMessages();
+
+    Message updateMessage(Message exMessage ,Message updateMessage);
+
     void removeMessage(Message garbageMessage);
 }

@@ -34,7 +34,7 @@ public class JCFChannelService implements ChannelService {
                     System.out.println("채널 이름: " + readChannel.getChannelName());
                     System.out.println("채널 소유자: " + readChannel.getChannelOwnerUser().getUserName());
                     System.out.println("채널 생성시간: " + createdAt);
-                    System.out.println("채널 UUID: " + readChannel.getChannelId());
+                    //System.out.println("채널 UUID: " + readChannel.getChannelId());
                 });
     }
 
