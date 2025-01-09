@@ -1,11 +1,12 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.MessageService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class JCFMessageService implements MessageService {
     private final List<Message> messagesList;
@@ -14,39 +15,41 @@ public class JCFMessageService implements MessageService {
         this.messagesList = messagesList;
     }
 
-    @Override
-    public void sendMessage(Message sendMessage) {
-        messagesList.add(sendMessage);
+    public JCFMessageService() {
+        this.messagesList = new ArrayList<>();
     }
 
     @Override
-    public void readMessage(Message message) {
-        Date data = new Date();
-        data.setTime(message.getCreatedAt());
-        String createdAt = new SimpleDateFormat("HH:mm:ss").format(data);
-
-        System.out.println(
-                "(" + message.getMessageSendUser().getUserName() +") " + message.getMessageTitle() + "\n"
-                + message.getMessageContent() + " (" + message.getMessageReceiveUser().getUserName() + ", " + createdAt +")"
-        );
+    public Message sendMessage(String title, String content, User sender, User receiver) {
+        Message message = new Message(title, content, sender, receiver);
+        messagesList.add(message);
+        return message;
     }
 
     @Override
-    public void readAllMessages() {
-        messagesList.forEach(this::readMessage);
+    public Message getMessageById(UUID messageId) {
+        return messagesList.stream()
+                .filter(message -> message.getId().equals(messageId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("찾는 메세지가 없습니다."));
     }
 
     @Override
-    public Message updateMessage(Message exMessage, Message updateMessage) {
-        exMessage.updateMessageTitle(updateMessage.getMessageTitle());
-        exMessage.updateMessageContent(updateMessage.getMessageContent());
-
-        sendMessage(exMessage);
-        return exMessage;
+    public List<Message> getAllMessages() {
+        return messagesList.stream().toList();
     }
 
     @Override
-    public void removeMessage(Message garbageMessage) {
-        messagesList.remove(garbageMessage);
+    public Message updateMessage(UUID messageId, String newTitle, String newContent) {
+        Message message = getMessageById(messageId);
+        message.updateMessage(newTitle, newContent);
+
+        return message;
+    }
+
+    @Override
+    public void deleteMessage(UUID messageId) {
+        Message findMessage = getMessageById(messageId);
+        messagesList.remove(findMessage);
     }
 }

@@ -2,66 +2,100 @@ package com.sprint.mission.discodeit.entity;
 
 import java.util.UUID;
 
-public class Message {
-    private final UUID id;
-    private Long createdAt;
-    private Long updatedAt;
+public class Message extends BaseObject {
     private String messageTitle;
     private String messageContent;
     private User messageSendUser;
     private User messageReceiveUser;
 
-    public Message(String title ,String messageContent, User messageSendUser, User messageReceiveUser) {
-        checkMessageContent(messageContent);
-        checkSenderAndReciver(messageSendUser, messageReceiveUser);
-        this.id = UUID.randomUUID();
-        this.messageTitle = title;
-        this.messageContent = messageContent;
-        this.messageSendUser = messageSendUser;
-        this.messageReceiveUser = messageReceiveUser;
-        this.createdAt = System.currentTimeMillis();
+    public Message(String title, String messageContent, User messageSendUser, User messageReceiveUser) {
+        super();
+        setMessageTitle(title);
+        setMessageContent(messageContent);
+        setSenderAndReceiver(messageSendUser, messageReceiveUser);
     }
 
-    public boolean checkMessageContent(String messageContent) {
-        if(messageContent == null || messageContent.isEmpty()) {
+    private void setMessageTitle(String title) {
+        checkMessageContent(title);
+        this.messageTitle = title;
+        setUpdatedAt();
+    }
+
+    private void setMessageContent(String messageContent) {
+        checkMessageContent(messageContent);
+        this.messageContent = messageContent;
+        setUpdatedAt();
+    }
+
+    private void setSenderAndReceiver(User sender, User receiver) {
+        checkSenderAndReceiver(sender, receiver);
+        this.messageSendUser = sender;
+        this.messageReceiveUser = receiver;
+        setUpdatedAt();
+    }
+
+    private void setSeder(User sender) {
+        checkSender(sender);
+        this.messageSendUser = sender;
+        setUpdatedAt();
+    }
+
+    private void setReceiver(User receiver) {
+        checkReceiver(receiver);
+        this.messageReceiveUser = receiver;
+        setUpdatedAt();
+    }
+
+
+    private void checkMessageContent(String messageContent) {
+        if (messageContent == null || messageContent.isEmpty()) {
             throw new IllegalArgumentException("메시지 내용을 작성해주세요.");
         }
 
-        return true;
     }
 
-    public boolean checkSenderAndReciver(User messageSendUser, User messageReceiveUser) {
-        if(messageSendUser == null || messageReceiveUser == null) {
+    private void checkSenderAndReceiver(User messageSendUser, User messageReceiveUser) {
+        if (messageSendUser == null || messageReceiveUser == null) {
             throw new IllegalArgumentException("메시지를 보내는 사람과 받는 사람을 작성해주세요.");
-        }
-        else if(messageSendUser.equals(messageReceiveUser)) {
+        } else if (messageSendUser.equals(messageReceiveUser)) {
             throw new IllegalArgumentException("메시지를 보내는 사람과 받는 사람이 같습니다.");
         }
+    }
 
-        return true;
+    private void checkSender(User sender) {
+        if(sender == null) {
+            throw new IllegalArgumentException("보낸 사람을 다시 지정하세요.");
+        }
+    }
+
+    private void checkReceiver(User receiver) {
+        if(receiver == null) {
+            throw new IllegalArgumentException("받는 사람을 다시 지정하세요.");
+        }
     }
 
     public String updateMessageTitle(String updateMessageTitle) {
-        this.messageTitle = updateMessageTitle;
-        this.updatedAt = System.currentTimeMillis();
-        return this.messageContent;
+        setMessageTitle(updateMessageTitle);
+        return this.messageTitle;
     }
 
     public String updateMessageContent(String updateMessageContent) {
-        this.messageContent = updateMessageContent;
-        this.updatedAt = System.currentTimeMillis();
+        setMessageContent(updateMessageContent);
         return this.messageContent;
     }
 
+    public void updateMessage(String title, String content) {
+        setMessageTitle(title);
+        setMessageContent(content);
+    }
+
     public User updateSendUser(User updateSendUser) {
-        this.messageSendUser = updateSendUser;
-        this.updatedAt = System.currentTimeMillis();
+        setSeder(updateSendUser);
         return this.messageSendUser;
     }
 
-    public User receiveUser(User updateReceiveUser) {
-        this.messageReceiveUser = updateReceiveUser;
-        this.updatedAt = System.currentTimeMillis();
+    public User updateReceiveUser(User updateReceiveUser) {
+        setReceiver(updateReceiveUser);
         return this.messageReceiveUser;
     }
 
@@ -69,8 +103,8 @@ public class Message {
         return messageTitle;
     }
 
-    public UUID getId() {
-        return id;
+    public UUID getMessageId() {
+        return getId();
     }
 
     public String getMessageContent() {
@@ -86,10 +120,22 @@ public class Message {
     }
 
     public Long getCreatedAt() {
-        return createdAt;
+        return getCreatedAtBaseObject();
     }
 
     public Long getUpdatedAt() {
-        return updatedAt;
+        return getUpdatedAtBaseObject();
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "messageTitle='" + messageTitle + '\'' +
+                ", messageContent='" + messageContent + '\'' +
+                ", messageSendUser=" + messageSendUser +
+                ", messageReceiveUser=" + messageReceiveUser +
+                ", createdAt=" + getCreatedAt() +
+                ", updatedAt=" + getUpdatedAt() +
+                '}';
     }
 }

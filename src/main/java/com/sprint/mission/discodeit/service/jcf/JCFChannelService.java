@@ -4,9 +4,9 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class JCFChannelService implements ChannelService {
     private final List<Channel> channelList;
@@ -15,56 +15,71 @@ public class JCFChannelService implements ChannelService {
         this.channelList = channelList;
     }
 
+    public JCFChannelService() {
+        channelList = new ArrayList<>();
+    }
+
     @Override
-    public void createChannel(Channel channel) {
+    public Channel createChannel(String channelName, User owner, List<User> userList) {
+        Channel channel = new Channel(channelName, owner, userList);
         channelList.add(channel);
+        return channel;
     }
 
     @Override
-    public void readChannelInfo(String channelName) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date data = new Date();
-
-        channelList.stream()
+    public Channel getChannelByName(String channelName) {
+        return channelList.stream()
                 .filter(readChannel -> readChannel.getChannelName().equals(channelName))
-                .forEach(readChannel -> {
-                    data.setTime(readChannel.getCreatedAt());
-                    String createdAt = simpleDateFormat.format(data); /* 유닉스 타임스탬프 변경 */
-
-                    System.out.println("채널 이름: " + readChannel.getChannelName());
-                    System.out.println("채널 소유자: " + readChannel.getChannelOwnerUser().getUserName());
-                    System.out.println("채널 생성시간: " + createdAt);
-                    //System.out.println("채널 UUID: " + readChannel.getChannelId());
-                });
-    }
-
-
-    @Override
-    public void readAllChannels() {
-        channelList.forEach(channel -> readChannelInfo(channel.getChannelName()));
-    }
-
-    @Override
-    public Channel updateChannel(Channel exChannel ,Channel updateChannel) {
-        Channel upCh = channelList.stream()
-                .filter(exCh -> exCh.getChannelId().equals(exChannel.getChannelId()))
                 .findFirst()
-                .orElseThrow(IllegalArgumentException::new);
+                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없습니다."));
+    }
 
-        upCh.updateChannelName(updateChannel.getChannelName());
-        upCh.updateOwnerUser(updateChannel.getChannelOwnerUser());
-        upCh.updateChannelUsers(updateChannel.getChannelUsers());
+    @Override
+    public Channel findChannelById(UUID id) {
+        return channelList.stream()
+                .filter(ch -> ch.getChannelId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없어요."));
+    }
 
-        return upCh;
+
+    @Override
+    public List<Channel> getAllChannels() {
+        return channelList.stream()
+                .toList();
+    }
+
+    @Override
+    public Channel updateChannel(Channel channelToUpdate) {
+        Channel exChannel = findChannelById(channelToUpdate.getChannelId());
+        exChannel.updateChannelName(channelToUpdate.getChannelName());
+        exChannel.updateOwnerUser(channelToUpdate.getChannelOwnerUser());
+        exChannel.getChannelUsers().addAll(channelToUpdate.getChannelUsers());
+
+        return exChannel;
     }
 
     @Override
     public void removeChannel(String removeChannelName) {
-        channelList.removeIf(removeCh -> removeCh.getChannelName().equals(removeChannelName));
+        Channel findChannel = getChannelByName(removeChannelName);
+        channelList.remove(findChannel);
     }
 
     @Override
-    public void kickUser(User kickUser) {
+    public void kickUserChannel(String channelName, User kickUser) {
+        Channel findChannel = getChannelByName(channelName);
 
+        if(!findChannel.getChannelUsers().contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
+            throw new IllegalArgumentException("강퇴할 유저가 없습니다.");
+        } else if(findChannel.getChannelOwnerUser().equals(kickUser)) {
+            findChannel.removeUser(findChannel.getChannelOwnerUser());
+            findNextOwnerUser(findChannel);
+        }
+    }
+    private void findNextOwnerUser(Channel findChannel) {
+        User nextOwnerUser = findChannel.getChannelUsers().stream()
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("채널에 아무도 없습니다."));
+        findChannel.updateOwnerUser(nextOwnerUser);
     }
 }

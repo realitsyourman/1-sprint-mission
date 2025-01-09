@@ -3,7 +3,9 @@ package com.sprint.mission.discodeit.service.jcf;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class JCFUserService implements UserService {
     private final List<User> userList;
@@ -12,42 +14,50 @@ public class JCFUserService implements UserService {
         this.userList = userList;
     }
 
-    @Override
-    public User createUser(User createUser) {
-        userList.add(createUser);
-        return createUser;
+    public JCFUserService() {
+        userList = new ArrayList<>();
     }
 
     @Override
-    public void readUserInfo(User readUser) {
-        System.out.println("유저 이름: " + readUser.getUserName());
-        System.out.println("유저 이메일: " + readUser.getUserEmail());
+    public User createUser(String userName, String userEmail, String userPassword) {
+        User user = new User(userName, userEmail, userPassword);
+        userList.add(user);
+
+        return user;
     }
 
     @Override
-    public void readAllUsers() {
-        userList.forEach(this::readUserInfo);
-    }
-
-    @Override
-    public User updateUser(User exUser ,User updateUser) {
-        User findUser = userList.stream()
-                .filter(users -> users.getUserId().equals(exUser.getUserId()))
+    public User getUserById(UUID userId) {
+        return userList.stream()
+                .filter(user -> user.getUserId().equals(userId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("해당 유저가 존재하지 않음"));
+                .orElseThrow(() -> new IllegalArgumentException("찾는 유저가 없습니다."));
+    }
 
-        findUser.updateName(updateUser.getUserName());
-        findUser.updateEmail(updateUser.getUserEmail());
-        findUser.updatePassword(updateUser.getUserPassword());
+    @Override
+    public List<User> getAllUsers() {
+        return userList.stream().toList();
+    }
 
-        deleteUser(exUser);
+    @Override
+    public User updateUser(UUID userId, String newName, String newEmail, String newPassword) {
+        User findUser = getUserById(userId);
+
+        findUser.updateName(newName);
+        findUser.updateEmail(newEmail);
+        findUser.updatePassword(newPassword);
 
         return findUser;
     }
 
     @Override
-    public User deleteUser(User deleteUser) {
-        userList.remove(deleteUser);
-        return deleteUser;
+    public void deleteUser(UUID userId) {
+        User removeUser = getUserById(userId);
+        if(removeUser != null) {
+            userList.remove(removeUser);
+        }
+        else {
+            throw new IllegalArgumentException("삭제할 유저가 없습니다.");
+        }
     }
 }

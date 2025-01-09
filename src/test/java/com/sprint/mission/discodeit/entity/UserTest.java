@@ -1,48 +1,65 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.jcf.JCFUserService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UserTest {
-    @Test
-    @DisplayName("유저가 제대로 생성되었는지 확인")
-    void createUser() {
-        User user = new User("userId", "test@email.com", "testPassword");
-        assertEquals("userId", user.getUserName());
-        assertEquals("test@email.com", user.getUserEmail());
-        assertEquals("testPassword", user.getUserPassword());
+    UserService userService = new JCFUserService();
+
+    @BeforeEach
+    void init() {
+        userService = new JCFUserService();
     }
 
     @Test
-    @DisplayName("잘못된 유저 생성 검증(일부러 예외 발생)")
-    void createUserException() {
-        User user = new User("", "testemail.com", "word");
-        assertEquals("", user.getUserName());
-        assertEquals("testemail.com", user.getUserEmail());
-        assertEquals("word", user.getUserPassword());
+    @DisplayName("유저가 제대로 생성되었는지 확인")
+    void createUser() {
+        User user = userService.createUser("test1", "test@test.com", "testpasswrod");
+
+        assertNotNull(user);
+        assertNotNull(user.getUserId());
+        assertEquals("test1", user.getUserName());
+        assertEquals("test@test.com", user.getUserEmail());
+        assertEquals("testpasswrod", user.getUserPassword());
+
     }
 
     @Test
     @DisplayName("이름이 없을 때 검증")
     void createNoneUserName() {
-        assertThrows(IllegalArgumentException.class, () -> new User("", "testEmail", "testPassword"));
+        String name = "";
+        String email = "test@naver.com";
+        String pw = "1231234";
+
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(name, email, pw));
     }
 
     @Test
     @DisplayName("이메일이 없거나 잘못된 형식 검증")
     void checkUserEmailNoneOrWrong() {
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "", "dqwddq))"));
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "testEmailnavercom", "dqwddq"));
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "testEmail@navercom", "dqwddq"));
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "sdasdsgmail.com", "d1234124"));
+        String name = "name";
+        String email1 = "testnaver.com";
+        String email2 = "test@navercom";
+        String pw = "1231234";
+
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(name, email1, pw));
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(name, email2, pw));
     }
 
     @Test
     @DisplayName("비밀번호가 없거나 길이가 6보다 작을 경우 검증")
     void checkUserPasswordNoneOrShort() {
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "testEmail", ""));
-        assertThrows(IllegalArgumentException.class, () -> new User("testUser", "testEmail", "12345"));
+        String name = "name";
+        String email = "test@naver.com";
+        String pw1 = "";
+        String pw2 = "123";
+
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(name, email, pw1));
+        assertThrows(IllegalArgumentException.class, () -> userService.createUser(name, email, pw2));
     }
 }
