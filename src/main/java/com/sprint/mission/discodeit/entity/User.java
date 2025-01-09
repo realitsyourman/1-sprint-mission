@@ -11,11 +11,41 @@ public class User {
     private String userPassword;
 
     public User(String userName, String userEmail, String userPassword) {
+        checkUserName(userName);
+        checkUserEmail(userEmail);
+        checkUserPassword(userPassword);
         this.userId = UUID.randomUUID();
         this.userName = userName;
         this.userEmail = userEmail;
         this.userPassword = userPassword;
         this.createdAt = System.currentTimeMillis();
+    }
+
+    public boolean checkUserName(String userName) {
+        if(userName == null || userName.isEmpty()) {
+            throw new IllegalArgumentException("이름을 작성해주세요.");
+        }
+        return true;
+    }
+
+    public boolean checkUserEmail(String userEmail) {
+        final String EMAIL_REGEX = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z0-9]+$";
+
+        if(userEmail == null || userEmail.isEmpty()) {
+            throw new IllegalArgumentException("이메일을 적어주세요.");
+        }
+        else if(!userEmail.matches(EMAIL_REGEX)) {
+            throw new IllegalArgumentException("이메일 형식이 잘못되었습니다.");
+        }
+
+        return true;
+    }
+
+    public boolean checkUserPassword(String userPassword) {
+        if(userPassword == null || userPassword.length() < 6) {
+            throw new IllegalArgumentException("비밀번호가 잘못되었습니다.");
+        }
+        return true;
     }
 
     public String updateName(String updateName) {
@@ -30,7 +60,7 @@ public class User {
         return this.userEmail;
     }
 
-    public String password(String updatePassword) {
+    public String updatePassword(String updatePassword) {
         this.userPassword = updatePassword;
         this.updatedAt = System.currentTimeMillis();
         return this.userPassword;
@@ -59,4 +89,5 @@ public class User {
     public Long getUpdatedAt() {
         return updatedAt;
     }
+
 }

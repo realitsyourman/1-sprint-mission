@@ -12,12 +12,33 @@ public class Message {
     private User messageReceiveUser;
 
     public Message(String title ,String messageContent, User messageSendUser, User messageReceiveUser) {
+        checkMessageContent(messageContent);
+        checkSenderAndReciver(messageSendUser, messageReceiveUser);
         this.id = UUID.randomUUID();
         this.messageTitle = title;
         this.messageContent = messageContent;
         this.messageSendUser = messageSendUser;
         this.messageReceiveUser = messageReceiveUser;
         this.createdAt = System.currentTimeMillis();
+    }
+
+    public boolean checkMessageContent(String messageContent) {
+        if(messageContent == null || messageContent.isEmpty()) {
+            throw new IllegalArgumentException("메시지 내용을 작성해주세요.");
+        }
+
+        return true;
+    }
+
+    public boolean checkSenderAndReciver(User messageSendUser, User messageReceiveUser) {
+        if(messageSendUser == null || messageReceiveUser == null) {
+            throw new IllegalArgumentException("메시지를 보내는 사람과 받는 사람을 작성해주세요.");
+        }
+        else if(messageSendUser.equals(messageReceiveUser)) {
+            throw new IllegalArgumentException("메시지를 보내는 사람과 받는 사람이 같습니다.");
+        }
+
+        return true;
     }
 
     public String updateMessageTitle(String updateMessageTitle) {
