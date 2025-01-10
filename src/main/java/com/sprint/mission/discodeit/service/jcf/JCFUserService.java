@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
+import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.ArrayList;
@@ -9,18 +11,21 @@ import java.util.UUID;
 
 public class JCFUserService implements UserService {
     private final List<User> userList;
+    private final EntityFactory entityFactory;
 
-    public JCFUserService(List<User> userList) {
-        this.userList = userList;
+    public JCFUserService(EntityFactory entityFactory, List<User> userList) {
+        this.entityFactory = entityFactory;
+        this.userList = new ArrayList<>(userList);
     }
 
     public JCFUserService() {
+        this.entityFactory = new BaseEntityFactory();
         userList = new ArrayList<>();
     }
 
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
-        User user = new User(userName, userEmail, userPassword);
+        User user = entityFactory.createUser(userName, userEmail, userPassword);
         userList.add(user);
 
         return user;
@@ -36,7 +41,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public List<User> getAllUsers() {
-        return userList.stream().toList();
+        return new ArrayList<>(userList);
     }
 
     @Override

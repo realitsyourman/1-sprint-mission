@@ -15,10 +15,6 @@ public class User extends BaseObject {
         setUserPassword(userPassword);
     }
 
-    public User createUser() {
-        return new User(null, null, null);
-    }
-
     private void setUserName(String userName) {
         checkUserName(userName);
         this.userName = userName;

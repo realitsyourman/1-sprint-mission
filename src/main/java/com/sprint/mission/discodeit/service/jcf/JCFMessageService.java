@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
+import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.MessageService;
 
 import java.util.ArrayList;
@@ -10,18 +12,21 @@ import java.util.UUID;
 
 public class JCFMessageService implements MessageService {
     private final List<Message> messagesList;
+    private final EntityFactory entityFactory;
 
-    public JCFMessageService(List<Message> messagesList) {
+    public JCFMessageService(EntityFactory entityFactory, List<Message> messagesList) {
+        this.entityFactory = entityFactory;
         this.messagesList = messagesList;
     }
 
     public JCFMessageService() {
+        this.entityFactory = new BaseEntityFactory();
         this.messagesList = new ArrayList<>();
     }
 
     @Override
-    public Message sendMessage(String title, String content, User sender, User receiver) {
-        Message message = new Message(title, content, sender, receiver);
+    public Message createMessage(String title, String content, User sender, User receiver) {
+        Message message = entityFactory.createMessage(title, content, sender, receiver);
         messagesList.add(message);
         return message;
     }

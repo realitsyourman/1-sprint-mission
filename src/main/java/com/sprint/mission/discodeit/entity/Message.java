@@ -34,7 +34,7 @@ public class Message extends BaseObject {
         setUpdatedAt();
     }
 
-    private void setSeder(User sender) {
+    private void setSender(User sender) {
         checkSender(sender);
         this.messageSendUser = sender;
         setUpdatedAt();
@@ -90,7 +90,7 @@ public class Message extends BaseObject {
     }
 
     public User updateSendUser(User updateSendUser) {
-        setSeder(updateSendUser);
+        setSender(updateSendUser);
         return this.messageSendUser;
     }
 

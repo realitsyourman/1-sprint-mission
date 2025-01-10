@@ -22,7 +22,7 @@ class MessageTest {
     @Test
     @DisplayName("메세지가 제대로 생성되었는지 확인")
     void checkMessageContentNone() {
-        Message message = messageService.sendMessage("title", "content", sender, receiver);
+        Message message = messageService.createMessage("title", "content", sender, receiver);
 
         Assertions.assertEquals("title", message.getMessageTitle());
         Assertions.assertEquals("content", message.getMessageContent());
@@ -33,9 +33,9 @@ class MessageTest {
     @Test
     @DisplayName("메세지 제목이나 내용이 비어있을 때 검증")
     void checkMessageContentNoneException() {
-        assertThrows(IllegalArgumentException.class, () -> messageService.sendMessage("", "content", sender, receiver));
+        assertThrows(IllegalArgumentException.class, () -> messageService.createMessage("", "content", sender, receiver));
 
-        assertThrows(IllegalArgumentException.class, () -> messageService.sendMessage("title", "", sender, receiver));
+        assertThrows(IllegalArgumentException.class, () -> messageService.createMessage("title", "", sender, receiver));
     }
 
     @Test

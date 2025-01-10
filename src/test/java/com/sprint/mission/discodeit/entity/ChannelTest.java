@@ -49,4 +49,14 @@ public class ChannelTest {
 
         Assertions.assertThrows(IllegalAccessError.class, () -> channelService.createChannel(chName, null, userList));
     }
+
+    @Test
+    @DisplayName("채널에서 강퇴")
+    void kickUser() {
+        User user = new User("user1", "user1@mail.com", "user12345");
+        channelService.createChannel("test", user, new ArrayList<>(List.of(user)));
+
+        Assertions.assertThrows(IllegalArgumentException.class, () ->channelService.kickUserChannel("test", user));
+
+    }
 }

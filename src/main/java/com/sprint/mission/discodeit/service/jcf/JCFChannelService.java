@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
+import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 
 import java.util.ArrayList;
@@ -10,18 +12,21 @@ import java.util.UUID;
 
 public class JCFChannelService implements ChannelService {
     private final List<Channel> channelList;
+    private final EntityFactory entityFactory;
 
-    public JCFChannelService(List<Channel> channelList) {
-        this.channelList = channelList;
+    public JCFChannelService(EntityFactory entityFactory ,List<Channel> channelList) {
+        this.entityFactory = entityFactory;
+        this.channelList = new ArrayList<>(channelList);
     }
 
     public JCFChannelService() {
+        this.entityFactory = new BaseEntityFactory();
         channelList = new ArrayList<>();
     }
 
     @Override
     public Channel createChannel(String channelName, User owner, List<User> userList) {
-        Channel channel = new Channel(channelName, owner, userList);
+        Channel channel = entityFactory.createChannel(channelName, owner, userList);
         channelList.add(channel);
         return channel;
     }
@@ -68,11 +73,15 @@ public class JCFChannelService implements ChannelService {
     @Override
     public void kickUserChannel(String channelName, User kickUser) {
         Channel findChannel = getChannelByName(channelName);
+        List<User> userList = findChannel.getChannelUsers();
 
-        if(!findChannel.getChannelUsers().contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
+        if(!userList.contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
             throw new IllegalArgumentException("강퇴할 유저가 없습니다.");
-        } else if(findChannel.getChannelOwnerUser().equals(kickUser)) {
-            findChannel.removeUser(findChannel.getChannelOwnerUser());
+        }
+
+        findChannel.removeUser(kickUser);
+
+        if (findChannel.getChannelOwnerUser().equals(kickUser)) {
             findNextOwnerUser(findChannel);
         }
     }

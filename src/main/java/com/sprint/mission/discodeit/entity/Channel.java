@@ -14,10 +14,18 @@ public class Channel extends BaseObject {
         super();
         setChannelName(channelName);
         setChannelOwnerUser(channelOwnerUser);
+
         this.channelUsers = new ArrayList<>();
-        if(channelUsers != null) {
+        if (channelUsers != null) {
             this.channelUsers.addAll(channelUsers);
         }
+    }
+
+    public Channel(String channelName, User channelOwnerUser) {
+        super();
+        setChannelName(channelName);
+        setChannelOwnerUser(channelOwnerUser);
+        this.channelUsers = new ArrayList<>();
     }
 
     public void addUser(User user) {
@@ -25,7 +33,16 @@ public class Channel extends BaseObject {
             throw new IllegalArgumentException("유저를 추가해주세요");
         }
 
-        this.channelUsers.add(user);
+        System.out.println("Before add - channelUsers type: " + channelUsers.getClass().getName());
+        System.out.println("Before add - user to add: " + user);
+
+        try {
+            this.channelUsers.add(user);
+        } catch (Exception e) {
+            System.out.println("Exception during add: " + e);
+            throw e;
+        }
+
         setUpdatedAt();
     }
 
@@ -75,7 +92,11 @@ public class Channel extends BaseObject {
     }
 
     public List<User> updateChannelUsers(List<User> updateChannelUsers) {
-        this.channelUsers = updateChannelUsers;
+        if (updateChannelUsers == null) {
+            this.channelUsers = new ArrayList<>();
+        } else {
+            this.channelUsers = new ArrayList<>(updateChannelUsers);
+        }
         setUpdatedAt();
         return this.channelUsers;
     }
