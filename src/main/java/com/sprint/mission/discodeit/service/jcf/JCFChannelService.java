@@ -6,52 +6,53 @@ import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class JCFChannelService implements ChannelService {
-    private final List<Channel> channelList;
+    private final Map<UUID, Channel> channelList;
     private final EntityFactory entityFactory;
 
-    public JCFChannelService(EntityFactory entityFactory, List<Channel> channelList) {
+    public JCFChannelService(EntityFactory entityFactory, Map<UUID, Channel> channelList) {
         this.entityFactory = entityFactory;
-        this.channelList = new ArrayList<>(channelList);
+        this.channelList = new HashMap<>(channelList);
     }
 
     public JCFChannelService() {
         this.entityFactory = new BaseEntityFactory();
-        channelList = new ArrayList<>();
+        channelList = new HashMap<>();
     }
 
     @Override
-    public Channel createChannel(String channelName, User owner, List<User> userList) {
+    public Channel createChannel(String channelName, User owner, Map<UUID, User> userList) {
         Channel channel = entityFactory.createChannel(channelName, owner, userList);
-        channelList.add(channel);
+        channelList.put(channel.getChannelId(), channel);
         return channel;
     }
 
     @Override
-    public Channel getChannelByName(String channelName) {
-        return channelList.stream()
-                .filter(readChannel -> readChannel.getChannelName().equals(channelName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없습니다."));
+    public Map<UUID, Channel> getChannelByName(String channelName) {
+        return channelList.entrySet().stream()
+                .filter(entry -> entry.getValue().getChannelName().equals(channelName))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
     }
 
     @Override
     public Channel findChannelById(UUID id) {
-        return channelList.stream()
-                .filter(ch -> ch.getChannelId().equals(id))
+        return channelList.entrySet().stream()
+                .filter(entry -> entry.getValue().getChannelId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없어요."));
+                .map(Map.Entry::getValue)
+                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없습니다"));
     }
 
 
     @Override
-    public List<Channel> getAllChannels() {
-        return channelList.stream()
-                .toList();
+    public Map<UUID, Channel> getAllChannels() {
+        return channelList;
     }
 
     @Override
@@ -59,37 +60,38 @@ public class JCFChannelService implements ChannelService {
         Channel exChannel = findChannelById(channelToUpdate.getChannelId());
         exChannel.updateChannelName(channelToUpdate.getChannelName());
         exChannel.updateOwnerUser(channelToUpdate.getChannelOwnerUser());
-        exChannel.getChannelUsers().addAll(channelToUpdate.getChannelUsers());
+        exChannel.getChannelUsers().putAll(channelToUpdate.getChannelUsers());
 
         return exChannel;
     }
 
     @Override
-    public void removeChannel(String removeChannelName) {
-        Channel findChannel = getChannelByName(removeChannelName);
-        channelList.remove(findChannel);
+    public void removeChannelById(UUID removeChannelUUID) {
+        Channel channelById = findChannelById(removeChannelUUID);
+
+        channelList.remove(channelById.getChannelId());
     }
 
     @Override
-    public void kickUserChannel(String channelName, User kickUser) {
-        Channel findChannel = getChannelByName(channelName);
-        List<User> userList = findChannel.getChannelUsers();
+    public void kickUserChannel(UUID channelUUID, User kickUser) {
+        Channel findChannel = findChannelById(channelUUID);
 
-        if (!userList.contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
-            throw new IllegalArgumentException("강퇴할 유저가 없습니다.");
-        }
+        User findKickUser = channelList.get(findChannel.getChannelId())
+                .getChannelUsers().get(kickUser.getUserId());
 
-        findChannel.removeUser(kickUser);
+        findChannel.removeUser(findKickUser);
 
-        if (findChannel.getChannelOwnerUser().equals(kickUser)) {
+        if (findChannel.getChannelOwnerUser().equals(findKickUser)) {
             findNextOwnerUser(findChannel);
         }
     }
 
     private void findNextOwnerUser(Channel findChannel) {
-        User nextOwnerUser = findChannel.getChannelUsers().stream()
+        User nextOwnerUser = findChannel.getChannelUsers().entrySet().stream()
                 .findAny()
+                .map(Map.Entry::getValue)
                 .orElseThrow(() -> new IllegalArgumentException("채널에 아무도 없습니다."));
+
         findChannel.updateOwnerUser(nextOwnerUser);
     }
 }

@@ -7,16 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class ChannelTest {
     ChannelService channelService = new JCFChannelService();
-    List<User> userList = new ArrayList<>();
+    Map<UUID, User> userList = new HashMap<>();
 
     @BeforeEach
     void init() {
-        userList = new ArrayList<>();
+        userList = new HashMap<>();
     }
 
     @Test

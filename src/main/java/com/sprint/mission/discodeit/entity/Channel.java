@@ -1,23 +1,23 @@
 package com.sprint.mission.discodeit.entity;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class Channel extends BaseObject {
     private String channelName;
     private User channelOwnerUser;
-    private List<User> channelUsers;
+    //private List<User> channelUsers;
+    private Map<UUID, User> channelUsers;
 
-    public Channel(String channelName, User channelOwnerUser, List<User> channelUsers) {
+    public Channel(String channelName, User channelOwnerUser, Map<UUID, User> channelUsers) {
         super();
         setChannelName(channelName);
         setChannelOwnerUser(channelOwnerUser);
 
-        this.channelUsers = new ArrayList<>();
+        this.channelUsers = new HashMap<>();
         if (channelUsers != null) {
-            this.channelUsers.addAll(channelUsers);
+            this.channelUsers.putAll(channelUsers);
         }
     }
 
@@ -25,7 +25,7 @@ public class Channel extends BaseObject {
         super();
         setChannelName(channelName);
         setChannelOwnerUser(channelOwnerUser);
-        this.channelUsers = new ArrayList<>();
+        this.channelUsers = new HashMap<>();
     }
 
     public void addUser(User user) {
@@ -33,17 +33,18 @@ public class Channel extends BaseObject {
             throw new IllegalArgumentException("유저를 추가해주세요");
         }
 
+
+
         setUpdatedAt();
     }
 
     public void removeUser(User user) {
-        channelUsers.stream()
-                .filter(Objects::nonNull)
-                .filter(u -> u.getUserId().equals(user.getUserId()))
+        channelUsers.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(user.getUserId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 유저가 없습니다."));
 
-        channelUsers.remove(user);
+        channelUsers.remove(user.getUserId());
         setUpdatedAt();
     }
 
@@ -69,11 +70,11 @@ public class Channel extends BaseObject {
         return this.channelOwnerUser;
     }
 
-    public List<User> updateChannelUsers(List<User> updateChannelUsers) {
+    public Map<UUID, User> updateChannelUsers(Map<UUID, User> updateChannelUsers) {
         if (updateChannelUsers == null) {
-            this.channelUsers = new ArrayList<>();
+            this.channelUsers = new HashMap<>();
         } else {
-            this.channelUsers = new ArrayList<>(updateChannelUsers);
+            this.channelUsers = new HashMap<>(updateChannelUsers);
         }
         setUpdatedAt();
         return this.channelUsers;
@@ -103,7 +104,7 @@ public class Channel extends BaseObject {
         setUpdatedAt();
     }
 
-    public List<User> getChannelUsers() {
+    public Map<UUID, User> getChannelUsers() {
         return channelUsers;
     }
 
@@ -117,12 +118,6 @@ public class Channel extends BaseObject {
 
     @Override
     public String toString() {
-        return "Channel{" +
-                "channelName='" + channelName + '\'' +
-                ", channelOwnerUser=" + channelOwnerUser +
-                ", channelUsers=" + channelUsers +
-                ", createdAt=" + getCreatedAt() +
-                ", updatedAt=" + getUpdatedAt() +
-                '}';
+        return "Channel{" + "channelName='" + channelName + '\'' + ", channelOwnerUser=" + channelOwnerUser + ", channelUsers=" + channelUsers + ", createdAt=" + getCreatedAt() + ", updatedAt=" + getUpdatedAt() + '}';
     }
 }

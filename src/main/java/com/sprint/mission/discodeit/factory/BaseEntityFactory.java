@@ -4,7 +4,8 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 
-import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class BaseEntityFactory implements EntityFactory {
     @Override
@@ -13,7 +14,7 @@ public class BaseEntityFactory implements EntityFactory {
     }
 
     @Override
-    public Channel createChannel(String channelName, User owner, List<User> userList) {
+    public Channel createChannel(String channelName, User owner, Map<UUID, User> userList) {
         return new Channel(channelName, owner, userList);
     }
 

@@ -5,43 +5,42 @@ import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class JCFUserService implements UserService {
-    private final List<User> userList;
+    private final Map<UUID, User> userList;
     private final EntityFactory entityFactory;
 
-    public JCFUserService(EntityFactory entityFactory, List<User> userList) {
+    public JCFUserService(EntityFactory entityFactory, Map<UUID, User> userList) {
         this.entityFactory = entityFactory;
-        this.userList = new ArrayList<>(userList);
+        this.userList = new HashMap<>(userList);
     }
 
     public JCFUserService() {
         this.entityFactory = new BaseEntityFactory();
-        userList = new ArrayList<>();
+        userList = new HashMap<>();
     }
 
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
         User user = entityFactory.createUser(userName, userEmail, userPassword);
-        userList.add(user);
+        userList.put(user.getUserId(), user);
 
         return user;
     }
 
     @Override
     public User getUserById(UUID userId) {
-        return userList.stream()
-                .filter(user -> user.getUserId().equals(userId))
+        return userList.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(userId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("찾는 유저가 없습니다."));
+                .map(Map.Entry::getValue)
+                .orElseThrow(() -> new IllegalAccessError("찾는 유저가 없습니다."));
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return new ArrayList<>(userList);
+    public Map<UUID, User> getAllUsers() {
+        return new HashMap<>(userList);
     }
 
     @Override
@@ -59,7 +58,7 @@ public class JCFUserService implements UserService {
     public void deleteUser(UUID userId) {
         User removeUser = getUserById(userId);
         if (removeUser != null) {
-            userList.remove(removeUser);
+            userList.remove(removeUser.getUserId());
         } else {
             throw new IllegalArgumentException("삭제할 유저가 없습니다.");
         }
