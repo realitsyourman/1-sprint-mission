@@ -8,11 +8,7 @@ public abstract class BaseObject {
     private Long updatedAt;
 
     public BaseObject(UUID id, Long createdAt, Long updatedAt) {
-        if (id != null) {
-            this.id = id;
-        } else {
-            this.id = UUID.randomUUID();
-        }
+        this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
