@@ -56,13 +56,13 @@ public class JCFChannelService implements ChannelService {
     }
 
     @Override
-    public Channel updateChannel(Channel channelToUpdate) {
-        Channel exChannel = findChannelById(channelToUpdate.getChannelId());
-        exChannel.updateChannelName(channelToUpdate.getChannelName());
-        exChannel.updateOwnerUser(channelToUpdate.getChannelOwnerUser());
-        exChannel.getChannelUsers().putAll(channelToUpdate.getChannelUsers());
+    public Channel updateChannel(UUID channelUUID, String channelName, User changeOwnerUser) {
+        Channel findChannel = findChannelById(channelUUID);
 
-        return exChannel;
+        findChannel.updateChannelName(channelName);
+        findChannel.updateOwnerUser(changeOwnerUser);
+
+        return findChannel;
     }
 
     @Override

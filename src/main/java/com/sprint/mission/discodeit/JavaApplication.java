@@ -10,7 +10,9 @@ import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
 import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
 import com.sprint.mission.discodeit.service.jcf.JCFUserService;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class JavaApplication {
     public static void main(java.lang.String[] args) {
@@ -83,6 +85,10 @@ public class JavaApplication {
 
         System.out.println("\n채널 삭제 및 조회");
         channelService.removeChannelById(channel2.getChannelId());
+        channelService.getAllChannels().entrySet().forEach(System.out::println);
+
+        System.out.println("\n채널 업데이트");
+        channelService.updateChannel(channel1.getChannelId(), "바뀐채널", userHan);
         channelService.getAllChannels().entrySet().forEach(System.out::println);
 
 

@@ -15,7 +15,7 @@ public interface ChannelService {
 
     Map<UUID, Channel> getAllChannels();
 
-    Channel updateChannel(Channel channelToUpdate);
+    Channel updateChannel(UUID channelUUID, String channelName, User changeUser);
 
     void removeChannelById(UUID channelUUID);
 

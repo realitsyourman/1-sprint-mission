@@ -7,7 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ChannelTest {
     ChannelService channelService = new JCFChannelService();
@@ -53,9 +55,9 @@ public class ChannelTest {
     @DisplayName("채널에서 강퇴")
     void kickUser() {
         User user = new User("user1", "user1@mail.com", "user12345");
-        channelService.createChannel("test", user, new ArrayList<>(List.of(user)));
+        Channel channel = channelService.createChannel("test", user, Map.of(user.getUserId(), user));
 
-        Assertions.assertThrows(IllegalArgumentException.class, () ->channelService.kickUserChannel("test", user));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> channelService.kickUserChannel(channel.getChannelId(), user));
 
     }
 }

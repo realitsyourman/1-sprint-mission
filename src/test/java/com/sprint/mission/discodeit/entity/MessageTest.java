@@ -31,19 +31,38 @@ class MessageTest {
     }
 
     @Test
-    @DisplayName("메세지 제목이나 내용이 비어있을 때 검증")
-    void checkMessageContentNoneException() {
-        assertThrows(IllegalArgumentException.class, () -> messageService.createMessage("", "content", sender, receiver));
-
+    @DisplayName("메세지 내용이 비어있을 때 검증")
+    void checkMessageNoneContentException() {
         assertThrows(IllegalArgumentException.class, () -> messageService.createMessage("title", "", sender, receiver));
     }
 
     @Test
-    @DisplayName("메세지를 보내거나 받는 사람 검증")
-    void checkSenderAndReceiver() {
+    @DisplayName("메세지 제목이 비어있을 때 검증")
+    void checkMessageNoneTitleException() {
+        assertThrows(IllegalArgumentException.class, () -> messageService.createMessage("", "content", sender, receiver));
+    }
+
+    @Test
+    @DisplayName("보내는 사람과 받는 사람이 없을 때")
+    void checkAllOfNullSenderAndReceiver() {
         assertThrows(IllegalArgumentException.class, () -> new Message("hi", "hello?", null, null));
+    }
+
+    @Test
+    @DisplayName("보내는 사람이 없을 때")
+    void checkNullSender() {
         assertThrows(IllegalArgumentException.class, () -> new Message("hi", "hello?", null, receiver));
+    }
+
+    @Test
+    @DisplayName("받는 사람이 없을 때")
+    void checkNullReceiver() {
         assertThrows(IllegalArgumentException.class, () -> new Message("hi", "hello?", sender, null));
+    }
+
+    @Test
+    @DisplayName("보내는 사람이 똑같을 때")
+    void checkSenderToSender() {
         assertThrows(IllegalArgumentException.class, () -> new Message("hi", "hello?", sender, sender));
     }
 }
