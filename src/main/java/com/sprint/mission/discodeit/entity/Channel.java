@@ -33,7 +33,7 @@ public class Channel extends BaseObject {
             throw new IllegalArgumentException("유저를 추가해주세요");
         }
 
-
+        channelUsers.put(user.getUserId(), user);
 
         setUpdatedAt();
     }
