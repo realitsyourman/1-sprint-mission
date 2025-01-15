@@ -6,7 +6,7 @@ import com.sprint.mission.discodeit.entity.User;
 
 import java.util.List;
 
-public class BaseEntityFactory implements EntityFactory{
+public class BaseEntityFactory implements EntityFactory {
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
         return new User(userName, userEmail, userPassword);

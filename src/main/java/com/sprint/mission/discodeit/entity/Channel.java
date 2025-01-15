@@ -29,18 +29,8 @@ public class Channel extends BaseObject {
     }
 
     public void addUser(User user) {
-        if(user == null) {
+        if (user == null) {
             throw new IllegalArgumentException("유저를 추가해주세요");
-        }
-
-        System.out.println("Before add - channelUsers type: " + channelUsers.getClass().getName());
-        System.out.println("Before add - user to add: " + user);
-
-        try {
-            this.channelUsers.add(user);
-        } catch (Exception e) {
-            System.out.println("Exception during add: " + e);
-            throw e;
         }
 
         setUpdatedAt();
@@ -57,26 +47,14 @@ public class Channel extends BaseObject {
         setUpdatedAt();
     }
 
-    private void setChannelName(String channelName) {
-        checkChannelName(channelName);
-        this.channelName = channelName;
-        setUpdatedAt();
-    }
-
-    private void setChannelOwnerUser(User channelOwnerUser) {
-        checkChannelOwnerUser(channelOwnerUser);
-        this.channelOwnerUser = channelOwnerUser;
-        setUpdatedAt();
-    }
-
     private void checkChannelName(String channelName) {
-        if(channelName == null || channelName.isEmpty()) {
+        if (channelName == null || channelName.isEmpty()) {
             throw new IllegalArgumentException("채널 이름을 작성해주세요.");
         }
     }
 
     private void checkChannelOwnerUser(User channelOwnerUser) {
-        if(channelOwnerUser == null) {
+        if (channelOwnerUser == null) {
             throw new IllegalAccessError("방장을 지정해주세요.");
         }
     }
@@ -101,7 +79,6 @@ public class Channel extends BaseObject {
         return this.channelUsers;
     }
 
-
     public UUID getChannelId() {
         return getId();
     }
@@ -110,8 +87,20 @@ public class Channel extends BaseObject {
         return channelName;
     }
 
+    private void setChannelName(String channelName) {
+        checkChannelName(channelName);
+        this.channelName = channelName;
+        setUpdatedAt();
+    }
+
     public User getChannelOwnerUser() {
         return channelOwnerUser;
+    }
+
+    private void setChannelOwnerUser(User channelOwnerUser) {
+        checkChannelOwnerUser(channelOwnerUser);
+        this.channelOwnerUser = channelOwnerUser;
+        setUpdatedAt();
     }
 
     public List<User> getChannelUsers() {

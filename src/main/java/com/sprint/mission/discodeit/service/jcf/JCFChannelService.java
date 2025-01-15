@@ -14,7 +14,7 @@ public class JCFChannelService implements ChannelService {
     private final List<Channel> channelList;
     private final EntityFactory entityFactory;
 
-    public JCFChannelService(EntityFactory entityFactory ,List<Channel> channelList) {
+    public JCFChannelService(EntityFactory entityFactory, List<Channel> channelList) {
         this.entityFactory = entityFactory;
         this.channelList = new ArrayList<>(channelList);
     }
@@ -75,7 +75,7 @@ public class JCFChannelService implements ChannelService {
         Channel findChannel = getChannelByName(channelName);
         List<User> userList = findChannel.getChannelUsers();
 
-        if(!userList.contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
+        if (!userList.contains(kickUser) || findChannel.getChannelUsers().isEmpty()) {
             throw new IllegalArgumentException("강퇴할 유저가 없습니다.");
         }
 
@@ -85,6 +85,7 @@ public class JCFChannelService implements ChannelService {
             findNextOwnerUser(findChannel);
         }
     }
+
     private void findNextOwnerUser(Channel findChannel) {
         User nextOwnerUser = findChannel.getChannelUsers().stream()
                 .findAny()

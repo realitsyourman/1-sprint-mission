@@ -29,8 +29,8 @@ public class Message extends BaseObject {
 
     private void setSenderAndReceiver(User sender, User receiver) {
         checkSenderAndReceiver(sender, receiver);
-        this.messageSendUser = sender;
-        this.messageReceiveUser = receiver;
+        setSender(sender);
+        setReceiver(receiver);
         setUpdatedAt();
     }
 
@@ -63,13 +63,13 @@ public class Message extends BaseObject {
     }
 
     private void checkSender(User sender) {
-        if(sender == null) {
+        if (sender == null) {
             throw new IllegalArgumentException("보낸 사람을 다시 지정하세요.");
         }
     }
 
     private void checkReceiver(User receiver) {
-        if(receiver == null) {
+        if (receiver == null) {
             throw new IllegalArgumentException("받는 사람을 다시 지정하세요.");
         }
     }

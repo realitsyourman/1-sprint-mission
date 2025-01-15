@@ -7,15 +7,10 @@ public abstract class BaseObject {
     private final Long createdAt;
     private Long updatedAt;
 
-    public BaseObject createBaseObject(UUID id) {
-        return this;
-    }
-
     public BaseObject(UUID id, Long createdAt, Long updatedAt) {
-        if(id != null) {
+        if (id != null) {
             this.id = id;
-        }
-        else {
+        } else {
             this.id = UUID.randomUUID();
         }
         this.createdAt = createdAt;
@@ -30,6 +25,9 @@ public abstract class BaseObject {
         this(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis());
     }
 
+    public BaseObject createBaseObject(UUID id) {
+        return this;
+    }
 
     public long setUpdatedAt() {
         return this.updatedAt = System.currentTimeMillis();

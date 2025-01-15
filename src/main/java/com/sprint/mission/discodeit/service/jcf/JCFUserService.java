@@ -58,10 +58,9 @@ public class JCFUserService implements UserService {
     @Override
     public void deleteUser(UUID userId) {
         User removeUser = getUserById(userId);
-        if(removeUser != null) {
+        if (removeUser != null) {
             userList.remove(removeUser);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("삭제할 유저가 없습니다.");
         }
     }

@@ -23,11 +23,9 @@
   
 
 ## 스크린샷
-![2025-01-09 18 18 38](../../../../blog/realitsyourman.github.io/assets/img/2025-01-09 18 18 38.png)
+![![[2025-01-09 18 18 38.png](../../../../blog/realitsyourman.github.io/assets/img/2025-01-09 18 18 38-1736474608730-10.png)](2025-01-09 18 18 38.png)]()
 
-![2025-01-09 18 50 15](../../../../blog/realitsyourman.github.io/assets/img/2025-01-09 18 50 15.png)
 
-![2025-01-09 18 58 38](../../../../blog/realitsyourman.github.io/assets/img/2025-01-09 18 58 38.png)
 
 
 
