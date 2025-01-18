@@ -8,6 +8,17 @@ import java.util.Map;
 import java.util.UUID;
 
 public class BaseEntityFactory implements EntityFactory {
+
+    private BaseEntityFactory() {}
+
+    private static class SingleInstanceHolder {
+        private static final EntityFactory INSTANCE = new BaseEntityFactory();
+    }
+
+    public static EntityFactory getInstance() {
+        return SingleInstanceHolder.INSTANCE;
+    }
+
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
         return new User(userName, userEmail, userPassword);

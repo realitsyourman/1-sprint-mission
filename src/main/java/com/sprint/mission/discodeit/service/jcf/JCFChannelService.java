@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 
@@ -13,16 +12,15 @@ import java.util.stream.Collectors;
 
 public class JCFChannelService implements ChannelService {
     private final Map<UUID, Channel> channelList;
-    private final EntityFactory entityFactory;
-
-    public JCFChannelService(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
-        this.channelList = new HashMap<>();
-    }
+    private static EntityFactory entityFactory;
 
     public JCFChannelService() {
-        this.entityFactory = new BaseEntityFactory();
         channelList = new HashMap<>();
+    }
+
+    public JCFChannelService(EntityFactory entityFactory) {
+        JCFChannelService.entityFactory = entityFactory;
+        this.channelList = new HashMap<>();
     }
 
     @Override

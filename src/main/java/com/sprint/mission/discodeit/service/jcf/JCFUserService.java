@@ -10,17 +10,26 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JCFUserService implements UserService {
+    private static JCFUserService instance;
     private final Map<UUID, User> userList;
-    private final EntityFactory entityFactory;
+    private static EntityFactory entityFactory;
 
     public JCFUserService(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
+        JCFUserService.entityFactory = entityFactory;
         this.userList = new HashMap<>();
     }
 
     public JCFUserService() {
-        this.entityFactory = new BaseEntityFactory();
+        entityFactory = BaseEntityFactory.getInstance();
         userList = new HashMap<>();
+    }
+
+    public JCFUserService getInstance() {
+        if (instance == null) {
+            instance = new JCFUserService();
+        }
+
+        return instance;
     }
 
     @Override

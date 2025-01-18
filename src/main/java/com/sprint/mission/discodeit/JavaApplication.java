@@ -19,7 +19,7 @@ import java.util.UUID;
 public class JavaApplication {
     public static void main(java.lang.String[] args) {
 
-        EntityFactory entityFactory = new BaseEntityFactory();
+        EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
         UserService userService = new JCFUserService(entityFactory);
         ChannelService channelService = new JCFChannelService(entityFactory);

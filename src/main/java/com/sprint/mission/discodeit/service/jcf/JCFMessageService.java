@@ -12,15 +12,15 @@ import java.util.UUID;
 
 public class JCFMessageService implements MessageService {
     private final Map<UUID, Message> messagesList;
-    private final EntityFactory entityFactory;
+    private static EntityFactory entityFactory;
 
     public JCFMessageService(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
+        JCFMessageService.entityFactory = entityFactory;
         this.messagesList = new HashMap<>();
     }
 
     public JCFMessageService() {
-        this.entityFactory = new BaseEntityFactory();
+        entityFactory = BaseEntityFactory.getInstance();
         this.messagesList = new HashMap<>();
     }
 
