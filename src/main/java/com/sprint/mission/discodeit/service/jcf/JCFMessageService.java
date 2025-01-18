@@ -14,9 +14,9 @@ public class JCFMessageService implements MessageService {
     private final Map<UUID, Message> messagesList;
     private final EntityFactory entityFactory;
 
-    public JCFMessageService(EntityFactory entityFactory, Map<UUID, Message> messagesList) {
+    public JCFMessageService(EntityFactory entityFactory) {
         this.entityFactory = entityFactory;
-        this.messagesList = messagesList;
+        this.messagesList = new HashMap<>();
     }
 
     public JCFMessageService() {

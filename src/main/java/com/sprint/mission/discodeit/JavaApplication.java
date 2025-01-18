@@ -3,6 +3,8 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
+import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -16,9 +18,12 @@ import java.util.UUID;
 
 public class JavaApplication {
     public static void main(java.lang.String[] args) {
-        UserService userService = new JCFUserService();
-        ChannelService channelService = new JCFChannelService();
-        MessageService messageService = new JCFMessageService();
+
+        EntityFactory entityFactory = new BaseEntityFactory();
+
+        UserService userService = new JCFUserService(entityFactory);
+        ChannelService channelService = new JCFChannelService(entityFactory);
+        MessageService messageService = new JCFMessageService(entityFactory);
 
         /* JCF User Service */
         User userKim = userService.createUser("kim", "mikk@naver.com", "password1");

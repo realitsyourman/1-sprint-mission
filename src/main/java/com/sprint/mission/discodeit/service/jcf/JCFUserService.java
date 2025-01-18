@@ -13,9 +13,9 @@ public class JCFUserService implements UserService {
     private final Map<UUID, User> userList;
     private final EntityFactory entityFactory;
 
-    public JCFUserService(EntityFactory entityFactory, Map<UUID, User> userList) {
+    public JCFUserService(EntityFactory entityFactory) {
         this.entityFactory = entityFactory;
-        this.userList = new HashMap<>(userList);
+        this.userList = new HashMap<>();
     }
 
     public JCFUserService() {

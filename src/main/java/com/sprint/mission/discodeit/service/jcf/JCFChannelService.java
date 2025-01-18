@@ -15,9 +15,9 @@ public class JCFChannelService implements ChannelService {
     private final Map<UUID, Channel> channelList;
     private final EntityFactory entityFactory;
 
-    public JCFChannelService(EntityFactory entityFactory, Map<UUID, Channel> channelList) {
+    public JCFChannelService(EntityFactory entityFactory) {
         this.entityFactory = entityFactory;
-        this.channelList = new HashMap<>(channelList);
+        this.channelList = new HashMap<>();
     }
 
     public JCFChannelService() {
