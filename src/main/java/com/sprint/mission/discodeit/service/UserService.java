@@ -6,14 +6,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface UserService {
-    User createUser(String userName, String userEmail, String userPassword);
+    User createUser(String userName, String userEmail, String userPassword); // 저장
 
-    User getUserById(UUID userId);
+    User getUserById(UUID userId); // 저장
 
-    Map<UUID, User> getAllUsers();
+    Map<UUID, User> getAllUsers(); // 저장
 
-    User updateUser(UUID userId, String newName, String newEmail, String newPassword);
+    User updateUser(UUID userId, String newName, String newEmail, String newPassword); // 비즈니스
 
-    void deleteUser(UUID userId);
+    void deleteUser(UUID userId); // 저장
 
 }
