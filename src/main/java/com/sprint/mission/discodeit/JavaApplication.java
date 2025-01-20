@@ -1,12 +1,15 @@
 package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.file.FileChannelService;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
 import com.sprint.mission.discodeit.service.file.FileUserService;
 
 import java.util.HashMap;
@@ -20,6 +23,7 @@ public class JavaApplication {
         // FileUserService
         UserService userService = new FileUserService(entityFactory);
         ChannelService channelService = new FileChannelService(entityFactory);
+        MessageService messageService = new FileMessageService(entityFactory);
 
         System.out.println("유저 추가 및 출력");
         User userKim = userService.createUser("kim", "mikk@naver.com", "password1");
@@ -77,7 +81,24 @@ public class JavaApplication {
         channelService.removeChannelById(channel2.getChannelId());
         channelService.getAllChannels().entrySet().forEach(System.out::println);
 
+        System.out.println();
 
+
+        System.out.println("\n메세지 생성 및 조회");
+        Message message1 = messageService.createMessage("안녕", "이건 메일 내용이야", userKim, userLee);
+        Message message2 = messageService.createMessage("반갑다", "첫번째 메일 잘 받았어", userLee, userKim);
+        System.out.println(messageService.getMessageById(message1.getMessageId()));
+
+        System.out.println("\n메세지 여러건 조회");
+        messageService.getAllMessages().entrySet().forEach(System.out::println);
+
+        System.out.println("\n메세지 수정");
+        messageService.updateMessage(message1.getMessageId(), "메세지 제목을 바꿈", "잘 바뀌지?");
+        messageService.getAllMessages().entrySet().forEach(System.out::println);
+
+        System.out.println("\n메세지 삭제");
+        messageService.deleteMessage(message1.getMessageId());
+        messageService.getAllMessages().entrySet().forEach(System.out::println);
 
 
 
