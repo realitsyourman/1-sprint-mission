@@ -1,11 +1,35 @@
 package com.sprint.mission.discodeit.service.file;
 
+import java.io.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public interface FileService<T> {
 
-    void save();
+    default void save(String path, Map<UUID, T> map) {
+        try (FileOutputStream fos = new FileOutputStream(path, false);
+             ObjectOutputStream out = new ObjectOutputStream(fos)) {
 
-    Map<UUID, T> load();
+            out.writeObject(map);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    default Map<UUID, T> load(String path, Map<UUID, T> map) {
+        try (FileInputStream fos = new FileInputStream(path);
+             ObjectInputStream ois = new ObjectInputStream(fos)) {
+
+            map = (HashMap<UUID, T>) ois.readObject();
+
+        } catch (FileNotFoundException e) {
+            return map;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
+        return map;
+    }
 }

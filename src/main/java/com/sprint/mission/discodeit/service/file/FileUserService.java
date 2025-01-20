@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.UserService;
 
-import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -26,43 +25,11 @@ public class FileUserService implements UserService, FileService<User> {
     }
 
     @Override
-    public void save() {
-
-        try (FileOutputStream fos = new FileOutputStream(USER_PATH, false);
-             ObjectOutputStream out = new ObjectOutputStream(fos)) {
-
-            out.writeObject(userList);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public Map<UUID, User> load() {
-        HashMap<UUID, User> map = new HashMap<>();
-
-        try (FileInputStream fos = new FileInputStream(USER_PATH);
-             ObjectInputStream ois = new ObjectInputStream(fos)) {
-
-            map = (HashMap<UUID, User>) ois.readObject();
-
-        } catch (FileNotFoundException e) {
-            return map;
-        } catch (IOException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
-        return map;
-    }
-
-
-    @Override
     public User createUser(String userName, String userEmail, String userPassword) {
         User user = ef.createUser(userName, userEmail, userPassword);
         userList.put(user.getUserId(), user);
 
-        save();
+        save(USER_PATH, userList);
 
         return user;
     }
@@ -74,7 +41,7 @@ public class FileUserService implements UserService, FileService<User> {
 
     @Override
     public Map<UUID, User> getAllUsers() {
-        return new HashMap<>(userList);
+        return load(USER_PATH, userList);
     }
 
     @Override
@@ -89,7 +56,8 @@ public class FileUserService implements UserService, FileService<User> {
             findUser.updatePassword(newPassword);
         }
 
-        save();
+        save(USER_PATH, userList);
+
 
         return findUser;
     }
@@ -98,7 +66,8 @@ public class FileUserService implements UserService, FileService<User> {
     public void deleteUser(UUID userId) {
         userList.remove(userId);
 
-        save();
+        save(USER_PATH, userList);
+
     }
 
 }

@@ -1,7 +1,8 @@
-package com.sprint.mission.discodeit.service.jcf;
+package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 
@@ -10,23 +11,28 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class JCFChannelService implements ChannelService {
-    private final Map<UUID, Channel> channelList;
-    private static EntityFactory entityFactory;
+public class FileChannelService implements ChannelService, FileService<Channel> {
+    private static final String CHANNEL_PATH = "channel.ser";
 
-    public JCFChannelService() {
-        channelList = new HashMap<>();
+    static EntityFactory ef;
+    Map<UUID, Channel> channelList = new HashMap<>();
+
+    public FileChannelService(EntityFactory ef) {
+        FileChannelService.ef = ef;
     }
 
-    public JCFChannelService(EntityFactory entityFactory) {
-        JCFChannelService.entityFactory = entityFactory;
-        this.channelList = new HashMap<>();
+    public FileChannelService() {
+        ef = BaseEntityFactory.getInstance();
     }
 
     @Override
     public Channel createChannel(String channelName, User owner, Map<UUID, User> userList) {
-        Channel channel = entityFactory.createChannel(channelName, owner, userList);
+        Channel channel = ef.createChannel(channelName, owner, userList);
+
         channelList.put(channel.getChannelId(), channel);
+
+        save(CHANNEL_PATH, channelList);
+
         return channel;
     }
 
@@ -35,60 +41,58 @@ public class JCFChannelService implements ChannelService {
         return channelList.entrySet().stream()
                 .filter(entry -> entry.getValue().getChannelName().equals(channelName))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
     }
 
     @Override
-    public Channel findChannelById(UUID id) {
-        return channelList.entrySet().stream()
-                .filter(entry -> entry.getValue().getChannelId().equals(id))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(() -> new IllegalArgumentException("찾는 채널이 없습니다"));
+    public Channel findChannelById(UUID channelId) {
+         return channelList.get(channelId);
     }
-
 
     @Override
     public Map<UUID, Channel> getAllChannels() {
-        return channelList;
+        return load(CHANNEL_PATH, channelList);
     }
 
     @Override
-    public Channel updateChannel(UUID channelUUID, String channelName, User changeOwnerUser) {
+    public Channel updateChannel(UUID channelUUID, String channelName, User changeUser) {
         Channel findChannel = findChannelById(channelUUID);
 
         findChannel.updateChannelName(channelName);
-        findChannel.updateOwnerUser(changeOwnerUser);
+        findChannel.updateOwnerUser(changeUser);
+
+        save(CHANNEL_PATH, channelList);
 
         return findChannel;
     }
 
     @Override
-    public void removeChannelById(UUID removeChannelUUID) {
-        Channel channelById = findChannelById(removeChannelUUID);
+    public void removeChannelById(UUID channelUUID) {
+        channelList.remove(channelUUID);
 
-        channelList.remove(channelById.getChannelId());
+        save(CHANNEL_PATH, channelList);
     }
 
     @Override
     public void addUserChannel(UUID channelUUID, User addUser) {
-        Channel channelById = findChannelById(channelUUID);
+        Map<UUID, Channel> load = load(CHANNEL_PATH, channelList);
 
-        channelById.addUser(addUser);
+        Channel findChannel = findChannelById(channelUUID);
+        findChannel.addUser(addUser);
+
+        save(CHANNEL_PATH, channelList);
     }
 
     @Override
     public void kickUserChannel(UUID channelUUID, User kickUser) {
         Channel findChannel = findChannelById(channelUUID);
 
-        User findKickUser = channelList.get(findChannel.getChannelId())
-                .getChannelUsers().get(kickUser.getUserId());
+        findChannel.removeUser(kickUser);
 
-        findChannel.removeUser(findKickUser);
-
-        if (findChannel.getChannelOwnerUser().equals(findKickUser)) {
+        if (findChannel.getChannelOwnerUser().equals(kickUser)) {
             findNextOwnerUser(findChannel);
         }
+
+        save(CHANNEL_PATH, channelList);
     }
 
     private void findNextOwnerUser(Channel findChannel) {
@@ -99,4 +103,5 @@ public class JCFChannelService implements ChannelService {
 
         findChannel.updateOwnerUser(nextOwnerUser);
     }
+
 }
