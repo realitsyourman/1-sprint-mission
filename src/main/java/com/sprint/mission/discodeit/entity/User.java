@@ -1,9 +1,13 @@
 package com.sprint.mission.discodeit.entity;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class User extends BaseObject {
+public class User extends BaseObject implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
     private String userName;
     private String userEmail;
     private String userPassword;

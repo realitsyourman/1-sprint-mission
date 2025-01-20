@@ -14,6 +14,8 @@ public class JCFUserService implements UserService {
     private final Map<UUID, User> userList;
     private static EntityFactory entityFactory;
 
+
+
     public JCFUserService(EntityFactory entityFactory) {
         JCFUserService.entityFactory = entityFactory;
         this.userList = new HashMap<>();
@@ -42,11 +44,7 @@ public class JCFUserService implements UserService {
 
     @Override
     public User getUserById(UUID userId) {
-        return userList.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(userId))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(() -> new IllegalAccessError("찾는 유저가 없습니다."));
+        return userList.get(userId);
     }
 
     @Override
@@ -58,9 +56,13 @@ public class JCFUserService implements UserService {
     public User updateUser(UUID userId, String newName, String newEmail, String newPassword) {
         User findUser = getUserById(userId);
 
-        findUser.updateName(newName);
-        findUser.updateEmail(newEmail);
-        findUser.updatePassword(newPassword);
+        if (findUser == null) {
+            throw new IllegalArgumentException("찾는 유저가 없습니다");
+        } else {
+            findUser.updateName(newName);
+            findUser.updateEmail(newEmail);
+            findUser.updatePassword(newPassword);
+        }
 
         return findUser;
     }

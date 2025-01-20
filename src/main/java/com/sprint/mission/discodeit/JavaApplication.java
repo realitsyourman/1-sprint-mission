@@ -1,31 +1,42 @@
 package com.sprint.mission.discodeit;
 
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
-import com.sprint.mission.discodeit.service.ChannelService;
-import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-import com.sprint.mission.discodeit.service.jcf.JCFMessageService;
-import com.sprint.mission.discodeit.service.jcf.JCFUserService;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import com.sprint.mission.discodeit.service.file.FileUserService;
 
 public class JavaApplication {
     public static void main(java.lang.String[] args) {
+        EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
+        // FileUserService
+        UserService userService = new FileUserService(entityFactory);
+
+        System.out.println("유저 추가 및 출력");
+        User userKim = userService.createUser("kim", "mikk@naver.com", "password1");
+        User userLee = userService.createUser("lee", "lee2ee@gmail.com", "12341234");
+        userService.getAllUsers().entrySet().forEach(System.out::println);
+
+        System.out.println("\n[userKim] 유저 수정");
+        userService.updateUser(userKim.getUserId(), "gim", "ilovegim@gmail.com", "gimgimgim");
+        userService.getAllUsers().entrySet().forEach(System.out::println);
+
+        System.out.println("\n[userLee] 유저 삭제");
+        userService.deleteUser(userLee.getUserId());
+        userService.getAllUsers().entrySet().forEach(System.out::println);
+
+/*
+**      기존의 JCF로 구현한 걸 테스트
+*
+*
         EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
         UserService userService = new JCFUserService(entityFactory);
         ChannelService channelService = new JCFChannelService(entityFactory);
         MessageService messageService = new JCFMessageService(entityFactory);
 
-        /* JCF User Service */
+        *//* JCF User Service *//*
         User userKim = userService.createUser("kim", "mikk@naver.com", "password1");
         User userLee = userService.createUser("lee", "lee2ee@gmail.com", "12341234");
         User userPark = userService.createUser("park", "parkimlee@outlook.com", "parkbarkdark");
@@ -50,7 +61,7 @@ public class JavaApplication {
 
 
 
-        /* JCF Channel Service */
+        *//* JCF Channel Service *//*
         Map<UUID, User> userMap1 = new HashMap<>();
         userMap1.put(userKim.getUserId(), userKim);
         userMap1.put(userLee.getUserId(), userLee);
@@ -67,9 +78,9 @@ public class JavaApplication {
         System.out.println("\n모든 채널 정보 조회");
         channelService.getAllChannels().entrySet().forEach(System.out::println);
 
-        /**
+        *//**
          * 채널 방장 강퇴 시, 방에 있던 다른 유저가 방장을 넘겨 받음
-         */
+         *//*
         System.out.println("\n채널 방장(userOh) 강퇴");
         channelService.kickUserChannel(channel2.getChannelId(), userOh);
         channelService.getAllChannels().entrySet().forEach(System.out::println);
@@ -98,7 +109,7 @@ public class JavaApplication {
 
 
 
-        /* JCF Message Service */
+        *//* JCF Message Service *//*
         System.out.println("\n메세지 생성 및 조회");
         Message message1 = messageService.createMessage("안녕", "이건 메일 내용이야", userKim, userLee);
         Message message2 = messageService.createMessage("반갑다", "첫번째 메일 잘 받았어", userLee, userKim);
@@ -113,7 +124,7 @@ public class JavaApplication {
 
         System.out.println("\n메세지 삭제");
         messageService.deleteMessage(message1.getMessageId());
-        messageService.getAllMessages().entrySet().forEach(System.out::println);
+        messageService.getAllMessages().entrySet().forEach(System.out::println);*/
 
     }
 }
