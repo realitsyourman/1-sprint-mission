@@ -19,10 +19,13 @@ public interface FileService<T> {
     }
 
     default Map<UUID, T> load(String path, Map<UUID, T> map) {
+
+        Map<UUID, T> newMap = new HashMap<>();
+
         try (FileInputStream fos = new FileInputStream(path);
              ObjectInputStream ois = new ObjectInputStream(fos)) {
 
-            map = (HashMap<UUID, T>) ois.readObject();
+            newMap = (HashMap<UUID, T>) ois.readObject();
 
         } catch (FileNotFoundException e) {
             return map;
@@ -30,6 +33,6 @@ public interface FileService<T> {
             throw new RuntimeException(e);
         }
 
-        return map;
+        return newMap;
     }
 }
