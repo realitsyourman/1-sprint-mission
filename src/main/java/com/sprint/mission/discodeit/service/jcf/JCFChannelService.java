@@ -74,7 +74,7 @@ public class JCFChannelService implements ChannelService {
     public void addUserChannel(UUID channelUUID, User addUser) {
         Channel channelById = findChannelById(channelUUID);
 
-        channelById.addUser(addUser);
+        channelById.addUser(addUser); //
     }
 
     @Override
