@@ -13,7 +13,7 @@ import java.util.UUID;
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
     private final ChannelRepository channelRepository;
-    private final EntityFactory entityFactory = BaseEntityFactory.getInstance();
+    private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
     public BasicUserService(UserRepository userRepository, ChannelRepository channelRepository) {
         this.userRepository = userRepository;
