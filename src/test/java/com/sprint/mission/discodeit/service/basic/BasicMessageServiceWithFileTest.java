@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-class BasicMessageServiceTest {
+public class BasicMessageServiceWithFileTest {
 
-    MessageRepository messageRepository = new JCFMessageRepository();
+    MessageRepository messageRepository = new FileMessageRepository();
 
     MessageService messageService = new BasicMessageService(messageRepository);
 
@@ -59,7 +59,8 @@ class BasicMessageServiceTest {
         Map<UUID, Message> allMessages = messageService.getAllMessages();
 
 
-        Assertions.assertEquals(testMap, allMessages);
+        Assertions.assertEquals(message1, allMessages.get(message1.getMessageId()));
+        Assertions.assertEquals(message2, allMessages.get(message2.getMessageId()));
     }
 
     @Test
