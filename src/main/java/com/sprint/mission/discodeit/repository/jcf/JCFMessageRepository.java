@@ -12,7 +12,9 @@ public class JCFMessageRepository implements MessageRepository {
 
     @Override
     public Message saveMessage(Message message) {
-        return messageMap.put(message.getMessageId(), message);
+        messageMap.put(message.getMessageId(), message);
+
+        return messageMap.get(message.getMessageId());
     }
 
     @Override
