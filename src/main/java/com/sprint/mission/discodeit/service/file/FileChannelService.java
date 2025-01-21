@@ -15,7 +15,7 @@ public class FileChannelService implements ChannelService, FileService<Channel> 
     private static final String CHANNEL_PATH = "channel.ser";
 
     static EntityFactory ef;
-    Map<UUID, Channel> channelList = new HashMap<>();
+    private Map<UUID, Channel> channelList = new HashMap<>();
 
     public FileChannelService(EntityFactory ef) {
         FileChannelService.ef = ef;

@@ -13,7 +13,7 @@ import java.util.UUID;
 public class FileMessageService implements MessageService, FileService<Message> {
     private static final String MESSAGE_PATH = "message.ser";
     static EntityFactory ef;
-    Map<UUID, Message> messageList = new HashMap<>();
+    private Map<UUID, Message> messageList = new HashMap<>();
 
     public FileMessageService(EntityFactory ef) {
         FileMessageService.ef = ef;

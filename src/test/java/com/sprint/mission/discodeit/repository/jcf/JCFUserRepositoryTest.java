@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,10 +34,13 @@ class JCFUserRepositoryTest {
     void loadAllUser() {
         User user1 = userRepository.userSave(new User("kim", "dwqdwq@tss.com", "passwoooord"));
         User user2 = userRepository.userSave(new User("lee", "zkzkzk@nave.com", "pppppwwww"));
+        Map<UUID, User> testMap = new HashMap<>();
+        testMap.put(user1.getUserId(), user1);
+        testMap.put(user2.getUserId(), user2);
 
         Map<UUID, User> userMap = userRepository.findAllUser();
 
-        Assertions.assertEquals(userMap, userRepository.findAllUser());
+        Assertions.assertEquals(testMap, userMap);
     }
 
 
