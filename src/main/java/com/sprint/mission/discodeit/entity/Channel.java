@@ -4,6 +4,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Channel extends BaseObject implements Serializable {
@@ -123,5 +124,21 @@ public class Channel extends BaseObject implements Serializable {
     @Override
     public String toString() {
         return "Channel{" + "channelName='" + channelName + '\'' + ", channelOwnerUser=" + channelOwnerUser + ", channelUsers=" + channelUsers + ", createdAt=" + getCreatedAt() + ", updatedAt=" + getUpdatedAt() + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Channel channel = (Channel) o;
+        return Objects.equals(getChannelId(), channel.getChannelId()) &&
+                Objects.equals(channelName, channel.channelName) &&
+                Objects.equals(channelOwnerUser, channel.channelOwnerUser) &&
+                Objects.equals(channelUsers, channel.channelUsers);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getChannelId(), channelName, channelOwnerUser, channelUsers);
     }
 }
