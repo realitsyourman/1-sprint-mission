@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.entity;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Message extends BaseObject implements Serializable {
@@ -142,4 +143,21 @@ public class Message extends BaseObject implements Serializable {
                 ", updatedAt=" + getUpdatedAt() +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Message message = (Message) o;
+        return Objects.equals(getId(), message.getId()) &&
+                Objects.equals(messageTitle, message.messageTitle) &&
+                Objects.equals(messageContent, message.messageContent) &&
+                Objects.equals(messageSendUser, message.messageSendUser);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), messageTitle, messageContent, messageSendUser);
+    }
+
 }
