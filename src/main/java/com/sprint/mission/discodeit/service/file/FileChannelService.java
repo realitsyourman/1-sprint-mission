@@ -45,7 +45,7 @@ public class FileChannelService implements ChannelService, FileService<Channel> 
 
     @Override
     public Channel findChannelById(UUID channelId) {
-         return channelList.get(channelId);
+        return channelList.get(channelId);
     }
 
     @Override

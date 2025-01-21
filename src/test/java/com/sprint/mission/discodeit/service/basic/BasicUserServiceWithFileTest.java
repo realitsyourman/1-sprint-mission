@@ -23,11 +23,11 @@ class BasicUserServiceWithFileTest {
 
     ChannelRepository channelRepository = new JCFChannelRepository();
 
-    UserService userService = new BasicUserService(userRepository, channelRepository);
+    UserService userService = new BasicUserService(userRepository);
 
     @BeforeEach
     void init() {
-        userService = new BasicUserService(userRepository, channelRepository);
+        userService = new BasicUserService(userRepository);
     }
 
     @Test

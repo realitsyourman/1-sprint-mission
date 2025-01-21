@@ -1,7 +1,39 @@
 package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.factory.AppConfig;
+import com.sprint.mission.discodeit.factory.BaseEntityFactory;
+import com.sprint.mission.discodeit.factory.EntityFactory;
+import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.UserService;
+
+import java.util.Map;
+import java.util.UUID;
+
 public class JavaApplication {
     public static void main(java.lang.String[] args) {
+
+        EntityFactory entityFactory = BaseEntityFactory.getInstance();
+        AppConfig config = new AppConfig();
+        UserService userService = config.basicUserService();
+        ChannelService channelService = config.basicChannelService();
+
+        User lee = userService.createUser("lee", "lee@gmail.com", "leeeelee");
+        User kim = userService.createUser("kim", "kim@gmail.com", "kimkimkikim");
+        User park = userService.createUser("park", "park@gmail.com", "parkapkark");
+        Map<UUID, User> allUsers = userService.getAllUsers();
+
+        channelService.createChannel("ch.1", lee, allUsers);
+
+        Map<UUID, Channel> allChannels = channelService.getAllChannels();
+
+        System.out.println(allChannels);
+
+        userService.updateUser(lee.getUserId(), "newNameLee", "newLee@gmail.com", "chanmgePassword");
+
+        System.out.println(allChannels);
+
 
 //        // FileUserService
 //        UserService userService = new FileUserService(entityFactory);

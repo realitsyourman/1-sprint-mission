@@ -15,12 +15,10 @@ public class AppConfig {
     public ChannelService basicChannelService() {
         return new BasicChannelService(new JCFChannelRepository());
         //return new BasicChannelService(new FileChannelRepository());
-
     }
 
     public UserService basicUserService() {
-        return new BasicUserService(new JCFUserRepository(),
-                new JCFChannelRepository());
+        return new BasicUserService(new JCFUserRepository());
     }
 
     public MessageService basicMessageService() {

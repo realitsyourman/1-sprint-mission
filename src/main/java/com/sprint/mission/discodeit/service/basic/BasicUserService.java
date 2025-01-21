@@ -3,7 +3,6 @@ package com.sprint.mission.discodeit.service.basic;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 
@@ -12,12 +11,10 @@ import java.util.UUID;
 
 public class BasicUserService implements UserService {
     private final UserRepository userRepository;
-    private final ChannelRepository channelRepository;
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
-    public BasicUserService(UserRepository userRepository, ChannelRepository channelRepository) {
+    public BasicUserService(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.channelRepository = channelRepository;
     }
 
     @Override
@@ -47,11 +44,7 @@ public class BasicUserService implements UserService {
         findUser.updateEmail(newEmail);
         findUser.updatePassword(newPassword);
 
-        User updateUser = userRepository.userSave(findUser);
-
-        // 유저의 정보가 업데이트 되면 채널에 있는 유저의 정보도 업데이트 되어야함
-
-        return updateUser;
+        return userRepository.userSave(findUser);
     }
 
     @Override

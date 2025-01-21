@@ -1,9 +1,7 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import org.junit.jupiter.api.Assertions;
@@ -17,13 +15,12 @@ import java.util.UUID;
 class BasicUserServiceWithJCFTest {
 
     UserRepository userRepository = new JCFUserRepository();
-    ChannelRepository channelRepository = new JCFChannelRepository();
 
-    UserService userService = new BasicUserService(userRepository, channelRepository);
+    UserService userService = new BasicUserService(userRepository);
 
     @BeforeEach
     void init() {
-        userService = new BasicUserService(userRepository, channelRepository);
+        userService = new BasicUserService(userRepository);
     }
 
     @Test
