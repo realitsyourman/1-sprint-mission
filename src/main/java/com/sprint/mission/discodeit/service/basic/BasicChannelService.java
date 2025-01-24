@@ -1,23 +1,29 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.MessageService;
 
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class BasicChannelService implements ChannelService {
-
-    private final ChannelRepository channelRepository;
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
+    private final ChannelRepository channelRepository;
 
-    public BasicChannelService(ChannelRepository channelRepository) {
+    //private final MessageRepository messageRepository = new FileMessageRepository();
+
+    private final MessageService messageService;
+
+    public BasicChannelService(ChannelRepository channelRepository, MessageService messageService) {
         this.channelRepository = channelRepository;
+        this.messageService = messageService;
     }
 
     @Override
@@ -83,5 +89,45 @@ public class BasicChannelService implements ChannelService {
         findChannel.removeUser(kickUser);
 
         channelRepository.saveChannel(findChannel);
+    }
+
+    // 채널은 메세지를 가지고 있음. 메세지를 추가
+    @Override
+    public void addMessageInCh(UUID channelId, Message message) {
+        Channel findChannel = findChannelById(channelId);
+        Message addMessage = findChannel.addMessageInChannel(message);
+
+        // 메세지 저장
+        //messageRepository.saveMessage(addMessage);
+        messageService.createMessage(message.getMessageTitle(),
+                message.getMessageContent(),
+                message.getMessageSendUser(),
+                message.getMessageReceiveUser());
+
+        // 채널 저장
+        channelRepository.saveChannel(findChannel);
+    }
+
+    @Override
+    public void removeMessageInCh(UUID channelId, Message removeMessage) {
+        messageService.deleteMessage(removeMessage.getMessageId());
+    }
+
+    @Override
+    public Message findChannelMessageById(UUID channelId, UUID messageId) {
+        Channel channel = channelRepository.findChannelById(channelId);
+
+        if (channel == null) {
+            return null;
+        }
+
+        return channel.getChannelMessages().get(messageId);
+    }
+
+    @Override
+    public Map<UUID, Message> findChannelInMessageAll(UUID channelId) {
+        //return messageRepository.findAllMessage();
+
+        return messageService.getAllMessages();
     }
 }

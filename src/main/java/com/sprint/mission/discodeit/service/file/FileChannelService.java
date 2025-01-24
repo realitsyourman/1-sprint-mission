@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
@@ -104,4 +105,36 @@ public class FileChannelService implements ChannelService, FileService<Channel> 
         findChannel.updateOwnerUser(nextOwnerUser);
     }
 
+
+    @Override
+    public void addMessageInCh(UUID channelId, Message message) {
+        Channel findChannel = findChannelById(channelId);
+
+        findChannel.addMessageInChannel(message);
+
+        save(CHANNEL_PATH, channelList);
+    }
+
+    @Override
+    public void removeMessageInCh(UUID channelId, Message removeMessage) {
+        Channel findChannel = findChannelById(channelId);
+
+        findChannel.removeMessageInChannel(removeMessage.getMessageId());
+
+        save(CHANNEL_PATH, channelList);
+    }
+
+    @Override
+    public Message findChannelMessageById(UUID channelId, UUID messageId) {
+        Channel findChannel = findChannelById(channelId);
+
+        return findChannel.getChannelMessages().get(messageId);
+    }
+
+    @Override
+    public Map<UUID, Message> findChannelInMessageAll(UUID channelId) {
+        Channel findChannel = findChannelById(channelId);
+
+        return findChannel.getChannelMessages();
+    }
 }

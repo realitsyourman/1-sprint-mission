@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -98,5 +99,36 @@ public class JCFChannelService implements ChannelService {
                 .orElseThrow(() -> new IllegalArgumentException("채널에 아무도 없습니다."));
 
         findChannel.updateOwnerUser(nextOwnerUser);
+    }
+
+
+    @Override
+    public void addMessageInCh(UUID channelId, Message message) {
+        Channel findChannel = findChannelById(channelId);
+
+        findChannel.addMessageInChannel(message);
+    }
+
+    @Override
+    public void removeMessageInCh(UUID channelId, Message removeMessage) {
+        Channel findChannel = findChannelById(channelId);
+
+        findChannel.removeMessageInChannel(removeMessage.getMessageId());
+    }
+
+    @Override
+    public Message findChannelMessageById(UUID channelId, UUID messageId) {
+        Channel findChannel = findChannelById(channelId);
+
+        Map<UUID, Message> channelMessages = findChannel.getChannelMessages();
+
+        return channelMessages.get(messageId);
+    }
+
+    @Override
+    public Map<UUID, Message> findChannelInMessageAll(UUID channelId) {
+        Channel findChannel = findChannelById(channelId);
+
+        return findChannel.getChannelMessages();
     }
 }
