@@ -13,7 +13,7 @@ import com.sprint.mission.discodeit.service.basic.BasicUserService;
 public class AppConfig {
 
     public ChannelService basicChannelService() {
-        return new BasicChannelService(new JCFChannelRepository());
+        return new BasicChannelService(new JCFChannelRepository(), new BasicMessageService(new JCFMessageRepository()));
         //return new BasicChannelService(new FileChannelRepository());
     }
 
