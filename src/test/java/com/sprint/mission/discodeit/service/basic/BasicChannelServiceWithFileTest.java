@@ -1,12 +1,11 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.AppConfig;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import org.junit.jupiter.api.Assertions;
@@ -17,16 +16,18 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-
 public class BasicChannelServiceWithFileTest {
+
     ChannelRepository channelRepository = new FileChannelRepository(); // file repo
-    MessageRepository messageRepository = new FileMessageRepository();
-    MessageService messageService = new BasicMessageService(messageRepository);
-    ChannelService channelService = new BasicChannelService(channelRepository, messageService);
+    MessageService messageService;
+    ChannelService channelService;
 
     @BeforeEach
     void init() {
-        channelService = new BasicChannelService(channelRepository, messageService);
+        AppConfig appConfig = new AppConfig();
+
+        channelService = appConfig.basicChannelService();
+        messageService = appConfig.basicMessageService();
     }
 
     @Test

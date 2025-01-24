@@ -2,10 +2,10 @@ package com.sprint.mission.discodeit;
 
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.factory.AppConfig;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
 
 import java.util.Map;
@@ -18,6 +18,7 @@ public class JavaApplication {
         AppConfig config = new AppConfig();
         UserService userService = config.basicUserService();
         ChannelService channelService = config.basicChannelService();
+        MessageService messageService = config.basicMessageService();
 
         User lee = userService.createUser("lee", "lee@gmail.com", "leeeelee");
         User kim = userService.createUser("kim", "kim@gmail.com", "kimkimkikim");

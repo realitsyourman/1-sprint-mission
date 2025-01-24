@@ -1,5 +1,8 @@
-package com.sprint.mission.discodeit.factory;
+package com.sprint.mission.discodeit;
 
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFChannelRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFMessageRepository;
 import com.sprint.mission.discodeit.repository.jcf.JCFUserRepository;
@@ -13,15 +16,31 @@ import com.sprint.mission.discodeit.service.basic.BasicUserService;
 public class AppConfig {
 
     public ChannelService basicChannelService() {
-        return new BasicChannelService(new JCFChannelRepository(), new BasicMessageService(new JCFMessageRepository()));
+        return new BasicChannelService(channelRepository(), new BasicMessageService(messageRepository()));
         //return new BasicChannelService(new FileChannelRepository());
     }
 
+    // 채널 레포지토리
+    private static ChannelRepository channelRepository() {
+        return new JCFChannelRepository();
+    }
+
     public UserService basicUserService() {
-        return new BasicUserService(new JCFUserRepository());
+        return new BasicUserService(userRepository());
+    }
+
+    // 유저 레포지토리
+    private static UserRepository userRepository() {
+        return new JCFUserRepository();
     }
 
     public MessageService basicMessageService() {
-        return new BasicMessageService(new JCFMessageRepository());
+        return new BasicMessageService(messageRepository());
+    }
+
+
+    // 메세지 레포지토리
+    private static MessageRepository messageRepository() {
+        return new JCFMessageRepository();
     }
 }
