@@ -10,7 +10,7 @@ public class User extends BaseObject implements Serializable {
     private static final long serialVersionUID = 1L;
     private String userName;
     private String userEmail;
-    private String userPassword;
+    private transient String userPassword;
 
     public User(String userName, String userEmail, String userPassword) {
         super();
@@ -118,11 +118,13 @@ public class User extends BaseObject implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(userName, user.userName) && Objects.equals(userEmail, user.userEmail) && Objects.equals(userPassword, user.userPassword) && Objects.equals(getId(), user.getId());
+        return Objects.equals(getId(), user.getId()) &&
+                Objects.equals(userName, user.userName) &&
+                Objects.equals(userEmail, user.userEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getUserId(), userName, userEmail, userPassword);
+        return Objects.hash(getId(), userName, userEmail);
     }
 }
