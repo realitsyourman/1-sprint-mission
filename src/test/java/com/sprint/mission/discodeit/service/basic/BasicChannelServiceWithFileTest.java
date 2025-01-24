@@ -1,10 +1,14 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
+import com.sprint.mission.discodeit.service.MessageService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +20,13 @@ import java.util.UUID;
 
 public class BasicChannelServiceWithFileTest {
     ChannelRepository channelRepository = new FileChannelRepository(); // file repo
-    ChannelService channelService = new BasicChannelService(channelRepository);
+    MessageRepository messageRepository = new FileMessageRepository();
+    MessageService messageService = new BasicMessageService(messageRepository);
+    ChannelService channelService = new BasicChannelService(channelRepository, messageService);
 
     @BeforeEach
     void init() {
-        channelService = new BasicChannelService(channelRepository);
+        channelService = new BasicChannelService(channelRepository, messageService);
     }
 
     @Test
@@ -89,6 +95,7 @@ public class BasicChannelServiceWithFileTest {
         Assertions.assertEquals("newChannelName", channelById.getChannelName());
         Assertions.assertEquals(user3, channelById.getChannelOwnerUser());
     }
+
     @Test
     @DisplayName("채널 아이디로 삭제")
     void removeChannelById() {
@@ -139,7 +146,103 @@ public class BasicChannelServiceWithFileTest {
         User findUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelUsers().get(newU1.getUserId()); // newU1 찾기
 
         Assertions.assertNull(findUser);
+    }
 
+    @Test
+    @DisplayName("채널에 메세지 추가")
+    void addMessage() {
+        User user1 = new User("user1", "user1@gmail.com", "pass12341");
+        User user2 = new User("user2", "user2@gmail.com", "pass12341");
+        Message message = new Message("title", "content", user1, user2);
+        Channel channel1 = channelService.createChannel("ch.1", user1, new HashMap<>());
+        channelService.addUserChannel(channel1.getChannelId(), user1);
+        channelService.addUserChannel(channel1.getChannelId(), user2);
+
+        // 채널에 메세지 추가
+        channelService.addMessageInCh(channel1.getChannelId(), message);
+
+        String messageTitle = channelService.getAllChannels().get(channel1.getChannelId()).getChannelMessages().get(message.getMessageId()).getMessageTitle();
+        String messageContent = channelService.getAllChannels().get(channel1.getChannelId()).getChannelMessages().get(message.getMessageId()).getMessageContent();
+        User messageSendUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelMessages().get(message.getMessageId()).getMessageSendUser();
+        User messageReceiveUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelMessages().get(message.getMessageId()).getMessageReceiveUser();
+
+
+        Assertions.assertEquals("title", messageTitle);
+        Assertions.assertEquals("content", messageContent);
+        Assertions.assertEquals(user1, messageSendUser);
+        Assertions.assertEquals(user2, messageReceiveUser);
+    }
+
+    @Test
+    @DisplayName("채널에서 메세지 조회")
+    void findMessage() {
+        User user1 = new User("user1", "user1@gmail.com", "pass12341");
+        User user2 = new User("user2", "user2@gmail.com", "pass12341");
+        Channel channel1 = channelService.createChannel("ch.1", user1, new HashMap<>());
+        Message message = new Message("안녕", "하이", user1, user2);
+
+        // 채널에 유저 추가
+        channelService.addUserChannel(channel1.getChannelId(), user1);
+        channelService.addUserChannel(channel1.getChannelId(), user2);
+
+        // 채널 내 메세지 추가
+        channelService.addMessageInCh(channel1.getChannelId(), message);
+
+        // 메세지 찾기
+        Message channelMessageById = channelService.findChannelMessageById(channel1.getChannelId(), message.getMessageId());
+
+        Assertions.assertEquals("안녕", channelMessageById.getMessageTitle());
+        Assertions.assertEquals("하이", channelMessageById.getMessageContent());
+
+    }
+
+    @Test
+    @DisplayName("채널에서 모든 메세지 조회")
+    void findAllMessage() {
+        User user1 = new User("user1", "user1@gmail.com", "pass12341");
+        User user2 = new User("user2", "user2@gmail.com", "pass12341");
+        Message message1 = new Message("title", "content", user1, user2);
+        Message message2 = new Message("good", "hihihi", user2, user1);
+        Channel channel1 = channelService.createChannel("ch.1", user1, new HashMap<>());
+        channelService.addUserChannel(channel1.getChannelId(), user1);
+        channelService.addUserChannel(channel1.getChannelId(), user2);
+
+        //메세지 추가
+        channelService.addMessageInCh(channel1.getChannelId(), message1);
+        channelService.addMessageInCh(channel1.getChannelId(), message2);
+
+        // 모든 메세지 찾기
+        Map<UUID, Message> channelInMessageAll = channelService.findChannelInMessageAll(channel1.getChannelId());
+
+        // 특정 메세지 뽑고 그 메세지 찾기
+        Message findMessage = channelService.findChannelMessageById(channel1.getChannelId(), message1.getMessageId());
+        Assertions.assertEquals("title", findMessage.getMessageTitle());
+
+    }
+
+    @Test
+    @DisplayName("채널에서 메세지 삭제")
+    void removeMessage() {
+        User user1 = new User("user1", "user1@gmail.com", "pass12341");
+        User user2 = new User("user2", "user2@gmail.com", "pass12341");
+        Message message1 = new Message("title", "content", user1, user2);
+        Message message2 = new Message("good", "hihihi", user2, user1);
+        Channel channel1 = channelService.createChannel("ch.1", user1, new HashMap<>());
+        channelService.addUserChannel(channel1.getChannelId(), user1);
+        channelService.addUserChannel(channel1.getChannelId(), user2);
+
+        //메세지 추가
+        channelService.addMessageInCh(channel1.getChannelId(), message1);
+        channelService.addMessageInCh(channel1.getChannelId(), message2);
+
+        System.out.println(channelService.getAllChannels());
+
+        // 메세지 삭제
+        channelService.removeMessageInCh(channel1.getChannelId(), message1);
+
+        Message channelMessageById = channelService.findChannelMessageById(channel1.getChannelId(), message1.getMessageId());
+
+        Assertions.assertEquals(message1,channelMessageById);
 
     }
 }
