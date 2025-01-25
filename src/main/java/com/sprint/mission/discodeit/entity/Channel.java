@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -27,11 +30,11 @@ public class Channel extends BaseObject implements Serializable {
         setChannelOwnerUser(channelOwnerUser);
 
         this.channelUsers = new HashMap<>();
+        this.channelMessages = new HashMap<>();
+
         if (channelUsers != null) {
             this.channelUsers.putAll(channelUsers);
         }
-
-        this.channelMessages = new HashMap<>();
     }
 
     public Channel(String channelName, User channelOwnerUser) {
@@ -44,7 +47,7 @@ public class Channel extends BaseObject implements Serializable {
 
     public void addUser(User user) {
         if (user == null) {
-            throw new IllegalArgumentException("유저를 추가해주세요");
+            throw new UserNotFoundException();
         }
 
         channelUsers.put(user.getUserId(), user);
@@ -69,7 +72,7 @@ public class Channel extends BaseObject implements Serializable {
         channelUsers.entrySet().stream()
                 .filter(entry -> entry.getKey().equals(user.getUserId()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 유저가 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         channelUsers.remove(user.getUserId());
         setUpdatedAt();
@@ -78,7 +81,7 @@ public class Channel extends BaseObject implements Serializable {
 
     public void removeMessageInChannel(UUID messageId) {
         if (!channelMessages.containsKey(messageId)) {
-            throw new IllegalArgumentException("삭제할 메세지가 없습니다.");
+            throw new MessageNotFoundException();
         }
 
         channelMessages.remove(messageId);
@@ -93,16 +96,20 @@ public class Channel extends BaseObject implements Serializable {
 
     private void checkChannelOwnerUser(User channelOwnerUser) {
         if (channelOwnerUser == null) {
-            throw new IllegalAccessError("방장을 지정해주세요.");
+            throw new UserNotFoundException();
         }
     }
 
     private void checkMessage(Message addMessage) {
+        if(addMessage == null) {
+            throw new MessageNotFoundException();
+        }
+
         UUID sender = addMessage.getMessageSendUser().getUserId();
         UUID receiver = addMessage.getMessageReceiveUser().getUserId();
 
         if (!channelUsers.containsKey(sender) || !channelUsers.containsKey(receiver)) {
-            throw new IllegalArgumentException("해당 유저가 채널에 존재하지 않습니다.");
+            throw new UserNotFoundException();
         }
     }
 
