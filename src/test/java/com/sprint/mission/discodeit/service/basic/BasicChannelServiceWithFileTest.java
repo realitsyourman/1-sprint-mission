@@ -4,11 +4,12 @@ import com.sprint.mission.discodeit.AppConfig;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
-import org.junit.jupiter.api.Assertions;
+import com.sprint.mission.discodeit.service.file.FileMessageService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,9 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 public class BasicChannelServiceWithFileTest {
 
     ChannelRepository channelRepository = new FileChannelRepository(); // file repo
@@ -26,8 +30,8 @@ public class BasicChannelServiceWithFileTest {
     void init() {
         AppConfig appConfig = new AppConfig();
 
-        channelService = appConfig.basicChannelService();
-        messageService = appConfig.basicMessageService();
+        messageService = new FileMessageService();
+        channelService = new BasicChannelService(channelRepository, messageService);
     }
 
     @Test
@@ -36,8 +40,8 @@ public class BasicChannelServiceWithFileTest {
         User user = new User("user", "user1@gmail.com", "pass12341");
         Channel channel1 = channelService.createChannel("ch.1", user, new HashMap<>());
 
-        Assertions.assertEquals("ch.1", channel1.getChannelName());
-        Assertions.assertEquals(user, channel1.getChannelOwnerUser());
+        assertEquals("ch.1", channel1.getChannelName());
+        assertEquals(user, channel1.getChannelOwnerUser());
     }
 
     @Test
@@ -45,12 +49,15 @@ public class BasicChannelServiceWithFileTest {
     void getChannelName() {
         User user1 = new User("user1", "user1@gmail.com", "pass12341");
         User user2 = new User("user2", "user2@gmail.com", "pass12341");
+
         Channel channel1 = channelService.createChannel("ch.1", user1, new HashMap<>());
         Channel channel2 = channelService.createChannel("ch.2", user2, new HashMap<>());
 
-        Map<UUID, Channel> findChannel = channelService.getChannelByName("ch.2");
+        // ch1 찾기
+        Channel findChannel = channelService.findChannelById(channel1.getChannelId());
 
-        Assertions.assertEquals("ch.2", findChannel.get(channel2.getChannelId()).getChannelName());
+        // ch1 이름 찾기
+        assertEquals("ch.1", findChannel.getChannelName());
     }
 
     @Test
@@ -63,7 +70,7 @@ public class BasicChannelServiceWithFileTest {
 
         Channel findCh = channelService.findChannelById(channel1.getChannelId());
 
-        Assertions.assertEquals(channel1, findCh);
+        assertEquals(channel1, findCh);
     }
 
     @Test
@@ -76,8 +83,8 @@ public class BasicChannelServiceWithFileTest {
 
         Map<UUID, Channel> allChannels = channelService.getAllChannels();
 
-        Assertions.assertEquals(channel1, allChannels.get(channel1.getChannelId()));
-        Assertions.assertEquals(channel2, allChannels.get(channel2.getChannelId()));
+        assertEquals(channel1, allChannels.get(channel1.getChannelId()));
+        assertEquals(channel2, allChannels.get(channel2.getChannelId()));
     }
 
     @Test
@@ -93,8 +100,8 @@ public class BasicChannelServiceWithFileTest {
 
         Channel channelById = channelService.findChannelById(channel2.getChannelId());
 
-        Assertions.assertEquals("newChannelName", channelById.getChannelName());
-        Assertions.assertEquals(user3, channelById.getChannelOwnerUser());
+        assertEquals("newChannelName", channelById.getChannelName());
+        assertEquals(user3, channelById.getChannelOwnerUser());
     }
 
     @Test
@@ -107,7 +114,7 @@ public class BasicChannelServiceWithFileTest {
 
         channelService.removeChannelById(channel1.getChannelId());
 
-        Assertions.assertNull(channelRepository.findChannelById(channel1.getChannelId()));
+        assertNull(channelRepository.findChannelById(channel1.getChannelId()));
     }
 
     @Test
@@ -127,7 +134,7 @@ public class BasicChannelServiceWithFileTest {
         Channel findChannel = channelService.findChannelById(channel1.getChannelId());
         User findUser = findChannel.getChannelUsers().get(user3.getUserId());
 
-        Assertions.assertEquals(user3, findUser);
+        assertEquals(user3, findUser);
     }
 
     @Test
@@ -146,7 +153,7 @@ public class BasicChannelServiceWithFileTest {
         channelService.kickUserChannel(channel1.getChannelId(), newU1);
         User findUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelUsers().get(newU1.getUserId()); // newU1 찾기
 
-        Assertions.assertNull(findUser);
+        assertNull(findUser);
     }
 
     @Test
@@ -168,10 +175,10 @@ public class BasicChannelServiceWithFileTest {
         User messageReceiveUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelMessages().get(message.getMessageId()).getMessageReceiveUser();
 
 
-        Assertions.assertEquals("title", messageTitle);
-        Assertions.assertEquals("content", messageContent);
-        Assertions.assertEquals(user1, messageSendUser);
-        Assertions.assertEquals(user2, messageReceiveUser);
+        assertEquals("title", messageTitle);
+        assertEquals("content", messageContent);
+        assertEquals(user1, messageSendUser);
+        assertEquals(user2, messageReceiveUser);
     }
 
     @Test
@@ -192,8 +199,8 @@ public class BasicChannelServiceWithFileTest {
         // 메세지 찾기
         Message channelMessageById = channelService.findChannelMessageById(channel1.getChannelId(), message.getMessageId());
 
-        Assertions.assertEquals("안녕", channelMessageById.getMessageTitle());
-        Assertions.assertEquals("하이", channelMessageById.getMessageContent());
+        assertEquals("안녕", channelMessageById.getMessageTitle());
+        assertEquals("하이", channelMessageById.getMessageContent());
 
     }
 
@@ -217,7 +224,7 @@ public class BasicChannelServiceWithFileTest {
 
         // 특정 메세지 뽑고 그 메세지 찾기
         Message findMessage = channelService.findChannelMessageById(channel1.getChannelId(), message1.getMessageId());
-        Assertions.assertEquals("title", findMessage.getMessageTitle());
+        assertEquals("title", findMessage.getMessageTitle());
 
     }
 
@@ -236,14 +243,9 @@ public class BasicChannelServiceWithFileTest {
         channelService.addMessageInCh(channel1.getChannelId(), message1);
         channelService.addMessageInCh(channel1.getChannelId(), message2);
 
-        System.out.println(channelService.getAllChannels());
-
-        // 메세지 삭제
         channelService.removeMessageInCh(channel1.getChannelId(), message1);
 
-        Message channelMessageById = channelService.findChannelMessageById(channel1.getChannelId(), message1.getMessageId());
-
-        Assertions.assertEquals(message1,channelMessageById);
-
+        assertThrows(MessageNotFoundException.class,
+                () -> channelService.findChannelMessageById(channel1.getChannelId(), message1.getMessageId()));
     }
 }
