@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class FileUserService implements UserService, FileService<User> {
@@ -19,7 +20,7 @@ public class FileUserService implements UserService, FileService<User> {
 
     private static final EntityFactory ef = BaseEntityFactory.getInstance();
 
-    ServiceValidator<User> userValidator = new UserServiceValidator();
+    private final ServiceValidator<User> userValidator = new UserServiceValidator();
 
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
@@ -43,7 +44,8 @@ public class FileUserService implements UserService, FileService<User> {
 
     @Override
     public Map<UUID, User> getAllUsers() {
-        return load(USER_PATH, userList);
+        return Optional.ofNullable(load(USER_PATH, userList))
+                .orElseThrow(IllegalUserException::new);
     }
 
     @Override
