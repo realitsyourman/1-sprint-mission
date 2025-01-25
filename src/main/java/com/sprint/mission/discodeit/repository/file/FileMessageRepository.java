@@ -15,25 +15,26 @@ public class FileMessageRepository implements MessageRepository, FileService<Mes
 
     @Override
     public Message saveMessage(Message message) {
-        messageMap = findAllMessage();
-        messageMap.put(message.getMessageId(), message);
-
-        save(MESSAGE_PATH, messageMap);
-
+        Map<UUID, Message> messages = findAllMessage();
+        messages.put(message.getMessageId(), message);
+        save(MESSAGE_PATH, messages);
         return message;
     }
 
     @Override
     public void removeMessageById(UUID messageId) {
-        messageMap = findAllMessage();
-        messageMap.remove(messageId);
-
-        save(MESSAGE_PATH, messageMap);
+        Map<UUID, Message> messages = findAllMessage();
+        messages.remove(messageId);
+        save(MESSAGE_PATH, messages);
+        messageMap = messages;
     }
 
     @Override
     public Message findMessageById(UUID messageId) {
-        return messageMap.get(messageId);
+        messageMap = findAllMessage();  // 파일에서 최신 상태 로드
+        Message message = messageMap.get(messageId);
+        System.out.println("Finding message: " + message); // 디버깅용
+        return message;
     }
 
     @Override

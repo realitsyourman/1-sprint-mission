@@ -25,19 +25,17 @@ public class FileMessageService implements MessageService, FileService<Message> 
 
     @Override
     public Message createMessage(String title, String content, User sender, User receiver) {
+        Map<UUID, Message> messages = load(MESSAGE_PATH, messageList);
         Message message = ef.createMessage(title, content, sender, receiver);
-        messageList.put(message.getMessageId(), message);
-
-        save(MESSAGE_PATH, messageList);
-
+        messages.put(message.getMessageId(), message);
+        save(MESSAGE_PATH, messages);
         return message;
     }
 
     @Override
     public Message getMessageById(UUID messageId) {
-        Message message = messageList.get(messageId);
-
-        return message;
+        Map<UUID, Message> messages = load(MESSAGE_PATH, messageList);
+        return messages.get(messageId);
     }
 
     @Override
