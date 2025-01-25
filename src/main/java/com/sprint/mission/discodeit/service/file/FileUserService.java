@@ -1,9 +1,12 @@
 package com.sprint.mission.discodeit.service.file;
 
 import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.validate.ServiceValidator;
+import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,19 +17,18 @@ public class FileUserService implements UserService, FileService<User> {
 
     private Map<UUID, User> userList = new HashMap<>();
 
-    private static EntityFactory ef;
+    private static final EntityFactory ef = BaseEntityFactory.getInstance();
 
-    public FileUserService(EntityFactory ef) {
-        FileUserService.ef = ef;
-    }
-
-    public FileUserService() {
-        ef = BaseEntityFactory.getInstance();
-    }
+    ServiceValidator<User> userValidator = new UserServiceValidator();
 
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
-        User user = ef.createUser(userName, userEmail, userPassword);
+        if (userValidator.isNullParam(userName, userEmail, userPassword)) {
+            throw new IllegalUserException();
+        }
+
+        User user = userValidator.entityValidate(ef.createUser(userName, userEmail, userPassword));
+
         userList.put(user.getUserId(), user);
 
         save(USER_PATH, userList);
@@ -36,7 +38,7 @@ public class FileUserService implements UserService, FileService<User> {
 
     @Override
     public User getUserById(UUID userId) {
-        return userList.get(userId);
+        return userValidator.entityValidate(userList.get(userId));
     }
 
     @Override
@@ -64,10 +66,10 @@ public class FileUserService implements UserService, FileService<User> {
 
     @Override
     public void deleteUser(UUID userId) {
-        userList.remove(userId);
+        User findUser = getUserById(userId);
+
+        userList.remove(findUser.getUserId());
 
         save(USER_PATH, userList);
-
     }
-
 }
