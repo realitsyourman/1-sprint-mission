@@ -1,5 +1,8 @@
 package com.sprint.mission.discodeit.service.validate;
 
+import java.util.Map;
+import java.util.UUID;
+
 public interface ServiceValidator<T> {
 
     /**
@@ -8,6 +11,10 @@ public interface ServiceValidator<T> {
      * @Description: User, Message, Channel 객체를 받아 null인지 검증
      */
     T entityValidate(T t);
+
+    default Map<UUID, T> entityValidate(Map<UUID, T> map) {
+        return map;
+    }
 
     default boolean isNullParam(String... str) {
         for (String s : str) {
