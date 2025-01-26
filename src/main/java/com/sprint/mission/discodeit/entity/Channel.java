@@ -108,6 +108,10 @@ public class Channel extends BaseObject implements Serializable {
         UUID sender = addMessage.getMessageSendUser().getUserId();
         UUID receiver = addMessage.getMessageReceiveUser().getUserId();
 
+        if(channelOwnerUser.getUserId().equals(sender) || channelOwnerUser.getUserId().equals(receiver)) {
+            return;
+        }
+
         if (!channelUsers.containsKey(sender) || !channelUsers.containsKey(receiver)) {
             throw new UserNotFoundException();
         }

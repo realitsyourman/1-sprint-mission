@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
 import com.sprint.mission.discodeit.exception.message.NullMessageContentException;
+import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 
 import java.io.Serial;
@@ -24,7 +25,7 @@ public class Message extends BaseObject implements Serializable {
     }
 
     private void setMessageTitle(String title) {
-        checkMessageContent(title);
+        checkMessageTitle(title);
         this.messageTitle = title;
         setUpdatedAt();
     }
@@ -54,6 +55,12 @@ public class Message extends BaseObject implements Serializable {
         setUpdatedAt();
     }
 
+    private void checkMessageTitle(String messageTitle) {
+        if (messageTitle == null || messageTitle.isEmpty()) {
+            throw new NullMessageTitleException();
+        }
+
+    }
 
     private void checkMessageContent(String messageContent) {
         if (messageContent == null || messageContent.isEmpty()) {
