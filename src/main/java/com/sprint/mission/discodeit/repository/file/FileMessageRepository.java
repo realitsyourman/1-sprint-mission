@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.service.file.FileService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class FileMessageRepository implements MessageRepository, FileService<Message> {
@@ -32,13 +33,15 @@ public class FileMessageRepository implements MessageRepository, FileService<Mes
     @Override
     public Message findMessageById(UUID messageId) {
         messageMap = findAllMessage();  // 파일에서 최신 상태 로드
+
         Message message = messageMap.get(messageId);
-        System.out.println("Finding message: " + message); // 디버깅용
+
         return message;
     }
 
     @Override
     public Map<UUID, Message> findAllMessage() {
-        return load(MESSAGE_PATH, messageMap);
+        return Optional.ofNullable(load(MESSAGE_PATH, messageMap))
+                .orElse(new HashMap<>());
     }
 }
