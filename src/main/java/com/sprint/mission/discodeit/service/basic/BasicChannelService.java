@@ -12,7 +12,9 @@ import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.ChannelServiceValidator;
+import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
+import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,8 @@ import java.util.stream.Collectors;
 public class BasicChannelService implements ChannelService {
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
     private final ServiceValidator<Channel> channelValidator = new ChannelServiceValidator();
+    private final ServiceValidator<User> userValidator = new UserServiceValidator();
+    private final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
     private final ChannelRepository channelRepository;
     private final MessageService messageService;
 
@@ -58,11 +62,11 @@ public class BasicChannelService implements ChannelService {
         }
 
         return allChannels.entrySet().stream()
-                                        .filter(entry -> entry.getValue().getChannelName().equals(channelName))
-                                        .collect(Collectors.toMap(
-                                                Map.Entry::getKey,
-                                                Map.Entry::getValue
-                                        ));
+                .filter(entry -> entry.getValue().getChannelName().equals(channelName))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
     }
 
     @Override
@@ -71,7 +75,6 @@ public class BasicChannelService implements ChannelService {
     }
 
     /**
-     *
      * @return Map<UUID, Channel>
      * @Description: channelRepository에서 모든 채널을 가져오는데 없으면 빈 hashMap 반환
      */
@@ -100,7 +103,7 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public void addUserChannel(UUID channelUUID, User addUser) {
-        if(addUser == null) {
+        if (addUser == null) {
             throw new UserNotFoundException();
         }
 
@@ -113,15 +116,30 @@ public class BasicChannelService implements ChannelService {
 
     @Override
     public void kickUserChannel(UUID channelUUID, User kickUser) {
-        if(kickUser == null) {
-            throw new UserNotFoundException();
-        }
+        User wantKickUser = userValidator.entityValidate(kickUser);
 
         Channel findChannel = findChannelById(channelUUID);
 
-        findChannel.removeUser(kickUser);
+        if (findChannel.getChannelOwnerUser().equals(wantKickUser)) {
+            findNextOwnerUser(findChannel);
+        }
+
+        findChannel.removeUser(wantKickUser);
 
         channelRepository.saveChannel(findChannel);
+    }
+
+    private void findNextOwnerUser(Channel findChannel) {
+        Channel channel = channelValidator.entityValidate(findChannel);
+
+        User nextOwnerUser = channel.getChannelUsers().entrySet().stream()
+                .filter(entry -> !entry.getValue().equals(findChannel.getChannelOwnerUser()))
+                .findAny()
+                .map(Map.Entry::getValue)
+                .orElseThrow(UserNotFoundException::new);
+
+        channel.updateOwnerUser(nextOwnerUser);
+        channel.removeUser(nextOwnerUser);
     }
 
     // 채널은 메세지를 가지고 있음. 메세지를 추가
@@ -132,31 +150,33 @@ public class BasicChannelService implements ChannelService {
 
         // 메세지 저장
         messageService.createMessage(addMessage.getMessageTitle(),
-                                        addMessage.getMessageContent(),
-                                        addMessage.getMessageSendUser(),
-                                        addMessage.getMessageReceiveUser());
+                addMessage.getMessageContent(),
+                addMessage.getMessageSendUser(),
+                addMessage.getMessageReceiveUser());
 
         // 채널 저장
         channelRepository.saveChannel(findChannel);
     }
 
     /**
-     *
      * @param channelId
      * @param removeMessage
      * @Description: 메세지 서비스에서 가져온 메세지를 삭제, getMessageById에서 검증할 것임
      */
-
     @Override
     public void removeMessageInCh(UUID channelId, Message removeMessage) {
         Channel findChannel = findChannelById(channelId);
-        findChannel.getChannelMessages().remove(removeMessage.getMessageId());
-        channelRepository.saveChannel(findChannel);
-        messageService.deleteMessage(removeMessage.getMessageId());
+
+        Message message = messageValidator.entityValidate(removeMessage);
+
+        messageService.deleteMessage(message.getMessageId()); // 먼저 메시지 삭제
+
+        findChannel.getChannelMessages().remove(message.getMessageId());
+
+        channelRepository.saveChannel(findChannel); // 그 다음 채널 저장
     }
 
     /**
-     *
      * @param channelId
      * @param messageId
      * @return Message
@@ -167,10 +187,10 @@ public class BasicChannelService implements ChannelService {
         Channel findChannel = findChannelById(channelId);
 
         return findChannel.getChannelMessages().entrySet().stream()
-                            .filter(entry -> entry.getKey().equals(messageId))
-                            .findFirst()
-                            .map(Map.Entry::getValue)
-                            .orElseThrow(MessageNotFoundException::new);
+                .filter(entry -> entry.getKey().equals(messageId))
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElseThrow(MessageNotFoundException::new);
 
     }
 

@@ -4,13 +4,13 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
-import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
+import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
 
 import java.util.Map;
 import java.util.Optional;
@@ -23,6 +23,7 @@ public class BasicMessageService implements MessageService {
     private final MessageRepository messageRepository;
 
     private final ServiceValidator<Message> validator = new MessageServiceValidator();
+    private final ServiceValidator<User> userValidator = new UserServiceValidator();
 
     public BasicMessageService(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
@@ -33,11 +34,12 @@ public class BasicMessageService implements MessageService {
     public Message createMessage(String title, String content, User sender, User receiver) {
         if (validator.isNullParam(title)) {
             throw new NullMessageTitleException();
-        } else if (sender == null || receiver == null) {
-            throw new UserNotFoundException();
         }
 
-        Message message = entityFactory.createMessage(title, content, sender, receiver);
+        User sendUser = userValidator.entityValidate(sender);
+        User receiveUser = userValidator.entityValidate(receiver);
+
+        Message message = entityFactory.createMessage(title, content, sendUser, receiveUser);
         return messageRepository.saveMessage(message);
     }
 
