@@ -1,8 +1,8 @@
-package com.sprint.mission.discodeit.service.file;
+package com.sprint.mission.discodeit.service.jcf;
 
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import org.junit.jupiter.api.Assertions;
+import com.sprint.mission.discodeit.service.UserService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -10,9 +10,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class FileUserServiceTest {
-    FileUserService userService = new FileUserService();
+class JCFUserServiceTest {
+    UserService userService = new JCFUserService();
 
     @Test
     @DisplayName("유저 생성")
@@ -68,6 +69,7 @@ class FileUserServiceTest {
         userService.deleteUser(user1.getUserId());
 
         assertEquals(0, userService.getAllUsers().size());
-        Assertions.assertThrows(UserNotFoundException.class, () -> userService.getUserById(user1.getUserId()));
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(user1.getUserId()));
     }
 }
