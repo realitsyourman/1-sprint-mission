@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 
 import java.io.Serial;
@@ -7,12 +9,19 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseObject implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @JsonProperty("userName")
     private String userName;
+    @JsonProperty("userEmail")
     private String userEmail;
+    @JsonProperty("userPassword")
     private transient String userPassword;
+
+    public User() {}
 
     public User(String userName, String userEmail, String userPassword) {
         super();

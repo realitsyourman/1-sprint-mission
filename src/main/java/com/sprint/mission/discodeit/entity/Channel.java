@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 
@@ -13,16 +15,26 @@ import java.util.UUID;
 /**
  * The type Channel.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Channel extends BaseObject implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+
+    @JsonProperty("channelName")
     private String channelName;
+
+    @JsonProperty("channelOwnerUser")
     private User channelOwnerUser;
+
+    @JsonProperty("channelUsers")
     private Map<UUID, User> channelUsers;
 
     // 메세지는 채널 안에 존재함
+    @JsonProperty("channelMessages")
     private Map<UUID, Message> channelMessages;
 
+
+    public Channel() {}
 
     public Channel(String channelName, User channelOwnerUser, Map<UUID, User> channelUsers) {
         super();

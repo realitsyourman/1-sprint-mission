@@ -1,5 +1,7 @@
 package com.sprint.mission.discodeit.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.UUID;
@@ -7,8 +9,11 @@ import java.util.UUID;
 public abstract class BaseObject implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    @JsonProperty("userId")
     private final UUID id;
+    @JsonProperty("createdAt")
     private final Long createdAt;
+    @JsonProperty("updatedAt")
     private Long updatedAt;
 
     public BaseObject(UUID id, Long createdAt, Long updatedAt) {
