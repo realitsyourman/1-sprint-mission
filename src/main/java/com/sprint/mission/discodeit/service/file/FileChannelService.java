@@ -133,7 +133,7 @@ public class FileChannelService implements ChannelService, FileService<Channel> 
         Channel channel = channelValidator.entityValidate(findChannel);
 
         User nextOwnerUser = channel.getChannelUsers().entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(channel.getChannelOwnerUser().getUserId()))
+                .filter(entry -> !entry.getKey().equals(channel.getChannelOwnerUser().getId()))
                 .findAny()
                 .map(Map.Entry::getValue)
                 .orElseThrow(UserNotFoundException::new);

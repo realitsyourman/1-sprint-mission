@@ -101,7 +101,7 @@ public class JCFChannelService implements ChannelService {
     public void kickUserChannel(UUID channelUUID, User kickUser) {
         Channel findChannel = findChannelById(channelUUID);
 
-        User user = userValidator.entityValidate(findChannel.getChannelUsers().get(kickUser.getUserId()));
+        User user = userValidator.entityValidate(findChannel.getChannelUsers().get(kickUser.getId()));
 
         findChannel.removeUser(user);
 
@@ -117,7 +117,7 @@ public class JCFChannelService implements ChannelService {
 
 
         User nextOwnerUser = channel.getChannelUsers().entrySet().stream()
-                .filter(entry -> !entry.getKey().equals(channel.getChannelOwnerUser().getUserId()))
+                .filter(entry -> !entry.getKey().equals(channel.getChannelOwnerUser().getId()))
                 .findAny()
                 .map(Map.Entry::getValue)
                 .orElseThrow(() -> new UserNotFoundException("채널에 아무도 없습니다."));

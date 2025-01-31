@@ -21,10 +21,10 @@ public class JCFUserRepository implements UserRepository {
 
     @Override
     public User userSave(User user) {
-        userMap.put(user.getUserId(), user);
+        userMap.put(user.getId(), user);
 
 
-        return userMap.get(user.getUserId());
+        return userMap.get(user.getId());
     }
 
     @Override

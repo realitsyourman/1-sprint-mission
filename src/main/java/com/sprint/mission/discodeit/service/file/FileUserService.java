@@ -30,7 +30,7 @@ public class FileUserService implements UserService, FileService<User> {
 
         User user = userValidator.entityValidate(ef.createUser(userName, userEmail, userPassword));
 
-        userList.put(user.getUserId(), user);
+        userList.put(user.getId(), user);
 
         save(USER_PATH, userList);
 
@@ -70,7 +70,7 @@ public class FileUserService implements UserService, FileService<User> {
     public void deleteUser(UUID userId) {
         User findUser = getUserById(userId);
 
-        userList.remove(findUser.getUserId());
+        userList.remove(findUser.getId());
 
         save(USER_PATH, userList);
     }

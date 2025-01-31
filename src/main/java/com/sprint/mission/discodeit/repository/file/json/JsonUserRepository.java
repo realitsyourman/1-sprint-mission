@@ -18,7 +18,7 @@ public class JsonUserRepository implements UserRepository {
 
     @Override
     public User userSave(User user) {
-        userMap.put(user.getUserId(), user);
+        userMap.put(user.getId(), user);
         saveToJson();
         return user;
     }

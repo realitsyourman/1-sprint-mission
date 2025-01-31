@@ -82,6 +82,6 @@ public class JCFUserService implements UserService {
     public void deleteUser(UUID userId) {
         User findUser = validator.entityValidate(getUserById(userId));
 
-        userRepository.removeUserById(findUser.getUserId());
+        userRepository.removeUserById(findUser.getId());
     }
 }
