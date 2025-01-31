@@ -46,6 +46,7 @@ public class BasicMessageService implements MessageService {
     @Override
     public Message getMessageById(UUID messageId) {
         Map<UUID, Message> messages = messageRepository.findAllMessage();
+
         return validator.entityValidate(messages.get(messageId));
     }
 

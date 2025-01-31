@@ -146,15 +146,8 @@ public class BasicChannelService implements ChannelService {
     @Override
     public void addMessageInCh(UUID channelId, Message message) {
         Channel findChannel = findChannelById(channelId);
-        Message addMessage = findChannel.addMessageInChannel(message);
+        findChannel.addMessageInChannel(message);
 
-        // 메세지 저장
-        messageService.createMessage(addMessage.getMessageTitle(),
-                addMessage.getMessageContent(),
-                addMessage.getMessageSendUser(),
-                addMessage.getMessageReceiveUser());
-
-        // 채널 저장
         channelRepository.saveChannel(findChannel);
     }
 
@@ -169,11 +162,11 @@ public class BasicChannelService implements ChannelService {
 
         Message message = messageValidator.entityValidate(removeMessage);
 
-        messageService.deleteMessage(message.getMessageId()); // 먼저 메시지 삭제
-
         findChannel.getChannelMessages().remove(message.getMessageId());
 
-        channelRepository.saveChannel(findChannel); // 그 다음 채널 저장
+        channelRepository.saveChannel(findChannel);
+
+        messageService.deleteMessage(message.getMessageId());
     }
 
     /**
@@ -193,7 +186,6 @@ public class BasicChannelService implements ChannelService {
                 .orElseThrow(MessageNotFoundException::new);
 
     }
-
     @Override
     public Map<UUID, Message> findChannelInMessageAll(UUID channelId) {
         Channel findChannel = findChannelById(channelId);
