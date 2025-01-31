@@ -62,7 +62,7 @@ public class Channel extends BaseObject implements Serializable {
             throw new UserNotFoundException();
         }
 
-        channelUsers.put(user.getUserId(), user);
+        channelUsers.put(user.getId(), user);
 
         setUpdatedAt();
     }
@@ -82,11 +82,11 @@ public class Channel extends BaseObject implements Serializable {
 
     public void removeUser(User user) {
         channelUsers.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(user.getUserId()))
+                .filter(entry -> entry.getKey().equals(user.getId()))
                 .findFirst()
                 .orElseThrow(UserNotFoundException::new);
 
-        channelUsers.remove(user.getUserId());
+        channelUsers.remove(user.getId());
         setUpdatedAt();
     }
 
@@ -117,10 +117,10 @@ public class Channel extends BaseObject implements Serializable {
             throw new MessageNotFoundException();
         }
 
-        UUID sender = addMessage.getMessageSendUser().getUserId();
-        UUID receiver = addMessage.getMessageReceiveUser().getUserId();
+        UUID sender = addMessage.getMessageSendUser().getId();
+        UUID receiver = addMessage.getMessageReceiveUser().getId();
 
-        if(channelOwnerUser.getUserId().equals(sender) || channelOwnerUser.getUserId().equals(receiver)) {
+        if(channelOwnerUser.getId().equals(sender) || channelOwnerUser.getId().equals(receiver)) {
             return;
         }
 

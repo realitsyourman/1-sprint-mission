@@ -3,12 +3,13 @@ package com.sprint.mission.discodeit.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
-import java.util.UUID;
 
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User extends BaseObject implements Serializable {
     @Serial
@@ -87,30 +88,6 @@ public class User extends BaseObject implements Serializable {
     public String updatePassword(String updatePassword) {
         setUserPassword(updatePassword);
         return this.userPassword;
-    }
-
-    public UUID getUserId() {
-        return getId();
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public String getUserPassword() {
-        return userPassword;
-    }
-
-    public Long getCreatedAt() {
-        return getCreatedAtBaseObject();
-    }
-
-    public Long getUpdatedAt() {
-        return getUpdatedAtBaseObject();
     }
 
     @Override
