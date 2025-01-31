@@ -39,7 +39,7 @@ public class ChannelTest {
         User user1 = new User("user1", "user1@naver.com", "user12345");
         User user2 = new User("user2", "user2@gmail.com", "2222user12345");
 
-        Channel ch1 = channelService.createChannel("ch.1", user1, Map.of(user1.getUserId(), user1, user2.getUserId(), user2));
+        Channel ch1 = channelService.createChannel("ch.1", user1, Map.of(user1.getId(), user1, user2.getId(), user2));
 
         channelService.updateChannel(ch1.getChannelId(), "ch.999", user2);
 
@@ -69,7 +69,7 @@ public class ChannelTest {
     @DisplayName("채널에서 강퇴")
     void kickUser() {
         User user = new User("user1", "user1@mail.com", "user12345");
-        Channel channel = channelService.createChannel("test", user, Map.of(user.getUserId(), user));
+        Channel channel = channelService.createChannel("test", user, Map.of(user.getId(), user));
 
         Assertions.assertThrows(UserNotFoundException.class, () -> channelService.kickUserChannel(channel.getChannelId(), user));
 

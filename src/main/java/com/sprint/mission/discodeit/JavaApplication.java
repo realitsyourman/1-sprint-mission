@@ -3,8 +3,6 @@ package com.sprint.mission.discodeit;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
-import com.sprint.mission.discodeit.factory.BaseEntityFactory;
-import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.UserService;
@@ -16,8 +14,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class JavaApplication {
-    public static void main(java.lang.String[] args) {
-        EntityFactory entityFactory = BaseEntityFactory.getInstance();
+    public static void main(String[] args) {
+        //EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
         // 지금 AppConfig는 FileIO(.ser)를 구현한 클래스들로 의존성 주입하고 있음
         AppConfig config = new AppConfig();
@@ -35,8 +33,9 @@ public class JavaApplication {
         User userPark = userFileService.createUser("park", "park@gmail.com", "passwordpark");
 
 
+
         System.out.println("유저 추가 및 userKim id로 조회");
-        User findUser = userFileService.getUserById(userKim.getUserId());
+        User findUser = userFileService.getUserById(userKim.getId());
         System.out.println(findUser);
 
         System.out.println("\n모든 유저 조회");
@@ -44,11 +43,11 @@ public class JavaApplication {
         System.out.println(allUsers);
 
         System.out.println("\nuserKim 유저 수정 -> name='gim'");
-        userFileService.getUserById(userKim.getUserId()).updateName("gim");
-        System.out.println(userFileService.getUserById(userKim.getUserId()));
+        userFileService.getUserById(userKim.getId()).updateName("gim");
+        System.out.println(userFileService.getUserById(userKim.getId()));
 
         System.out.println("\nuserLee 유저 삭제");
-        userFileService.deleteUser(userLee.getUserId());
+        userFileService.deleteUser(userLee.getId());
         System.out.println(userFileService.getAllUsers());
         System.out.println();
 
@@ -57,8 +56,8 @@ public class JavaApplication {
          */
         FileChannelService channelFileService = new FileChannelService();
         Map<UUID, User> userMap1 = new HashMap<>();
-        userMap1.put(userKim.getUserId(), userKim);
-        userMap1.put(userLee.getUserId(), userLee);
+        userMap1.put(userKim.getId(), userKim);
+        userMap1.put(userLee.getId(), userLee);
 
         System.out.println("\n채널 등록 및 (code review) 채널 조회");
         Channel codeReviewChannel = channelFileService.createChannel("code review", userKim, userMap1);
@@ -143,18 +142,18 @@ public class JavaApplication {
         System.out.println("유저 추가 및 조회");
         User basicUserKim = userService.createUser("kim", "kim@mail.com", "passwordkim");
         User basicUserLee = userService.createUser("lee", "lee@mail.com", "passwordlee");
-        System.out.println(userService.getUserById(basicUserKim.getUserId()));
-        System.out.println(userService.getUserById(basicUserLee.getUserId()));
+        System.out.println(userService.getUserById(basicUserKim.getId()));
+        System.out.println(userService.getUserById(basicUserLee.getId()));
 
         System.out.println("\n모든 유저 조회");
         System.out.println(userService.getAllUsers());
 
         System.out.println("\n \"kim\" 유저 수정");
-        userService.updateUser(basicUserKim.getUserId(), "gim", "gim@mail.com", "passwordgim");
-        System.out.println(userService.getUserById(basicUserKim.getUserId()));
+        userService.updateUser(basicUserKim.getId(), "gim", "gim@mail.com", "passwordgim");
+        System.out.println(userService.getUserById(basicUserKim.getId()));
 
         System.out.println("\n \"lee\" 유저 삭제 후 전체 조회");
-        userService.deleteUser(basicUserLee.getUserId());
+        userService.deleteUser(basicUserLee.getId());
         System.out.println(userService.getAllUsers());
 
 
@@ -163,8 +162,8 @@ public class JavaApplication {
          */
         System.out.println("\n\n채널 등록 및 조회");
         Map<UUID, User> userMap2 = new HashMap<>();
-        userMap2.put(basicUserKim.getUserId(), basicUserKim);
-        userMap2.put(basicUserLee.getUserId(), basicUserLee);
+        userMap2.put(basicUserKim.getId(), basicUserKim);
+        userMap2.put(basicUserLee.getId(), basicUserLee);
         Channel basicChannel = channelService.createChannel("code review", basicUserKim, userMap2);
         System.out.println(channelService.getAllChannels());
 

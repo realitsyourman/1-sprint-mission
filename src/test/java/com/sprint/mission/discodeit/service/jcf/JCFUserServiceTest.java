@@ -31,7 +31,7 @@ class JCFUserServiceTest {
         User user1 = userService.createUser("userA", "dsadqwda@naver.com", "pawdawd111");
         User user2 = userService.createUser("userB", "q11qqqqqa@naver.com", "111ddddawd111");
 
-        User findUser = userService.getUserById(user1.getUserId());
+        User findUser = userService.getUserById(user1.getId());
 
         assertEquals(user1, findUser);
     }
@@ -45,8 +45,8 @@ class JCFUserServiceTest {
         Map<UUID, User> allUsers = userService.getAllUsers();
 
         assertEquals(2, allUsers.size());
-        assertEquals(user1, allUsers.get(user1.getUserId()));
-        assertEquals(user2, allUsers.get(user2.getUserId()));
+        assertEquals(user1, allUsers.get(user1.getId()));
+        assertEquals(user2, allUsers.get(user2.getId()));
     }
 
     @Test
@@ -54,7 +54,7 @@ class JCFUserServiceTest {
     void update() {
         User user1 = userService.createUser("userA", "dsadqwda@naver.com", "pawdawd111");
 
-        userService.updateUser(user1.getUserId(), "newUser", "newnew@mail.com", "newPassword");
+        userService.updateUser(user1.getId(), "newUser", "newnew@mail.com", "newPassword");
 
         assertEquals("newUser", user1.getUserName());
         assertEquals("newnew@mail.com", user1.getUserEmail());
@@ -66,10 +66,10 @@ class JCFUserServiceTest {
     void delete() {
         User user1 = userService.createUser("userA", "dsadqwda@naver.com", "pawdawd111");
 
-        userService.deleteUser(user1.getUserId());
+        userService.deleteUser(user1.getId());
 
         assertEquals(0, userService.getAllUsers().size());
 
-        assertThrows(UserNotFoundException.class, () -> userService.getUserById(user1.getUserId()));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(user1.getId()));
     }
 }

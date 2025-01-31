@@ -30,7 +30,7 @@ class JCFChannelServiceTest {
         ownerUser = new User("owner", "owner@test.com", "password");
         user = new User("test", "test@test.com", "password");
         userList = new HashMap<>();
-        userList.put(ownerUser.getUserId(), ownerUser);
+        userList.put(ownerUser.getId(), ownerUser);
     }
 
 

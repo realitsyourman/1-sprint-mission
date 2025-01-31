@@ -29,8 +29,8 @@ class MessageTest {
 
         Assertions.assertEquals("title", message.getMessageTitle());
         Assertions.assertEquals("content", message.getMessageContent());
-        Assertions.assertEquals(sender.getUserId(), message.getMessageSendUser().getUserId());
-        Assertions.assertEquals(receiver.getUserId(), message.getMessageReceiveUser().getUserId());
+        Assertions.assertEquals(sender.getId(), message.getMessageSendUser().getId());
+        Assertions.assertEquals(receiver.getId(), message.getMessageReceiveUser().getId());
     }
 
     @Test

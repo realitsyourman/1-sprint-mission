@@ -23,7 +23,7 @@ class UserTest {
         User user = userService.createUser("test1", "test@test.com", "testpasswrod");
 
         assertNotNull(user);
-        assertNotNull(user.getUserId());
+        assertNotNull(user.getId());
         assertEquals("test1", user.getUserName());
         assertEquals("test@test.com", user.getUserEmail());
         assertEquals("testpasswrod", user.getUserPassword());

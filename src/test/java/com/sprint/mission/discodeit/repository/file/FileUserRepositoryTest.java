@@ -40,8 +40,8 @@ class FileUserRepositoryTest {
         userRepository.userSave(user1);
         userRepository.userSave(user2);
 
-        User findUser1 = userRepository.findUserById(user1.getUserId());
-        User findUser2 = userRepository.findUserById(user2.getUserId());
+        User findUser1 = userRepository.findUserById(user1.getId());
+        User findUser2 = userRepository.findUserById(user2.getId());
 
         Assertions.assertEquals(user1, findUser1);
         Assertions.assertEquals(user2, findUser2);
@@ -54,8 +54,8 @@ class FileUserRepositoryTest {
         User user2 = new User("user2", "user2@test.com", "user1234");
         Map<UUID, User> testMap = new HashMap<>();
 
-        testMap.put(user1.getUserId(), user1);
-        testMap.put(user2.getUserId(), user2);
+        testMap.put(user1.getId(), user1);
+        testMap.put(user2.getId(), user2);
 
         userRepository.userSave(user1);
         userRepository.userSave(user2);
@@ -73,9 +73,9 @@ class FileUserRepositoryTest {
         userRepository.userSave(user1);
         userRepository.userSave(user2);
 
-        userRepository.removeUserById(user1.getUserId());
+        userRepository.removeUserById(user1.getId());
 
-        Assertions.assertEquals(null, userRepository.findUserById(user1.getUserId()));
+        Assertions.assertEquals(null, userRepository.findUserById(user1.getId()));
     }
 
 }

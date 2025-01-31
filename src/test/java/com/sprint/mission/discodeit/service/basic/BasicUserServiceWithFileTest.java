@@ -36,9 +36,9 @@ class BasicUserServiceWithFileTest {
     void create() {
         User user = userService.createUser("user1", "user1@test.com", "password1234");
 
-        Assertions.assertEquals("user1", userService.getUserById(user.getUserId()).getUserName());
-        Assertions.assertEquals("user1@test.com", userService.getUserById(user.getUserId()).getUserEmail());
-        Assertions.assertEquals("password1234", userService.getUserById(user.getUserId()).getUserPassword());
+        Assertions.assertEquals("user1", userService.getUserById(user.getId()).getUserName());
+        Assertions.assertEquals("user1@test.com", userService.getUserById(user.getId()).getUserEmail());
+        Assertions.assertEquals("password1234", userService.getUserById(user.getId()).getUserPassword());
 
     }
 
@@ -48,7 +48,7 @@ class BasicUserServiceWithFileTest {
         User user1 = userService.createUser("user1", "user1@test.com", "password1234");
         User user2 = userService.createUser("user2", "user2@test.com", "22password1234");
 
-        User findUser = userService.getUserById(user2.getUserId());
+        User findUser = userService.getUserById(user2.getId());
 
         Assertions.assertEquals(user2, findUser);
     }
@@ -61,8 +61,8 @@ class BasicUserServiceWithFileTest {
 
         Map<UUID, User> allUsers = userService.getAllUsers();
 
-        Assertions.assertEquals(user1, allUsers.get(user1.getUserId()));
-        Assertions.assertEquals(user2, allUsers.get(user2.getUserId()));
+        Assertions.assertEquals(user1, allUsers.get(user1.getId()));
+        Assertions.assertEquals(user2, allUsers.get(user2.getId()));
     }
 
     @Test
@@ -71,7 +71,7 @@ class BasicUserServiceWithFileTest {
         User user1 = userService.createUser("user1", "user1@test.com", "password1234");
         User user2 = userService.createUser("user2", "user2@test.com", "22password1234");
 
-        User updateUser = userService.updateUser(user1.getUserId(), "newName", "newEmail@gmail.com", "newPassword123");
+        User updateUser = userService.updateUser(user1.getId(), "newName", "newEmail@gmail.com", "newPassword123");
 
         Assertions.assertEquals("newName", updateUser.getUserName());
         Assertions.assertEquals("newEmail@gmail.com", updateUser.getUserEmail());
@@ -84,9 +84,9 @@ class BasicUserServiceWithFileTest {
         User user1 = userService.createUser("user1", "user1@test.com", "password1234");
         User user2 = userService.createUser("user2", "user2@test.com", "22password1234");
 
-        userService.deleteUser(user1.getUserId());
+        userService.deleteUser(user1.getId());
 
         Assertions.assertThrows(UserNotFoundException.class,
-                () -> userService.getUserById(user1.getUserId()));
+                () -> userService.getUserById(user1.getId()));
     }
 }

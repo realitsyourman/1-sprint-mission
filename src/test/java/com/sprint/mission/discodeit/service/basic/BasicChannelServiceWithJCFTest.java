@@ -122,7 +122,7 @@ class BasicChannelServiceWithJCFTest {
 
 
         Channel findChannel = channelService.findChannelById(channel1.getChannelId());
-        User findUser = findChannel.getChannelUsers().get(user3.getUserId());
+        User findUser = findChannel.getChannelUsers().get(user3.getId());
 
         Assertions.assertEquals(user3, findUser);
     }
@@ -141,7 +141,7 @@ class BasicChannelServiceWithJCFTest {
         channelService.addUserChannel(channel1.getChannelId(), newU2);
 
         channelService.kickUserChannel(channel1.getChannelId(), newU1);
-        User findUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelUsers().get(newU1.getUserId()); // newU1 찾기
+        User findUser = channelService.getAllChannels().get(channel1.getChannelId()).getChannelUsers().get(newU1.getId()); // newU1 찾기
 
         Assertions.assertNull(findUser);
 
