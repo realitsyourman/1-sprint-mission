@@ -15,6 +15,7 @@ import com.sprint.mission.discodeit.service.validate.ChannelServiceValidator;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
 import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,18 +28,15 @@ import java.util.stream.Collectors;
  * TODO: 각 서비스별 검증 로직 추가
  */
 
+@RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
-    private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
-    private final ServiceValidator<Channel> channelValidator = new ChannelServiceValidator();
-    private final ServiceValidator<User> userValidator = new UserServiceValidator();
-    private final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
     private final ChannelRepository channelRepository;
     private final MessageService messageService;
+    private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
+    private static final ServiceValidator<Channel> channelValidator = new ChannelServiceValidator();
+    private static final ServiceValidator<User> userValidator = new UserServiceValidator();
+    private static final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
 
-    public BasicChannelService(ChannelRepository channelRepository, MessageService messageService) {
-        this.channelRepository = channelRepository;
-        this.messageService = messageService;
-    }
 
     @Override
     public Channel createChannel(String channelName, User owner, Map<UUID, User> userList) {

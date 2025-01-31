@@ -8,21 +8,19 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
 import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
+import lombok.RequiredArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class BasicUserService implements UserService {
-    private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
-    private final ServiceValidator<User> validator = new UserServiceValidator();
     private final UserRepository userRepository;
+    private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
+    private static final ServiceValidator<User> validator = new UserServiceValidator();
 
-
-    public BasicUserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public User createUser(String userName, String userEmail, String userPassword) {
@@ -70,6 +68,6 @@ public class BasicUserService implements UserService {
     public void deleteUser(UUID userId) {
         User findUser = getUserById(userId);
 
-        userRepository.removeUserById(findUser.getUserId());
+        userRepository.removeUserById(findUser.getId());
     }
 }

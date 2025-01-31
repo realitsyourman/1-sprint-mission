@@ -11,28 +11,26 @@ import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
 import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+
+@RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
+    private final MessageRepository messageRepository;
 
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
-    private final MessageRepository messageRepository;
 
-    private final ServiceValidator<Message> validator = new MessageServiceValidator();
-    private final ServiceValidator<User> userValidator = new UserServiceValidator();
-
-    public BasicMessageService(MessageRepository messageRepository) {
-        this.messageRepository = messageRepository;
-    }
-
+    private static final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
+    private static final ServiceValidator<User> userValidator = new UserServiceValidator();
 
     @Override
     public Message createMessage(String title, String content, User sender, User receiver) {
-        if (validator.isNullParam(title)) {
+        if (messageValidator.isNullParam(title)) {
             throw new NullMessageTitleException();
         }
 
@@ -47,7 +45,7 @@ public class BasicMessageService implements MessageService {
     public Message getMessageById(UUID messageId) {
         Map<UUID, Message> messages = messageRepository.findAllMessage();
 
-        return validator.entityValidate(messages.get(messageId));
+        return messageValidator.entityValidate(messages.get(messageId));
     }
 
     @Override
@@ -60,7 +58,7 @@ public class BasicMessageService implements MessageService {
     public Message updateMessage(UUID messageId, String newTitle, String newContent) {
         if (messageId == null) {
             throw new MessageNotFoundException();
-        } else if (validator.isNullParam(newTitle, newContent)) {
+        } else if (messageValidator.isNullParam(newTitle, newContent)) {
             throw new MessageNotFoundException();
         }
 
