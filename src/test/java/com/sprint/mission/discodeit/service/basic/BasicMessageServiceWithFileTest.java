@@ -4,7 +4,7 @@ import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.repository.MessageRepository;
-import com.sprint.mission.discodeit.repository.file.FileMessageRepository;
+import com.sprint.mission.discodeit.repository.file.json.JsonMessageRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BasicMessageServiceWithFileTest {
 
-    MessageRepository messageRepository = new FileMessageRepository();
+    MessageRepository messageRepository = new JsonMessageRepository();
 
     MessageService messageService = new BasicMessageService(messageRepository);
 

@@ -5,7 +5,7 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileUserRepository;
+import com.sprint.mission.discodeit.repository.file.json.JsonUserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +20,7 @@ class BasicUserServiceWithFileTest {
     // UserRepository userRepository = new JCFUserRepository();
 
     // 직렬화 저장소
-    UserRepository userRepository = new FileUserRepository();
+    UserRepository userRepository = new JsonUserRepository();
 
     ChannelRepository channelRepository = new FileChannelRepository();
 

@@ -5,7 +5,7 @@ import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.file.FileChannelRepository;
+import com.sprint.mission.discodeit.repository.file.json.JsonChannelRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.file.FileMessageService;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class BasicChannelServiceWithFileTest {
 
-    ChannelRepository channelRepository = new FileChannelRepository(); // file repo
+    ChannelRepository channelRepository = new JsonChannelRepository(); // file repo
     MessageService messageService;
     ChannelService channelService;
 
