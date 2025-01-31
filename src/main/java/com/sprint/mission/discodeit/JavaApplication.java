@@ -19,7 +19,7 @@ public class JavaApplication {
     public static void main(java.lang.String[] args) {
         EntityFactory entityFactory = BaseEntityFactory.getInstance();
 
-        // 지금 AppConfig는 FileIO를 구현한 클래스들로 의존성 주입하고 있음
+        // 지금 AppConfig는 FileIO(.ser)를 구현한 클래스들로 의존성 주입하고 있음
         AppConfig config = new AppConfig();
         UserService userService = config.basicUserService();
         ChannelService channelService = config.basicChannelService();
@@ -50,7 +50,7 @@ public class JavaApplication {
         System.out.println("\nuserLee 유저 삭제");
         userFileService.deleteUser(userLee.getUserId());
         System.out.println(userFileService.getAllUsers());
-
+        System.out.println();
 
         /**
          * @Description: FileIO와 객체 직렬화를 이용한 **채널** 서비스 테스트
@@ -75,12 +75,12 @@ public class JavaApplication {
         channelFileService.updateChannel(codeReviewChannel.getChannelId(), "play game with me", userLee);
         System.out.println(channelFileService.getAllChannels());
 
-        System.out.println("\nuserHan 추가 및 전체 조회");
+        System.out.println("\nuserHan 추가 및 조회");
         User userHan = userFileService.createUser("Han", "han@gmail.com", "passwordhan");
         channelFileService.addUserChannel(codeReviewChannel.getChannelId(), userHan);
         System.out.println(channelFileService.findChannelById(codeReviewChannel.getChannelId()));
 
-        System.out.println("\n채널 삭제 및 조회");
+        System.out.println("\n \"play game with me\" 채널 삭제 및 전체 조회");
         channelFileService.removeChannelById(codeReviewChannel.getChannelId());
         System.out.println(channelFileService.getAllChannels());
 
@@ -98,7 +98,7 @@ public class JavaApplication {
         channelFileService.kickUserChannel(talkingChannel.getChannelId(), userLee);
         System.out.println(channelFileService.findChannelById(talkingChannel.getChannelId()));
 
-        System.out.println("\n 채널에 메세지 추가 및 조회");
+        System.out.println("\n \" talking \" 채널에 메세지 추가 및 조회");
         Message message = messageService.createMessage("안녕", "안녕하세요", userJung, userPark);
         Message message2 = messageService.createMessage("넵", "반갑습니다.", userPark, userJung);
         channelFileService.addMessageInCh(talkingChannel.getChannelId(), message);
@@ -110,8 +110,11 @@ public class JavaApplication {
         System.out.println(channelFileService.findChannelById(talkingChannel.getChannelId()).getChannelMessages());
 
         System.out.println("\n 채널에 있는 모든 메세지 조회");
+        Message message333 = messageService.createMessage("메세지 한번 더 추가", "할게요", userJung, userPark);
+        channelFileService.addMessageInCh(talkingChannel.getChannelId(), message333);
         Map<UUID, Message> channelInMessageAll = channelFileService.findChannelInMessageAll(talkingChannel.getChannelId());
         System.out.println(channelInMessageAll);
+        System.out.println("\n");
 
 
         /**
@@ -150,7 +153,7 @@ public class JavaApplication {
         userService.updateUser(basicUserKim.getUserId(), "gim", "gim@mail.com", "passwordgim");
         System.out.println(userService.getUserById(basicUserKim.getUserId()));
 
-        System.out.println("\n \"lee\" 유저 삭제");
+        System.out.println("\n \"lee\" 유저 삭제 후 전체 조회");
         userService.deleteUser(basicUserLee.getUserId());
         System.out.println(userService.getAllUsers());
 
@@ -158,7 +161,7 @@ public class JavaApplication {
         /**
          * @Description: File **BasicChannelService** 테스트
          */
-        System.out.println("\n채널 등록 및 조회");
+        System.out.println("\n\n채널 등록 및 조회");
         Map<UUID, User> userMap2 = new HashMap<>();
         userMap2.put(basicUserKim.getUserId(), basicUserKim);
         userMap2.put(basicUserLee.getUserId(), basicUserLee);
@@ -175,11 +178,11 @@ public class JavaApplication {
         Channel basicChannel2 = channelService.createChannel("play with me game", basicUserLee, userMap2);
         System.out.println(channelService.getAllChannels());
 
-        System.out.println("\n채널 변경");
+        System.out.println("\n play with me game -> game channel로 채널 변경");
         channelService.updateChannel(basicChannel2.getChannelId(), "game channel", basicUserKim);
         System.out.println(channelService.findChannelById(basicChannel2.getChannelId()));
 
-        System.out.println("\n채널 삭제");
+        System.out.println("\n game channel 채널 삭제 후 전체 조회");
         channelService.removeChannelById(basicChannel2.getChannelId());
         System.out.println(channelService.getAllChannels());
 
