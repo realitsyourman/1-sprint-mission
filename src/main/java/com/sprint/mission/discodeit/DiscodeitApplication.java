@@ -15,7 +15,7 @@ public class DiscodeitApplication {
 	public static void main(String[] args) {
 		ConfigurableApplicationContext ac = SpringApplication.run(DiscodeitApplication.class, args);
 
-		// EntityService 들 중에 Basic만 Bean으로 등록됨 -> 그래서 UserService.class 같이 인터페이스 이름으로 뽑을 수 있음
+		// EntityService 들 중에 Basic만 Bean으로 등록됨 -> 그래서 UserService.class 같이 인터페이스 타입으로 뽑을 수 있음
 		UserService userService = ac.getBean("userService", UserService.class);
 		ChannelService channelService = ac.getBean("channelService", ChannelService.class);
 		MessageService messageService = ac.getBean("messageService", MessageService.class);

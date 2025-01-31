@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository.file.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sprint.mission.discodeit.entity.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 
@@ -13,8 +14,13 @@ import java.util.UUID;
 
 public class JsonMessageRepository implements MessageRepository {
     private static final String MESSAGE_PATH = "messages.json";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private Map<UUID, Message> messageMap = new HashMap<>();
+
+    public JsonMessageRepository() {
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+    }
 
     @Override
     public Message saveMessage(Message message) {

@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -190,12 +191,12 @@ public class Channel extends BaseObject implements Serializable {
     }
 
 
-    public Long getCreatedAt() {
+    public Instant getCreatedAt() {
         return getCreatedAtBaseObject();
     }
 
 
-    public Long getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return getUpdatedAtBaseObject();
     }
 

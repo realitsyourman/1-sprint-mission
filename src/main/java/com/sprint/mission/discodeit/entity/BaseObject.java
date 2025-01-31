@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.UUID;
 @Getter
 public abstract class BaseObject implements Serializable {
@@ -13,41 +14,41 @@ public abstract class BaseObject implements Serializable {
     @JsonProperty("userId")
     private final UUID id;
     @JsonProperty("createdAt")
-    private final Long createdAt;
+    private final Instant createdAt;
     @JsonProperty("updatedAt")
-    private Long updatedAt;
+    private Instant updatedAt;
 
-    public BaseObject(UUID id, Long createdAt, Long updatedAt) {
+    public BaseObject(UUID id, Instant createdAt, Instant updatedAt) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
 
     public BaseObject(UUID id) {
-        this(id, System.currentTimeMillis(), System.currentTimeMillis());
+        this(id, Instant.now(), Instant.now());
     }
 
     public BaseObject() {
-        this(UUID.randomUUID(), System.currentTimeMillis(), System.currentTimeMillis());
+        this(UUID.randomUUID(), Instant.now(), Instant.now());
     }
 
     public BaseObject createBaseObject(UUID id) {
         return this;
     }
 
-    public long setUpdatedAt() {
-        return this.updatedAt = System.currentTimeMillis();
+    public Instant setUpdatedAt() {
+        return Instant.now();
     }
 
     public UUID getId() {
         return id;
     }
 
-    public Long getCreatedAtBaseObject() {
-        return createdAt;
+    public Instant getCreatedAtBaseObject() {
+        return Instant.now();
     }
 
-    public Long getUpdatedAtBaseObject() {
-        return updatedAt;
+    public Instant getUpdatedAtBaseObject() {
+        return Instant.now();
     }
 }

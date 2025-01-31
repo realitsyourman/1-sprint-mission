@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository.file.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sprint.mission.discodeit.entity.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 
@@ -13,8 +14,13 @@ import java.util.UUID;
 
 public class JsonUserRepository implements UserRepository {
     private static final String USER_PATH = "users.json";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private Map<UUID, User> userMap = new HashMap<>();
+
+    public JsonUserRepository() {
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+    }
 
     @Override
     public User userSave(User user) {

@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.repository.file.json;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sprint.mission.discodeit.entity.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 
@@ -13,8 +14,13 @@ import java.util.UUID;
 
 public class JsonChannelRepository implements ChannelRepository {
     private static final String CHANNEL_PATH = "channels.json";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
     private Map<UUID, Channel> channelMap = new HashMap<>();
+
+    public JsonChannelRepository() {
+        this.objectMapper = new ObjectMapper()
+                .registerModule(new JavaTimeModule());
+    }
 
     @Override
     public Channel saveChannel(Channel channel) {
