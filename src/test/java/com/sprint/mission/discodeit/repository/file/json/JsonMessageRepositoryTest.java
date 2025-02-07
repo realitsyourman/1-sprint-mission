@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.repository.file.json;
 
-import com.sprint.mission.discodeit.entity.Message;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.message.Message;
+import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -9,8 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class JsonMessageRepositoryTest {
 
@@ -37,7 +35,7 @@ class JsonMessageRepositoryTest {
 
         messageRepository.saveMessage(m);
 
-        Message findMessage = messageRepository.findMessageById(m.getMessageId());
+        Message findMessage = messageRepository.findMessageById(m.getId());
 
         Assertions.assertEquals(m, findMessage);
     }
@@ -58,8 +56,8 @@ class JsonMessageRepositoryTest {
 
         Map<UUID, Message> allMessage = messageRepository.findAllMessage();
 
-        Message find1 = allMessage.get(m1.getMessageId());
-        Message find2 = allMessage.get(m2.getMessageId());
+        Message find1 = allMessage.get(m1.getId());
+        Message find2 = allMessage.get(m2.getId());
 
         Assertions.assertEquals(m1, find1);
         Assertions.assertEquals(m2, find2);
@@ -79,9 +77,9 @@ class JsonMessageRepositoryTest {
         messageRepository.saveMessage(m1);
         messageRepository.saveMessage(m2);
 
-        messageRepository.removeMessageById(m1.getMessageId());
+        messageRepository.removeMessageById(m1.getId());
 
-        Assertions.assertNull(messageRepository.findMessageById(m1.getMessageId()));
+        Assertions.assertNull(messageRepository.findMessageById(m1.getId()));
 
     }
 
