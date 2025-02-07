@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.repository.file.json;
 
-import com.sprint.mission.discodeit.entity.Channel;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.channel.Channel;
+import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +35,7 @@ class JsonChannelRepositoryTest {
         channelRepository.saveChannel(channel1);
         channelRepository.saveChannel(channel2);
 
-        Channel findChannel = channelRepository.findChannelById(channel1.getChannelId());
+        Channel findChannel = channelRepository.findChannelById(channel1.getId());
 
         Assertions.assertEquals(channel1, findChannel);
     }
@@ -46,8 +46,8 @@ class JsonChannelRepositoryTest {
         Channel channel1 = new Channel("newName1", new User("user1", "user1@nana.com", "dasdsdasdas"));
         Channel channel2 = new Channel("newName2", new User("user2", "user2@nana.com", "dasdsdasdas"));
         Map<UUID, Channel> channelMap = new HashMap<>();
-        channelMap.put(channel1.getChannelId(), channel1);
-        channelMap.put(channel2.getChannelId(), channel2);
+        channelMap.put(channel1.getId(), channel1);
+        channelMap.put(channel2.getId(), channel2);
 
         channelRepository.saveChannel(channel1);
         channelRepository.saveChannel(channel2);
@@ -66,9 +66,9 @@ class JsonChannelRepositoryTest {
         channelRepository.saveChannel(channel1);
         channelRepository.saveChannel(channel2);
 
-        channelRepository.removeChannelById(channel2.getChannelId());
+        channelRepository.removeChannelById(channel2.getId());
 
-        assertNull(channelRepository.findChannelById(channel2.getChannelId()));
+        assertNull(channelRepository.findChannelById(channel2.getId()));
     }
 
 }
