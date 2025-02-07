@@ -1,13 +1,16 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sprint.mission.discodeit.entity.BaseObject;
+import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import lombok.Getter;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -17,18 +20,44 @@ public class User extends BaseObject implements Serializable {
 
     @JsonProperty("userName")
     private String userName;
+
     @JsonProperty("userEmail")
     private String userEmail;
+
     @JsonProperty("userPassword")
     private transient String userPassword;
 
+    @JsonProperty("userRole")
+    private UserRole userRole;
+
     public User() {}
+
+    public User(UUID userid) {
+        super(userid);
+    }
+
+    public User(String userName, String userEmail, String userPassword, UserRole userRole) {
+        super();
+        setUserName(userName);
+        setUserEmail(userEmail);
+        setUserRole(userRole);
+        setUserPassword(userPassword);
+    }
 
     public User(String userName, String userEmail, String userPassword) {
         super();
         setUserName(userName);
         setUserEmail(userEmail);
+        setUserRole(UserRole.ROLE_COMMON);
         setUserPassword(userPassword);
+    }
+
+    private void setUserRole(UserRole userRole) {
+        if (userRole == null) {
+            throw new IllegalUserException("user Role을 지정해주세요.");
+        }
+
+        this.userRole = userRole;
     }
 
     private void setUserName(String userName) {
@@ -78,6 +107,11 @@ public class User extends BaseObject implements Serializable {
     public String updateName(String updateName) {
         setUserName(updateName);
         return this.userName;
+    }
+
+    public UserRole updateUserRole(UserRole userRole) {
+        setUserRole(userRole);
+        return userRole;
     }
 
     public String updateEmail(String updateEmail) {

@@ -1,49 +1,66 @@
-package com.sprint.mission.discodeit.entity;
+package com.sprint.mission.discodeit.entity.channel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sprint.mission.discodeit.entity.BaseObject;
+import com.sprint.mission.discodeit.entity.message.Message;
+import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * The type Channel.
- */
+@Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Channel extends BaseObject implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    @NotEmpty
     @JsonProperty("channelName")
     private String channelName;
 
+    @NotNull
     @JsonProperty("channelOwnerUser")
     private User channelOwnerUser;
+
+    @Setter
+    @NotEmpty
+    @JsonProperty("channelType")
+    private String channelType;
 
     @JsonProperty("channelUsers")
     private Map<UUID, User> channelUsers;
 
-    // 메세지는 채널 안에 존재함
+    @Setter
     @JsonProperty("channelMessages")
     private Map<UUID, Message> channelMessages;
 
 
-    public Channel() {}
+    public Channel() {
+    }
 
-    public Channel(String channelName, User channelOwnerUser, Map<UUID, User> channelUsers) {
+    public Channel(UUID id) {
+        super(id);
+    }
+
+    public Channel(String channelName, User channelOwnerUser, String channelType, Map<UUID, User> channelUsers) {
         super();
         setChannelName(channelName);
         setChannelOwnerUser(channelOwnerUser);
 
         this.channelUsers = new HashMap<>();
         this.channelMessages = new HashMap<>();
+        this.channelType = channelType;
 
         if (channelUsers != null) {
             this.channelUsers.putAll(channelUsers);
@@ -55,6 +72,20 @@ public class Channel extends BaseObject implements Serializable {
         setChannelName(channelName);
         setChannelOwnerUser(channelOwnerUser);
         this.channelUsers = new HashMap<>();
+    }
+
+    public Channel(UUID channelId, String channelName, User channelOwnerUser, String channelType) {
+        super(channelId);
+        setChannelName(channelName);
+        setChannelOwnerUser(channelOwnerUser);
+        this.channelType = channelType;
+        this.channelUsers = new HashMap<>();
+    }
+
+    public Channel(User channelOwnerUser, String channelType, Map<UUID, User> channelUsers) {
+        setChannelOwnerUser(channelOwnerUser);
+        this.channelType = channelType;
+        this.channelUsers = channelUsers;
     }
 
 
@@ -72,9 +103,9 @@ public class Channel extends BaseObject implements Serializable {
     public Message addMessageInChannel(Message addMessage) {
         checkMessage(addMessage);
 
-        channelMessages.put(addMessage.getMessageId(), addMessage);
+        channelMessages.put(addMessage.getId(), addMessage);
 
-        Message putMessage = channelMessages.get(addMessage.getMessageId());
+        Message putMessage = channelMessages.get(addMessage.getId());
 
         setUpdatedAt();
 
@@ -114,14 +145,14 @@ public class Channel extends BaseObject implements Serializable {
     }
 
     private void checkMessage(Message addMessage) {
-        if(addMessage == null) {
+        if (addMessage == null) {
             throw new MessageNotFoundException();
         }
 
         UUID sender = addMessage.getMessageSendUser().getId();
         UUID receiver = addMessage.getMessageReceiveUser().getId();
 
-        if(channelOwnerUser.getId().equals(sender) || channelOwnerUser.getId().equals(receiver)) {
+        if (channelOwnerUser.getId().equals(sender) || channelOwnerUser.getId().equals(receiver)) {
             return;
         }
 
@@ -154,15 +185,6 @@ public class Channel extends BaseObject implements Serializable {
     }
 
 
-    public UUID getChannelId() {
-        return getId();
-    }
-
-
-    public String getChannelName() {
-        return channelName;
-    }
-
     private void setChannelName(String channelName) {
         checkChannelName(channelName);
         this.channelName = channelName;
@@ -170,34 +192,10 @@ public class Channel extends BaseObject implements Serializable {
     }
 
 
-    public User getChannelOwnerUser() {
-        return channelOwnerUser;
-    }
-
     private void setChannelOwnerUser(User channelOwnerUser) {
         checkChannelOwnerUser(channelOwnerUser);
         this.channelOwnerUser = channelOwnerUser;
         setUpdatedAt();
-    }
-
-
-    public Map<UUID, User> getChannelUsers() {
-        return channelUsers;
-    }
-
-
-    public Map<UUID, Message> getChannelMessages() {
-        return channelMessages;
-    }
-
-
-    public Instant getCreatedAt() {
-        return getCreatedAtBaseObject();
-    }
-
-
-    public Instant getUpdatedAt() {
-        return getUpdatedAtBaseObject();
     }
 
     @Override
@@ -210,12 +208,14 @@ public class Channel extends BaseObject implements Serializable {
                 '}' + "\n";
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Channel channel = (Channel) o;
-        return Objects.equals(getChannelId(), channel.getChannelId()) &&
+        return Objects.equals(getId(), channel.getId()) &&
                 Objects.equals(channelName, channel.channelName) &&
                 Objects.equals(channelOwnerUser, channel.channelOwnerUser) &&
                 Objects.equals(channelMessages, channel.channelMessages) &&
@@ -224,6 +224,6 @@ public class Channel extends BaseObject implements Serializable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getChannelId(), channelName, channelOwnerUser, channelUsers, channelMessages);
+        return Objects.hash(getId(), channelName, channelOwnerUser, channelUsers, channelMessages);
     }
 }
