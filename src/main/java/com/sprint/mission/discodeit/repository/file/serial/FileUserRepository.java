@@ -1,6 +1,6 @@
-package com.sprint.mission.discodeit.repository.file;
+package com.sprint.mission.discodeit.repository.file.serial;
 
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.file.FileService;
 

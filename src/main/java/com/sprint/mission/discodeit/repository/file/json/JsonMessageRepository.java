@@ -3,8 +3,10 @@ package com.sprint.mission.discodeit.repository.file.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sprint.mission.discodeit.entity.Message;
+import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Repository
+@Primary
 public class JsonMessageRepository implements MessageRepository {
     private static final String MESSAGE_PATH = "messages.json";
     private final ObjectMapper objectMapper;
@@ -24,7 +28,7 @@ public class JsonMessageRepository implements MessageRepository {
 
     @Override
     public Message saveMessage(Message message) {
-        messageMap.put(message.getMessageId(), message);
+        messageMap.put(message.getId(), message);
         saveToJson();
         return message;
     }
@@ -62,7 +66,7 @@ public class JsonMessageRepository implements MessageRepository {
                 messageMap = objectMapper.readValue(file,
                         new TypeReference<HashMap<UUID, Message>>() {});
             } catch (IOException e) {
-                throw new RuntimeException("Failed to load messages from JSON", e);
+                throw new RuntimeException("Json 읽는데 실패했습니다.", e);
             }
         }
     }

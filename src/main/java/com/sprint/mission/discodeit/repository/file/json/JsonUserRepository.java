@@ -3,8 +3,10 @@ package com.sprint.mission.discodeit.repository.file.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sprint.mission.discodeit.entity.User;
+import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+
+@Repository
+@Primary
 public class JsonUserRepository implements UserRepository {
     private static final String USER_PATH = "users.json";
     private final ObjectMapper objectMapper;

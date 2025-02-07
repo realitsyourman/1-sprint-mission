@@ -1,20 +1,22 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
-import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Repository
 public class JCFChannelRepository implements ChannelRepository{
 
     Map<UUID, Channel> channelMap = new HashMap<>();
 
     @Override
     public Channel saveChannel(Channel channel) {
-        channelMap.put(channel.getChannelId(), channel);
-        return channelMap.get(channel.getChannelId());
+        channelMap.put(channel.getId(), channel);
+        return channelMap.get(channel.getId());
     }
 
     @Override
