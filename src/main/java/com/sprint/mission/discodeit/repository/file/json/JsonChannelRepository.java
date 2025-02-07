@@ -3,8 +3,10 @@ package com.sprint.mission.discodeit.repository.file.json;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.sprint.mission.discodeit.entity.Channel;
+import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import org.springframework.context.annotation.Primary;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
+@Repository
+@Primary
 public class JsonChannelRepository implements ChannelRepository {
     private static final String CHANNEL_PATH = "channels.json";
     private final ObjectMapper objectMapper;
@@ -24,7 +28,7 @@ public class JsonChannelRepository implements ChannelRepository {
 
     @Override
     public Channel saveChannel(Channel channel) {
-        channelMap.put(channel.getChannelId(), channel);
+        channelMap.put(channel.getId(), channel);
         saveToJson();
         return channel;
     }
