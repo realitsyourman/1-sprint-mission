@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserRole;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -88,8 +89,7 @@ class JsonReadStatusRepositoryTest {
 
         readStatusRepository.remove(channel.getId());
 
-        assertThrows(IllegalArgumentException.class, () -> readStatusRepository.findByChannelId(channel.getId()));
+        ReadStatus byChannelId = readStatusRepository.findByChannelId(channel.getId());
+        Assertions.assertThat(byChannelId).isNull();
     }
-
-
 }

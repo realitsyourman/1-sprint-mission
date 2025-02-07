@@ -2,10 +2,8 @@ package com.sprint.mission.discodeit.repository.file.json;
 
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.user.User;
-import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -77,6 +75,8 @@ class JsonUserStatusRepositoryTest {
         
         userStatusRepository.remove(user.getId());
 
-        Assertions.assertThatThrownBy(() -> userStatusRepository.findById(user.getId())).isInstanceOf(IllegalUserException.class);
+
+        UserStatus byId = userStatusRepository.findById(user.getId());
+        assertThat(byId).isNull();
     }
 }
