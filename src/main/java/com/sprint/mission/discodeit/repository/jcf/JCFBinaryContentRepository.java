@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.exception.BinaryContentException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
@@ -17,7 +18,7 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     @Override
     public BinaryContent save(BinaryContent binaryContent) {
         if (binaryContent == null) {
-            throw new IllegalArgumentException("BinaryContent cannot be null");
+            throw new BinaryContentException("binaryContent가 null입니다.");
         }
         storage.put(binaryContent.getId(), binaryContent);
         return binaryContent;
@@ -25,21 +26,17 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public BinaryContent findByMessageId(UUID messageId) {
-        if (messageId == null) {
-            throw new IllegalArgumentException("MessageId cannot be null");
-        }
+        messageIdChecker(messageId);
 
         return storage.values().stream()
                 .filter(content -> content.getMessageId().equals(messageId))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("BinaryContent not found for messageId: " + messageId));
+                .orElseThrow(() -> new BinaryContentException("BinaryContent not found for messageId: " + messageId));
     }
 
     @Override
     public Map<UUID, BinaryContent> findByUserId(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
+        userIdChecker(userId);
 
         Map<UUID, BinaryContent> result = storage.values().stream()
                 .filter(content -> content.getUserId().equals(userId))
@@ -62,36 +59,21 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public BinaryContent findById(UUID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
+        userIdChecker(id);
 
-        BinaryContent content = storage.get(id);
-        if (content == null) {
-            throw new IllegalStateException("BinaryContent not found for id: " + id);
-        }
-
-        return content;
+        return storage.get(id);
     }
 
     @Override
     public void remove(UUID id) {
-        if (id == null) {
-            throw new IllegalArgumentException("Id cannot be null");
-        }
-
-        if (!storage.containsKey(id)) {
-            throw new IllegalStateException("BinaryContent not found for id: " + id);
-        }
+        userIdChecker(id);
 
         storage.remove(id);
     }
 
     @Override
     public void removeAllContentOfUser(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
+        userIdChecker(userId);
 
         // userId에 해당하는 모든 content의 id를 수집
         List<UUID> contentIdsToRemove = storage.values().stream()
@@ -109,9 +91,7 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public Map<UUID, BinaryContent> removeContent(UUID messageId) {
-        if (messageId == null) {
-            throw new IllegalArgumentException("MessageId cannot be null");
-        }
+        messageIdChecker(messageId);
 
         // messageId에 해당하는 모든 content를 찾아서 맵으로 저장
         Map<UUID, BinaryContent> removedContents = storage.values().stream()
@@ -121,13 +101,21 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
                         content -> content
                 ));
 
-        if (removedContents.isEmpty()) {
-            throw new IllegalStateException("No BinaryContent found for messageId: " + messageId);
-        }
-
         // 찾은 content들을 저장소에서 삭제
         removedContents.keySet().forEach(storage::remove);
 
         return Collections.unmodifiableMap(removedContents);
+    }
+
+    private static void userIdChecker(UUID userId) {
+        if (userId == null) {
+            throw new BinaryContentException("userId가 null입니다.");
+        }
+    }
+
+    private static void messageIdChecker(UUID messageId) {
+        if (messageId == null) {
+            throw new BinaryContentException("messageId가 null입니다.");
+        }
     }
 }

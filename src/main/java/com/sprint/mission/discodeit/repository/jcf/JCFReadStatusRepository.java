@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     @Override
     public ReadStatus save(ReadStatus readStatus) {
         if (readStatus == null) {
-            throw new IllegalArgumentException("ReadStatus cannot be null");
+            throw new IllegalArgumentException("ReadStatus가 없음");
         }
         storage.put(readStatus.getChannelId(), readStatus);
         return readStatus;
@@ -28,7 +27,7 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     @Override
     public ReadStatus findByUserId(UUID userId) {
         if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
+            throw new IllegalArgumentException("UserId가 없음");
         }
 
         return storage.values().stream()
@@ -40,7 +39,7 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     @Override
     public ReadStatus findByChannelId(UUID channelId) {
         if (channelId == null) {
-            throw new IllegalArgumentException("ChannelId cannot be null");
+            throw new IllegalArgumentException("ChannelId가 없음");
         }
 
         ReadStatus readStatus = storage.get(channelId);
@@ -52,14 +51,13 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 
     @Override
     public Map<UUID, ReadStatus> findAll() {
-        // 불변 Map을 반환하여 외부에서 직접 수정하는 것을 방지
-        return Collections.unmodifiableMap(new HashMap<>(storage));
+        return Map.copyOf(storage);
     }
 
     @Override
     public void remove(UUID channelId) {
         if (channelId == null) {
-            throw new IllegalArgumentException("ChannelId cannot be null");
+            throw new IllegalArgumentException("ChannelId가 없음");
         }
 
         if (!storage.containsKey(channelId)) {

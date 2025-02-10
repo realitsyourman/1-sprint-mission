@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -19,7 +18,7 @@ public class JCFUserStatusRepository implements UserStatusRepository {
     @Override
     public UserStatus save(UserStatus userStatus) {
         if (userStatus == null) {
-            throw new IllegalArgumentException("UserStatus cannot be null");
+            throw new IllegalArgumentException("UserStatus가 없음");
         }
         storage.put(userStatus.getUserId(), userStatus);
         return userStatus;
@@ -27,42 +26,45 @@ public class JCFUserStatusRepository implements UserStatusRepository {
 
     @Override
     public UserStatus findById(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
+        userIdChecker(userId);
         UserStatus userStatus = storage.get(userId);
-        if (userStatus == null) {
-            throw new IllegalStateException("UserStatus not found for userId: " + userId);
-        }
+//        if (userStatus == null) {
+//            throw new IllegalStateException("유저가 존재하지 않음 = " + userId);
+//        }
         return userStatus;
     }
 
     @Override
     public Map<UUID, UserStatus> findAll() {
-        // 불변 Map을 반환하여 외부에서 직접 수정하는 것을 방지
-        return Collections.unmodifiableMap(new HashMap<>(storage));
+        return Map.copyOf(storage);
     }
 
     @Override
     public UserStatus updateState(UUID userId, UserStatus userStatus) {
         if (userId == null || userStatus == null) {
-            throw new IllegalArgumentException("UserId and UserStatus cannot be null");
+            throw new IllegalArgumentException("UserId 또는 UserStatus가 없음");
         }
-        if (!storage.containsKey(userId)) {
-            throw new IllegalStateException("UserStatus not found for userId: " + userId);
-        }
+        isContainUserIdInStorage(userId);
         storage.put(userId, userStatus);
         return userStatus;
     }
 
     @Override
     public void remove(UUID userId) {
-        if (userId == null) {
-            throw new IllegalArgumentException("UserId cannot be null");
-        }
+        userIdChecker(userId);
+        isContainUserIdInStorage(userId);
+        storage.remove(userId);
+    }
+
+    private void isContainUserIdInStorage(UUID userId) {
         if (!storage.containsKey(userId)) {
             throw new IllegalStateException("UserStatus not found for userId: " + userId);
         }
-        storage.remove(userId);
+    }
+
+    private static void userIdChecker(UUID userId) {
+        if (userId == null) {
+            throw new IllegalArgumentException("UserId가 없음");
+        }
     }
 }
