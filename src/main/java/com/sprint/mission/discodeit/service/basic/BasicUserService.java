@@ -4,9 +4,7 @@ import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
-import com.sprint.mission.discodeit.entity.user.User;
-import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
-import com.sprint.mission.discodeit.entity.user.UserResponse;
+import com.sprint.mission.discodeit.entity.user.*;
 import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
@@ -15,9 +13,10 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.status.UserStateService;
-import com.sprint.mission.discodeit.service.validate.ServiceValidator;
 import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -25,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
@@ -34,10 +34,18 @@ public class BasicUserService implements UserService {
 
 
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
-    private static final ServiceValidator<User> validator = new UserServiceValidator();
+    private static final UserServiceValidator validator = new UserServiceValidator();
+
+
+    @PostConstruct
+    public void init() {
+        log.error("=== === === === ===");
+        log.error("주입된 userRepository: {}", userRepository.getClass().getSimpleName());
+        log.error("=== === === === ===");
+    }
 
     @Override
-    public User createUser(UserCommonRequest user) {
+    public UserCommonResponse createUser(UserCommonRequest user) {
         if (user == null) {
             throw new UserNotFoundException();
         }
@@ -47,15 +55,20 @@ public class BasicUserService implements UserService {
     }
 
     @Override
-    public User createUserWithProfile(UserCommonRequest createDto, BinaryContent binaryContent) {
-        User basicUser = createUser(createDto);
-
+    public UserCommonResponse createUserWithProfile(UserCommonRequest createDto, BinaryContent binaryContent) {
+        UserCommonResponse basicUser = createUser(createDto);
 
         if (binaryContent == null) {
             throw new IllegalUserException("프로필 이미지 등록 오류: null");
         }
 
-        BinaryContentCreateRequest binaryContentCreateRequest = new BinaryContentCreateRequest(basicUser.getId(), binaryContent.getMessageId(), binaryContent.getFileName(), binaryContent.getFileType());
+        BinaryContentCreateRequest binaryContentCreateRequest = new BinaryContentCreateRequest(
+                basicUser.userId(),
+                binaryContent.getMessageId(),
+                binaryContent.getFileName(),
+                binaryContent.getFileType()
+        );
+
         binaryContentService.create(binaryContentCreateRequest);
 
         return basicUser;
@@ -63,14 +76,14 @@ public class BasicUserService implements UserService {
 
     @Override
     public UserResponse find(UUID userId) {
-        User findUser = validator.entityValidate(userRepository.findUserById(userId));
+        User user = userRepository.findUserById(userId);
 
-        if (findUser == null) {
+        if (user == null) {
             throw new UserNotFoundException();
         }
 
         UserStatus status = userStateService.find(userId);
-        return new UserResponse(findUser.getUserName(), findUser.getUserEmail(), status);
+        return new UserResponse(user.getUserName(), user.getUserEmail(), status);
     }
 
     /**
@@ -92,7 +105,7 @@ public class BasicUserService implements UserService {
      *   - 수정 대상 객체의 id 파라미터, 수정할 값 파라미터
      */
     @Override
-    public User update(UUID updateUserId, UserCommonRequest updateDto) {
+    public UserCommonResponse update(UUID updateUserId, UserCommonRequest updateDto) {
         User findUser = userRepository.findUserById(updateUserId);
         findUser.updateName(updateDto.userName());
         findUser.updateEmail(updateDto.userEmail());
@@ -104,8 +117,12 @@ public class BasicUserService implements UserService {
 //                        .forEach(UserStatus::updateUserStatus);
 
         userStateService.updateByUserId(updateUserId);
-        return userRepository.userSave(findUser);
+        userRepository.userSave(findUser);
+
+        UserCommonResponse response = convertToUserResponse(updateUserId, findUser.getUserName(), findUser.getUserEmail());
+        return response;
     }
+
 
     /**
      * 프사도 바꿀 수 있음
@@ -139,7 +156,6 @@ public class BasicUserService implements UserService {
 
         return user;
     }
-
     /**
      * 관련된 도메인도 같이 삭제합니다.
      * - `BinaryContent`(프로필), `UserStatus`
@@ -155,22 +171,19 @@ public class BasicUserService implements UserService {
         binaryContentService.delete(userId);
     }
 
-    private User createBasicUser(UserCommonRequest user) {
+    private UserCommonResponse createBasicUser(UserCommonRequest user) {
         if (validator.isNullParam(user.userName(), user.userPassword())) {
             throw new IllegalUserException();
         }
 
-        User savedUser = validator.entityValidate(entityFactory.createUser(user.userName(), user.userEmail(), user.userPassword()));
+        UserCommonResponse response = new UserCommonResponse(user.userId(), user.userName(), user.userEmail());
+        User createUser = new User(response.userId(), response.userName(), response.userEmail(), user.userPassword(), UserRole.ROLE_COMMON);
 
-        if (savedUser == null) {
-            throw new UserNotFoundException();
-        }
-
-        UserStatus userStatus = new UserStatus(savedUser.getId());
+        UserStatus userStatus = new UserStatus(response.userId());
         userStateService.create(new UserStatusRequest(userStatus.getUserId(), userStatus.getState()));
-        userRepository.userSave(savedUser);
+        userRepository.userSave(createUser);
 
-        return savedUser;
+        return response;
     }
 
     private void checkDuplicated(UserCommonRequest user) {
@@ -204,6 +217,10 @@ public class BasicUserService implements UserService {
                 ));
 
         return convertMap;
+    }
+
+    private static UserCommonResponse convertToUserResponse(UUID userId, String userName, String userEmail) {
+        return new UserCommonResponse(userId, userName, userEmail);
     }
 
 /*    private static User convertToUser(UserCommonRequest updateDto, UserResponse findUser) {

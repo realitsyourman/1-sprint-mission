@@ -36,12 +36,10 @@ public class User extends BaseObject implements Serializable {
         super(userid);
     }
 
-    public User(String userName, String userEmail, String userPassword, UserRole userRole) {
-        super();
+    public User(UUID userId, String userName, String userEmail) {
+        super(userId);
         setUserName(userName);
         setUserEmail(userEmail);
-        setUserRole(userRole);
-        setUserPassword(userPassword);
     }
 
     public User(String userName, String userEmail, String userPassword) {
@@ -51,6 +49,31 @@ public class User extends BaseObject implements Serializable {
         setUserRole(UserRole.ROLE_COMMON);
         setUserPassword(userPassword);
     }
+
+    public User(String userName, String userEmail, String userPassword, UserRole userRole) {
+        super();
+        setUserName(userName);
+        setUserEmail(userEmail);
+        setUserRole(userRole);
+        setUserPassword(userPassword);
+    }
+
+    public User(UUID userId, String userName, String userEmail, String userPassword) {
+        super(userId);
+        setUserName(userName);
+        setUserEmail(userEmail);
+        setUserPassword(userPassword);
+    }
+
+    public User(UUID userId, String userName, String userEmail, String userPassword, UserRole userRole) {
+        super(userId);
+        setUserName(userName);
+        setUserEmail(userEmail);
+        setUserRole(userRole);
+        setUserPassword(userPassword);
+    }
+
+
 
     private void setUserRole(UserRole userRole) {
         if (userRole == null) {

@@ -3,15 +3,16 @@ package com.sprint.mission.discodeit.service;
 import com.sprint.mission.discodeit.entity.BinaryContent;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
+import com.sprint.mission.discodeit.entity.user.UserCommonResponse;
 import com.sprint.mission.discodeit.entity.user.UserResponse;
 
 import java.util.Map;
 import java.util.UUID;
 
 public interface UserService {
-    User createUser(UserCommonRequest user); // `username`과 `email`은 다른 유저와 같으면 안됩니다, `UserStatus`를 같이 생성합니다.
+    UserCommonResponse createUser(UserCommonRequest user); // `username`과 `email`은 다른 유저와 같으면 안됩니다, `UserStatus`를 같이 생성합니다.
 
-    default User createUserWithProfile(UserCommonRequest createDto, BinaryContent binaryContentDto) {
+    default UserCommonResponse createUserWithProfile(UserCommonRequest createDto, BinaryContent binaryContentDto) {
         return null;
     } // 선택적으로 프로필 이미지를 같이 등록할 수 있습니다.
 
@@ -24,7 +25,7 @@ public interface UserService {
 
     Map<UUID, UserResponse> findAll(); // 유저 전부 찾기
 
-    User update(UUID updateUserId, UserCommonRequest updateDto); // 유저 정보 업데이트
+    UserCommonResponse update(UUID updateUserId, UserCommonRequest updateDto); // 유저 정보 업데이트
 
     default User updateUserWithProfile(UUID userId, BinaryContent binaryContent) {
         return null;

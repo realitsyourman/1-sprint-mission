@@ -2,7 +2,7 @@ package com.sprint.mission.discodeit.entity.user;
 
 import java.util.UUID;
 
-public record UserCreateWithBinaryContentRequest(
+public record UserCreateWithBinaryContentResponse(
         UUID userId,
         UUID messageId,
         String fileName,
