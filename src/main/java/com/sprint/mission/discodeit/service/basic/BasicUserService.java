@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.BinaryContentCreateRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentCreateRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
 import com.sprint.mission.discodeit.entity.user.*;
@@ -128,7 +129,7 @@ public class BasicUserService implements UserService {
      * 프사도 바꿀 수 있음
      */
     @Override
-    public User updateUserWithProfile(UUID userId, BinaryContent binaryContent) {
+    public UserCommonResponse updateUserWithProfile(UUID userId, BinaryContentRequest binaryContent) {
         if (binaryContent == null) {
             throw new IllegalUserException("not found binary context");
         }
@@ -142,7 +143,7 @@ public class BasicUserService implements UserService {
         Map<UUID, UserStatus> findUserStatMap = userStateService.findAllByUserId(userId);
         UserStatus userStatus = findUserStatMap.values().stream()
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("찾는 userStat가 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("찾는 userStatus가 없습니다."));
         userStatus.updateUserStatus();
         userStateService.update(new UserStatusRequest(userStatus.getUserId(), userStatus.getState()));
 
@@ -151,10 +152,10 @@ public class BasicUserService implements UserService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("유저 프사를 찾을 수 없음"));
 
-        BinaryContent changeBin = updateBin.upload(binaryContent.getFileName(), binaryContent.getFileType());
+        BinaryContent changeBin = updateBin.upload(binaryContent.fileName(), binaryContent.fileType());
         binaryContentService.update(changeBin);
 
-        return user;
+        return convertToUserResponse(user.getId(), user.getUserName(), user.getUserEmail());
     }
     /**
      * 관련된 도메인도 같이 삭제합니다.

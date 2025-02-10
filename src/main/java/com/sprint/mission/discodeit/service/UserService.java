@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
 import com.sprint.mission.discodeit.entity.user.UserCommonResponse;
 import com.sprint.mission.discodeit.entity.user.UserResponse;
@@ -27,7 +27,7 @@ public interface UserService {
 
     UserCommonResponse update(UUID updateUserId, UserCommonRequest updateDto); // 유저 정보 업데이트
 
-    default User updateUserWithProfile(UUID userId, BinaryContent binaryContent) {
+    default UserCommonResponse updateUserWithProfile(UUID userId, BinaryContentRequest binaryContent) {
         return null;
     } // 선택적으로 프로필 이미지를 대체할 수 있습니다.
 
