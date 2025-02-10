@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface ChannelService {
-    Channel createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList);
+    ChannelResponse createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList);
 
-    Channel createPrivateChannel(ChannelPrivateRequest request, Map<UUID, User> userList);
+    ChannelResponse createPrivateChannel(ChannelPrivateRequest request, Map<UUID, User> userList);
 
 //    Map<UUID, Channel> getChannelByName(String channelName);
 

@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.channel.*;
 import com.sprint.mission.discodeit.entity.message.Message;
+import com.sprint.mission.discodeit.entity.message.MessageResponse;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
@@ -11,23 +12,22 @@ import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.ChannelServiceValidator;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
 import com.sprint.mission.discodeit.service.validate.UserServiceValidator;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-/**
- * TODO: 각 서비스별 검증 로직 추가
- */
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
@@ -38,49 +38,46 @@ public class BasicChannelService implements ChannelService {
     private final ChannelRepository channelRepository;
     private final MessageService messageService;
     private final ReadStatusRepository readStatusRepository;
+    private final UserRepository userRepository;
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
     private static final ServiceValidator<Channel> channelValidator = new ChannelServiceValidator();
     private static final ServiceValidator<User> userValidator = new UserServiceValidator();
     private static final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
+
+    @PostConstruct
+    public void init() {
+        log.error("=== === === === ===");
+        log.error("주입된 channelRepository: {}", channelRepository.getClass().getSimpleName());
+        log.error("=== === === === ===");
+    }
 
 
     /**
      * 일반 public 채널 생성
      */
     @Override
-    public Channel createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList) {
+    public ChannelResponse createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList) {
         if (request.getChannelName() == null || request.getOwner() == null) {
             throw new IllegalChannelException();
         }
 
         // 채널 이름 중복 체크 추가
-        boolean isDuplicate = channelRepository.findAllChannel().values().stream()
-                .anyMatch(ch -> ch.getChannelName().equals(request.getChannelName()));
-
-        if (isDuplicate) {
-            throw new IllegalChannelException("중복된 채널 이름입니다.");
-        }
+        validateDuplicateChannelName(request);
 
         // 채널 자체의 시간 정보
-        ReadStatus channelReadState = new ReadStatus(request.getOwner().getId(), request.getChannelId());
-        readStatusRepository.save(channelReadState);
+        createChannelReadStatus(request);
 
-        Channel channel = new Channel(request.getChannelId());
-        channel.updateChannelName(request.getChannelName());
-        channel.updateOwnerUser(request.getOwner());
-        channel.setChannelType("PUBLIC");
-        channel.updateChannelUsers(userList);
-        channel.setChannelMessages(new HashMap<>());
+        Channel channel = setPublicChannel(request, userList);
         channelRepository.saveChannel(channel);
 
-        return channel;
+        return convertToChannelResponse(channel);
     }
 
     /**
      * private 채널 생성
      */
     @Override
-    public Channel createPrivateChannel(ChannelPrivateRequest privateRequest, Map<UUID, User> userList) {
+    public ChannelResponse createPrivateChannel(ChannelPrivateRequest privateRequest, Map<UUID, User> userList) {
         if (privateRequest.getOwner() == null || privateRequest.getChannelType().equals(CHANNEL_TYPE_PUB)) {
             throw new IllegalChannelException();
         }
@@ -96,16 +93,10 @@ public class BasicChannelService implements ChannelService {
                     readStatusRepository.save(readStatus);
                 });
 
-        Channel channel = new Channel(privateRequest.getChannelId());
-        channel.updateChannelName(privateRequest.getChannelName());
-        channel.updateOwnerUser(privateRequest.getOwner());
-        channel.setChannelType("PRIVATE");
-        channel.updateChannelUsers(userList);
-        channel.setChannelMessages(new HashMap<>());
-
+        Channel channel = setPrivateChannel(privateRequest, userList);
         channelRepository.saveChannel(channel);
 
-        return channel;
+        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser());
     }
 
     /**
@@ -172,15 +163,15 @@ public class BasicChannelService implements ChannelService {
     /**
      * 특정 `User`가 볼 수 있는 Channel 목록을 조회하도록 조회 조건
      */
-    private Map<UUID, Channel> findAllByUserId(UUID userId) {
+    private Map<UUID, ChannelResponse> findAllByUserId(UUID userId) {
         Map<UUID, Channel> channels = channelRepository.findAllChannel();
 
-        Map<UUID, Channel> filteredChannels = channels.values().stream()
+        Map<UUID, ChannelResponse> filteredChannels = channels.values().stream()
                 .filter(ch -> ch.getChannelUsers().values().stream()
-                            .anyMatch(user -> user.getId().equals(userId)))
+                        .anyMatch(user -> user.getId().equals(userId)))
                 .collect(Collectors.toMap(
                         Channel::getId,
-                        channel -> channel
+                        channel -> new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser())
                 ));
 
         return filteredChannels;
@@ -208,6 +199,27 @@ public class BasicChannelService implements ChannelService {
     }
 
     /**
+     * 채널에 메세지 추가
+     */
+    @Override
+    public void sendMessage(ChannelAddMessageRequest request) {
+        Channel findChannel = channelRepository.findChannelById(request.channelId());
+        MessageResponse message = messageService.getMessageById(request.messageId());
+
+        if (findChannel == null || message == null) {
+            throw new ChannelNotFoundException();
+        }
+
+        User sender = userRepository.findUserById(message.senderId());
+        User receiver = userRepository.findUserById(message.receiverId());
+
+        Message createdMessage = new Message(message.messageId(), message.title(), message.content(), sender, receiver);
+        findChannel.addMessageInChannel(createdMessage);
+        channelRepository.saveChannel(findChannel);
+
+    }
+
+    /**
      * 관련된 도메인도 같이 삭제합니다.
      * - `Message`, `ReadStatus`
      */
@@ -226,25 +238,44 @@ public class BasicChannelService implements ChannelService {
             }
         }
 
-        // 채널 관련 readStatus 삭제
-        readStatusRepository.findAll().values()
-                .removeIf(entry -> entry.getChannelId().equals(channelUUID));
+        // 4. ReadStatus 삭제 - 새로운 리스트에 삭제할 ID들을 모은 후 한꺼번에 처리
+        Map<UUID, ReadStatus> allReadStatuses = readStatusRepository.findAll();
+        List<UUID> readStatusesToRemove = new ArrayList<>();
 
-        // 채널 삭제
+        // 삭제할 ReadStatus의 ID들을 먼저 수집
+        for (ReadStatus readStatus : allReadStatuses.values()) {
+            if (readStatus.getChannelId().equals(channelUUID)) {
+                readStatusesToRemove.add(readStatus.getChannelId());
+            }
+        }
+
+        // 수집된 ID들을 기반으로 삭제 수행
+        for (UUID statusId : readStatusesToRemove) {
+            readStatusRepository.remove(statusId);
+        }
+
+        // 5. 채널 삭제
         channelRepository.removeChannelById(findChannel.getId());
     }
 
+    private static Channel setPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList) {
+        Channel channel = new Channel(request.getChannelId());
+        channel.updateChannelName(request.getChannelName());
+        channel.updateOwnerUser(request.getOwner());
+        channel.setChannelType("PUBLIC");
+        channel.updateChannelUsers(userList);
+        channel.setChannelMessages(new HashMap<>());
+        return channel;
+    }
 
-    /**
-     * 채널에 메세지 추가
-     */
-    @Override
-    public void sendMessage(ChannelAddMessageRequest request) {
-        Channel findChannel = channelRepository.findChannelById(request.channelId());
-
-        findChannel.addMessageInChannel(request.message());
-
-        channelRepository.saveChannel(findChannel);
+    private static Channel setPrivateChannel(ChannelPrivateRequest privateRequest, Map<UUID, User> userList) {
+        Channel channel = new Channel(privateRequest.getChannelId());
+        channel.updateChannelName(privateRequest.getChannelName());
+        channel.updateOwnerUser(privateRequest.getOwner());
+        channel.setChannelType("PRIVATE");
+        channel.updateChannelUsers(userList);
+        channel.setChannelMessages(new HashMap<>());
+        return channel;
     }
 
 
@@ -262,6 +293,10 @@ public class BasicChannelService implements ChannelService {
                 userIdList);
     }
 
+    private static ChannelResponse convertToChannelResponse(Channel channel) {
+        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser());
+    }
+
     private static ChannelFindResponse toFindResponse(Channel findChannel, ReadStatus status) {
         ChannelFindResponse response = new ChannelFindResponse(findChannel.getId(),
                 findChannel.getChannelName(),
@@ -269,6 +304,20 @@ public class BasicChannelService implements ChannelService {
                 findChannel.getChannelType(), status);
 
         return response;
+    }
+
+    private void createChannelReadStatus(ChannelCommonRequest request) {
+        ReadStatus channelReadState = new ReadStatus(request.getOwner().getId(), request.getChannelId());
+        readStatusRepository.save(channelReadState);
+    }
+
+    private void validateDuplicateChannelName(ChannelCommonRequest request) {
+        boolean isDuplicate = channelRepository.findAllChannel().values().stream()
+                .anyMatch(ch -> ch.getChannelName().equals(request.getChannelName()));
+
+        if (isDuplicate) {
+            throw new IllegalChannelException("중복된 채널 이름입니다.");
+        }
     }
 
     private static ReadStatus findRecentMessageReadStatus(Map<UUID, ReadStatus> allReadStatus, Channel findChannel) {
@@ -289,8 +338,8 @@ public class BasicChannelService implements ChannelService {
 //                })
 //                .forEach(entry -> {
 //                    entry.getChannelMessages().values().forEach(message -> messageService.deleteMessage(message.getId()));
-//                });
 
+//                });
     /*@Override
     public void addUserChannel(UUID channelUUID, User addUser) {
         if (addUser == null) {
