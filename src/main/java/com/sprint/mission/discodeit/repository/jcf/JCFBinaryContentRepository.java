@@ -61,7 +61,10 @@ public class JCFBinaryContentRepository implements BinaryContentRepository {
     public BinaryContent findById(UUID id) {
         userIdChecker(id);
 
-        return storage.get(id);
+        return storage.values().stream()
+                .filter(v -> v.getUserId().equals(id))
+                .findFirst()
+                .orElseThrow(BinaryContentException::new);
     }
 
     @Override

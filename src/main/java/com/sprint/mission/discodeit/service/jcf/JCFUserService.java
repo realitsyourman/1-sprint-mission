@@ -1,7 +1,7 @@
 //package com.sprint.mission.discodeit.service.jcf;
 //
-//import com.sprint.mission.discodeit.entity.BinaryContent;
-//import com.sprint.mission.discodeit.entity.BinaryContentCreateRequest;
+//import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+//import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentCreateRequest;
 //import com.sprint.mission.discodeit.entity.user.User;
 //import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
 //import com.sprint.mission.discodeit.exception.user.IllegalUserException;

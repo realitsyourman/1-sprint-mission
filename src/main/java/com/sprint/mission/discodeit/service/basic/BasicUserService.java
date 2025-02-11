@@ -1,8 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
-import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentCreateRequest;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
 import com.sprint.mission.discodeit.entity.user.*;
@@ -61,7 +61,7 @@ public class BasicUserService implements UserService {
             throw new IllegalUserException("프로필 이미지 등록 오류: null");
         }
 
-        BinaryContentCreateRequest binaryContentCreateRequest = new BinaryContentCreateRequest(
+        BinaryContentRequest binaryContentCreateRequest = new BinaryContentRequest(
                 basicUser.userId(),
                 binaryContent.getMessageId(),
                 binaryContent.getFileName(),
@@ -138,23 +138,25 @@ public class BasicUserService implements UserService {
         }
 
         // userStat 업데이트
-        Map<UUID, UserStatus> findUserStatMap = userStateService.findAllByUserId(userId);
-        UserStatus userStatus = findUserStatMap.values().stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("찾는 userStatus가 없습니다."));
-        userStatus.updateUserStatus();
-        userStateService.update(new UserStatusRequest(userStatus.getUserId(), userStatus.getState()));
+        updateUserStat(userId);
 
         // 유저 프사 업데이트
-        BinaryContent updateBin = binaryContentService.findByUserId(userId).values().stream()
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("유저 프사를 찾을 수 없음"));
-
-        BinaryContent changeBin = updateBin.upload(binaryContent.fileName(), binaryContent.fileType());
+        BinaryContentRequest changeBin = updateUserProfileImage(userId);
         binaryContentService.update(changeBin);
 
         return convertToUserResponse(user.getId(), user.getUserName(), user.getUserEmail());
     }
+
+    private BinaryContentRequest updateUserProfileImage(UUID userId) {
+        BinaryContentResponse updateBin = binaryContentService.findByUserId(userId).values().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("유저 프사를 찾을 수 없음"));
+
+        BinaryContentRequest changeBin = new BinaryContentRequest(updateBin.userId(), updateBin.messageId(), updateBin.fileName(), updateBin.fileType());
+        return changeBin;
+    }
+
+
     /**
      * 관련된 도메인도 같이 삭제합니다.
      * - `BinaryContent`(프로필), `UserStatus`
@@ -168,6 +170,15 @@ public class BasicUserService implements UserService {
         userRepository.removeUserById(userId);
         userStateService.delete(userId);
         binaryContentService.delete(userId);
+    }
+
+    private void updateUserStat(UUID userId) {
+        Map<UUID, UserStatus> findUserStatMap = userStateService.findAllByUserId(userId);
+        UserStatus userStatus = findUserStatMap.values().stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("찾는 userStatus가 없습니다."));
+        userStatus.updateUserStatus();
+        userStateService.update(new UserStatusRequest(userStatus.getUserId(), userStatus.getState()));
     }
 
     private UserCommonResponse createBasicUser(UserCommonRequest user) {

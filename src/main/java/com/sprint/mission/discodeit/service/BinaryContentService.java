@@ -1,25 +1,25 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.BinaryContentCreateRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 
 import java.util.Map;
 import java.util.UUID;
 
 public interface BinaryContentService {
-    BinaryContent create(BinaryContentCreateRequest request);
+    BinaryContentResponse create(BinaryContentRequest request);
 
-    default BinaryContent update(BinaryContent binaryContent) {
+    default BinaryContentResponse update(BinaryContentRequest binaryContent) {
         return null;
     }
 
-    BinaryContent find(UUID id);
+    BinaryContentResponse find(UUID id);
 
-    Map<UUID, BinaryContent> findAllById(UUID id);
+    Map<UUID, BinaryContentResponse> findAllById(UUID id);
 
-    default Map<UUID, BinaryContent> findByUserId(UUID userId) {
+    default Map<UUID, BinaryContentResponse> findByUserId(UUID userId) {
         return null;
     }
 
-    void delete(UUID id);
+    void delete(UUID userId);
 }

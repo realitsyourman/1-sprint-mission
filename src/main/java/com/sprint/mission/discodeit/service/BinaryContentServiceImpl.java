@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.service;
 
-import com.sprint.mission.discodeit.entity.BinaryContent;
-import com.sprint.mission.discodeit.entity.BinaryContentCreateRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 import com.sprint.mission.discodeit.exception.BinaryContentException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,66 +18,80 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     private final BinaryContentRepository binaryRepository;
 
     @Override
-    public BinaryContent create(BinaryContentCreateRequest request) {
+    public BinaryContentResponse create(BinaryContentRequest request) {
         if (request == null) {
             throw new BinaryContentException("잘못된 request");
         }
-
         BinaryContent binaryContent = convertToBinaryContent(request);
-        return binaryRepository.save(binaryContent);
+        binaryRepository.save(binaryContent);
+        return convertBinaryContentResponse(request);
     }
 
     @Override
-    public BinaryContent update(BinaryContent binaryContent) {
-        if (binaryContent == null) {
+    public BinaryContentResponse update(BinaryContentRequest request) {
+        if (request == null) {
             throw new BinaryContentException();
         }
-
-        return binaryRepository.save(binaryContent);
+        BinaryContent updateBinaryContent = convertToBinaryContent(request);
+        binaryRepository.save(updateBinaryContent);
+        return convertBinaryContentResponse(request);
     }
 
     @Override
-    public BinaryContent find(UUID id) {
-        return getFindContent(id);
+    public BinaryContentResponse find(UUID id) {
+        BinaryContent findContent = binaryRepository.findById(id);
+
+        return new BinaryContentResponse(findContent.getUserId(), findContent.getMessageId(), findContent.getFileName(), findContent.getFileType());
     }
 
     @Override
-    public Map<UUID, BinaryContent> findAllById(UUID id) {
+    public Map<UUID, BinaryContentResponse> findAllById(UUID id) {
         Map<UUID, BinaryContent> binaryContentMap = binaryRepository.findAll();
 
-        return binaryContentMap.entrySet().stream()
-                .filter(entry -> entry.getKey().equals(id))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue
-                ));
+        return getBinaryContentResponseMap(id, binaryContentMap);
     }
 
-    public Map<UUID, BinaryContent> findByUserId(UUID userId) {
+
+    public Map<UUID, BinaryContentResponse> findByUserId(UUID userId) {
         Map<UUID, BinaryContent> byUserId = binaryRepository.findByUserId(userId);
 
         if (byUserId == null) {
             throw new BinaryContentException("userId에 대한 binary를 찾을 수 없음");
         }
 
-        return byUserId;
+        return getBinaryContentResponseMap(userId, byUserId);
     }
-
     @Override
     public void delete(UUID id) {
-        BinaryContent findContent = getFindContent(id);
+        BinaryContentResponse findContent = find(id);
+
+        if (findContent == null) {
+            throw new BinaryContentException("찾는 binaryContent가 없습니다.");
+        }
 
         binaryRepository.remove(id);
     }
 
-    private static BinaryContent convertToBinaryContent(BinaryContentCreateRequest request) {
+    private static Map<UUID, BinaryContentResponse> getBinaryContentResponseMap(UUID id, Map<UUID, BinaryContent> binaryContentMap) {
+        return binaryContentMap.entrySet().stream()
+                .filter(entry -> entry.getValue().getUserId().equals(id))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> new BinaryContentResponse(
+                                entry.getValue().getUserId(),
+                                entry.getValue().getMessageId(),
+                                entry.getValue().getFileName(),
+                                entry.getValue().getFileType()
+                        )
+                ));
+    }
+
+    private static BinaryContent convertToBinaryContent(BinaryContentRequest request) {
         return new BinaryContent(request.userId(), request.messageId(), request.fileName(), request.fileType());
     }
 
-
-    private BinaryContent getFindContent(UUID id) {
-        BinaryContent findContent = binaryRepository.findById(id);
-
-        return findContent;
+    private static BinaryContentResponse convertBinaryContentResponse(BinaryContentRequest request) {
+        return new BinaryContentResponse(request.userId(), request.messageId(), request.fileName(), request.fileType());
     }
+
 }
