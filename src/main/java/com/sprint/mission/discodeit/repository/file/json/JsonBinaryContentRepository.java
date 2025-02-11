@@ -6,11 +6,10 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.exception.BinaryContentException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.repository.RepositoryProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -18,15 +17,15 @@ import java.util.stream.Collectors;
 
 @Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file")
-public class JsonBinaryContentRepository implements BinaryContentRepository {
+public class JsonBinaryContentRepository extends JsonRepository<UUID, BinaryContent> implements BinaryContentRepository {
 
-    private static final String USER_PATH = "binaryContent.json";
-    private final ObjectMapper objectMapper;
-    private Map<UUID, BinaryContent> binaryContentMap = new HashMap<>();
-
-    public JsonBinaryContentRepository() {
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule());
+    public JsonBinaryContentRepository(RepositoryProperties properties) {
+        super(
+                new ObjectMapper().registerModule(new JavaTimeModule()),
+                properties,
+                "binaryContent.json",
+                new TypeReference<HashMap<UUID, BinaryContent>>() {}
+        );
     }
 
     @Override
@@ -35,10 +34,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
             throw new BinaryContentException("save 실패했습니다.");
         }
 
-        binaryContentMap.put(binaryContent.getId(), binaryContent);
-        saveToJson();
-
-        return binaryContentMap.get(binaryContent.getId());
+        return super.save(binaryContent.getId(), binaryContent);
     }
 
     /**
@@ -48,7 +44,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
      */
     @Override
     public BinaryContent findByMessageId(UUID messageId) {
-        return binaryContentMap.values().stream()
+        return map.values().stream()
                 .filter(v -> v.getMessageId().equals(messageId))
                 .findFirst()
                 .orElseThrow(() -> new BinaryContentException("찾는 파일이 없습니다."));
@@ -61,7 +57,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
      */
     @Override
     public Map<UUID, BinaryContent> findByUserId(UUID userId) {
-        return binaryContentMap.entrySet().stream()
+        return map.entrySet().stream()
                 .filter(entry -> entry.getValue().getUserId().equals(userId))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
@@ -73,14 +69,18 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
     public BinaryContent findById(UUID id) {
         checkId(id);
 
-        return binaryContentMap.get(id);
+        return map.values().stream()
+                .filter(v -> v.getUserId().equals(id))
+                .findFirst()
+                .orElseThrow(() -> new BinaryContentException("찾는 binaryConetent가 없습니다."));
+
     }
 
     @Override
     public void remove(UUID id) {
         checkId(id);
 
-        binaryContentMap.remove(id);
+        map.remove(id);
     }
 
     /**
@@ -90,7 +90,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
      */
     @Override
     public void removeAllContentOfUser(UUID userId) {
-        binaryContentMap.entrySet().removeIf(entry ->
+        map.entrySet().removeIf(entry ->
                 entry.getValue().getUserId().equals(userId));
         saveToJson();
     }
@@ -102,7 +102,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
      */
     @Override
     public Map<UUID, BinaryContent> removeContent(UUID messageId) {
-        binaryContentMap.entrySet().removeIf(entry ->
+        map.entrySet().removeIf(entry ->
                 entry.getValue().getMessageId().equals(messageId));
 
         saveToJson();
@@ -111,15 +111,7 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
 
     @Override
     public Map<UUID, BinaryContent> findAll() {
-        return binaryContentMap;
-    }
-
-    private void saveToJson() {
-        try {
-            objectMapper.writeValue(new File(USER_PATH), binaryContentMap);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save users to JSON", e);
-        }
+        return map;
     }
 
     private static void checkId(UUID id) {
@@ -128,15 +120,4 @@ public class JsonBinaryContentRepository implements BinaryContentRepository {
         }
     }
 
-    private void loadFromJson() {
-        File file = new File(USER_PATH);
-        if (file.exists()) {
-            try {
-                binaryContentMap = objectMapper.readValue(file,
-                        new TypeReference<HashMap<UUID, BinaryContent>>() {});
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load users from JSON", e);
-            }
-        }
-    }
 }

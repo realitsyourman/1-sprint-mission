@@ -3,10 +3,12 @@ package com.sprint.mission.discodeit.entity.binarycontent;
 import com.sprint.mission.discodeit.entity.ImmutableBaseObject;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.UUID;
 
 @Getter
+@RequiredArgsConstructor
 public class BinaryContent extends ImmutableBaseObject {
     private static final String TYPE_IMG = "image";
     private static final String TYPE_BIN = "binary";

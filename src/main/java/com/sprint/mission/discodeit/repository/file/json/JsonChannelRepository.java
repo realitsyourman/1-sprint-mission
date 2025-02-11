@@ -5,31 +5,29 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.repository.RepositoryProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file")
-public class JsonChannelRepository implements ChannelRepository {
-    private static final String CHANNEL_PATH = "channels.json";
-    private final ObjectMapper objectMapper;
-    private Map<UUID, Channel> channelMap = new HashMap<>();
-
-    public JsonChannelRepository() {
-        this.objectMapper = new ObjectMapper()
-                .registerModule(new JavaTimeModule());
+public class JsonChannelRepository extends JsonRepository<UUID, Channel> implements ChannelRepository {
+    public JsonChannelRepository(RepositoryProperties properties) {
+        super(
+                new ObjectMapper().registerModule(new JavaTimeModule()),
+                properties,
+                "channels.json",
+                new TypeReference<HashMap<UUID, Channel>>() {}
+        );
     }
 
     @Override
     public Channel saveChannel(Channel channel) {
-        channelMap.put(channel.getId(), channel);
+        map.put(channel.getId(), channel);
         saveToJson();
         return channel;
     }
@@ -37,38 +35,18 @@ public class JsonChannelRepository implements ChannelRepository {
     @Override
     public Channel findChannelById(UUID channelId) {
         loadFromJson();
-        return channelMap.get(channelId);
+        return map.get(channelId);
     }
 
     @Override
     public Map<UUID, Channel> findAllChannel() {
         loadFromJson();
-        return channelMap;
+        return map;
     }
 
     @Override
     public void removeChannelById(UUID channelId) {
-        channelMap.remove(channelId);
+        map.remove(channelId);
         saveToJson();
-    }
-
-    private void saveToJson() {
-        try {
-            objectMapper.writeValue(new File(CHANNEL_PATH), channelMap);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save channels to JSON", e);
-        }
-    }
-
-    private void loadFromJson() {
-        File file = new File(CHANNEL_PATH);
-        if (file.exists()) {
-            try {
-                channelMap = objectMapper.readValue(file,
-                        new TypeReference<HashMap<UUID, Channel>>() {});
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to load channels from JSON", e);
-            }
-        }
     }
 }
