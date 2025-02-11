@@ -46,9 +46,7 @@ public class BasicChannelService implements ChannelService {
 
     @PostConstruct
     public void init() {
-        log.error("=== === === === ===");
         log.error("주입된 channelRepository: {}", channelRepository.getClass().getSimpleName());
-        log.error("=== === === === ===");
     }
 
 

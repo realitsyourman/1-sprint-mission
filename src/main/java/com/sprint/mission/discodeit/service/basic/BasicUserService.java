@@ -40,9 +40,7 @@ public class BasicUserService implements UserService {
 
     @PostConstruct
     public void init() {
-        log.error("=== === === === ===");
         log.error("주입된 userRepository: {}", userRepository.getClass().getSimpleName());
-        log.error("=== === === === ===");
     }
 
     @Override

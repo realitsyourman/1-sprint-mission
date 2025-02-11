@@ -40,9 +40,7 @@ public class BasicMessageService implements MessageService {
 
     @PostConstruct
     public void init() {
-        log.error("=== === === === ===");
         log.error("주입된 messageRepository: {}", messageRepository.getClass().getSimpleName());
-        log.error("=== === === === ===");
     }
 
 
