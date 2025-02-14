@@ -66,4 +66,9 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
 
         storage.remove(channelId);
     }
+
+    @Override
+    public ReadStatus update(UUID channelId) {
+        return null;
+    }
 }

@@ -21,4 +21,7 @@ public interface ReadStatusRepository {
 
     // 삭제
     void remove(UUID channelId);
+
+    // 채널 메세지 수신 정보 수정
+    ReadStatus update(UUID channelId);
 }

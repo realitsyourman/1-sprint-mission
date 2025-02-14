@@ -16,12 +16,14 @@ public class MessageController {
     private final MessageService messageService;
 
     @RequestMapping(method = RequestMethod.POST)
-    public MessageCreateResponse sendMessage(@Validated @RequestBody MessageCreateRequest request) {
+    public MessageCreateResponse sendMessage(@Validated@RequestBody MessageCreateRequest request) {
         return messageService.createMessage(request);
     }
 
     @RequestMapping(value = "/{messageId}", method = RequestMethod.PUT)
-    public MessageResponse updateMessage(@PathVariable("messageId") String messageId, @Validated @RequestBody MessageUpdateRequest request) {
+    public MessageResponse updateMessage(@PathVariable("messageId") String messageId,
+                                         @Validated @RequestBody MessageUpdateRequest request) {
+
         return messageService.updateMessage(messageId, request);
     }
 

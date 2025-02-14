@@ -68,4 +68,13 @@ public class JsonReadStatusRepository extends JsonRepository<UUID, ReadStatus> i
         map.remove(channelId);
         saveToJson();
     }
+
+    @Override
+    public ReadStatus update(UUID channelId) {
+        ReadStatus findStatus = findByChannelId(channelId);
+
+        findStatus.updateLastReadAt();
+
+        return map.put(channelId, findStatus);
+    }
 }

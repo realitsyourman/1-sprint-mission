@@ -1,9 +1,9 @@
 package com.sprint.mission.discodeit.service.status;
 
-import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
-import com.sprint.mission.discodeit.entity.status.read.ReadStatusCreateRequest;
-import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
+import com.sprint.mission.discodeit.entity.status.read.*;
+import com.sprint.mission.discodeit.entity.user.UserCommonResponse;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,24 +33,31 @@ public class ReadStatusService implements StatusService<ReadStatus> {
         return convertToReadStatus(createRequest);
     }
 
+    public ChannelReadStatus createChannelReadStatus(String channelId) {
+        UUID uuid = convertToUUID(channelId);
+        ReadStatus readStatus = find(uuid);
+        if (readStatus != null) {
+            return new ChannelReadStatus(readStatus.getChannelId(), readStatus.getLastReadAt());
+        }
+
+        return new ChannelReadStatus(uuid, Instant.now());
+    }
+
     /**
      * `id`로 조회합니다.
      */
     @Override
     public ReadStatus find(UUID channelId) {
-        ReadStatus findChannel = readStatusRepository.findByChannelId(channelId);
-        if (findChannel == null) {
-            throw new IllegalArgumentException("채널에 대한 정보가 없습니다.");
-        }
-
-        return findChannel;
+        return readStatusRepository.findByChannelId(channelId);
     }
 
     /**
      * userId를 조건으로 전부 조회
      */
     @Override
-    public Map<UUID, ReadStatus> findAllByUserId(UUID userId) {
+    public Map<UUID, UserReadStatusResponse> findAllByUserId(String userName) {
+        UserCommonResponse findUser = userService.find(userName);
+        UUID userId = findUser.id();
         Map<UUID, ReadStatus> allReadStatus = readStatusRepository.findAll();
 
         if (allReadStatus.isEmpty()) {
@@ -60,7 +68,7 @@ public class ReadStatusService implements StatusService<ReadStatus> {
                 .filter(stat -> stat.getUserId().equals(userId))
                 .collect(Collectors.toMap(
                         ReadStatus::getChannelId,
-                        s -> s
+                        s -> new UserReadStatusResponse(s.getChannelId(), s.getLastReadAt())
                 ));
     }
 
@@ -84,6 +92,15 @@ public class ReadStatusService implements StatusService<ReadStatus> {
         findByChannelId.updateLastReadAt();
         return findByChannelId;
     }
+
+    public ChannelReadStatus updateChannelReadStatus(String id) {
+        UUID channelId = convertToUUID(id);
+
+        ReadStatus update = readStatusRepository.update(channelId);
+
+        return new ChannelReadStatus(update.getChannelId(), update.getLastReadAt());
+    }
+
 
     /**
      * `id`로 삭제합니다.
@@ -124,5 +141,20 @@ public class ReadStatusService implements StatusService<ReadStatus> {
                 .orElseThrow(() -> new ChannelNotFoundException("채널이 존재하지 않습니다."));
         Optional.ofNullable(userService.find(createRequest.userId()))
                 .orElseThrow(() -> new UserNotFoundException("유저가 존재하지 않습니다."));
+    }
+
+    private UUID convertToUUID(String messageId) {
+        if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
+            throw new MessageNotFoundException("messageID를 확인해주세요");
+        }
+
+        String uuid = new StringBuilder(messageId)
+                .insert(8, "-")
+                .insert(13, "-")
+                .insert(18, "-")
+                .insert(23, "-")
+                .toString();
+
+        return UUID.fromString(uuid);
     }
 }

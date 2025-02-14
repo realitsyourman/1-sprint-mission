@@ -22,7 +22,9 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/{channelName}", method = RequestMethod.PUT)
-    public ChannelUpdateResponse updateChannel(@PathVariable("channelName") String channelName, @Validated @RequestBody ChannelUpdateRequest request) {
+    public ChannelUpdateResponse updateChannel(@PathVariable("channelName") String channelName,
+                                               @Validated @RequestBody ChannelUpdateRequest request) {
+
         return channelService.updateChannel(channelName, request);
     }
 

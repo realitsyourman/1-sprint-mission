@@ -35,7 +35,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/{userName}", method = RequestMethod.PUT)
-    public UserCommonResponse updateUser(@PathVariable("userName") String userName, @Validated @RequestBody UserCommonRequest request) {
+    public UserCommonResponse updateUser(@PathVariable("userName") String userName,
+                                         @Validated @RequestBody UserCommonRequest request) {
+
         return userService.update(userName, request);
     }
 
@@ -47,7 +49,9 @@ public class UserController {
     }
 
     @RequestMapping(value = "/{userName}", method = RequestMethod.PATCH)
-    public UserStatusReponse updateUserStatus(@PathVariable("userName") String userName, @Validated @RequestBody UserStatusUpdateRequest request) {
+    public UserStatusReponse updateUserStatus(@PathVariable("userName") String userName,
+                                              @Validated @RequestBody UserStatusUpdateRequest request) {
+
         return userStateService.updateByUserName(userName, request);
     }
 }
