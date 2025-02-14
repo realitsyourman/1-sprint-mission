@@ -5,7 +5,6 @@ import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.message.*;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
-import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
@@ -13,6 +12,7 @@ import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
@@ -30,9 +30,10 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
+    private final UserRepository userRepository;
     private final MessageRepository messageRepository;
-    private final BinaryContentRepository binaryContentRepository;
     private final ChannelRepository channelRepository;
+    private final BinaryContentRepository binaryContentRepository;
 
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
     private static final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
@@ -55,8 +56,8 @@ public class BasicMessageService implements MessageService {
             throw new NullMessageTitleException();
         }
 
-        User sender = userValidator.entityValidate(request.sender());
-        User receiver = userValidator.entityValidate(request.receiver());
+        User sender = userValidator.entityValidate(userRepository.findUserByName(request.sender()));
+        User receiver = userValidator.entityValidate(userRepository.findUserByName(request.receiver()));
 
         MessageCreateResponse fileMessage = createMessageWithFile(request, fileRequests, sender, receiver);
         if (fileMessage != null) {
@@ -107,14 +108,14 @@ public class BasicMessageService implements MessageService {
      * - 수정 대상 객체의 id 파라미터, 수정할 값 파라미터
      */
     @Override
-    public MessageResponse updateMessage(MessageUpdateRequest request) {
-        if (request.updateMessageId() == null) {
-            throw new MessageNotFoundException();
-        } else if (messageValidator.isNullParam(request.newTitle(), request.newContent())) {
+    public MessageResponse updateMessage(String messageId, MessageUpdateRequest request) {
+        UUID updateMessageId = convertToUUID(messageId);
+
+        if (messageValidator.isNullParam(request.newTitle(), request.newContent())) {
             throw new MessageNotFoundException();
         }
 
-        Message findMessage = messageRepository.findMessageById(request.updateMessageId());
+        Message findMessage = messageRepository.findMessageById(updateMessageId);
 
         // 찾은 메세지 업데이트 후 저장
         findMessage.updateMessage(request.newTitle(), request.newContent());
@@ -127,23 +128,23 @@ public class BasicMessageService implements MessageService {
         return convertToMessageResponse(findMessage);
     }
 
+
     /**
      * 관련된 도메인도 같이 삭제합니다.
      * <p>
      * - 첨부파일(`BinaryContent`)
      */
     @Override
-    public void deleteMessage(UUID messageId) {
-        if (messageId == null) {
-            throw new IllegalChannelException("message ID를 확인해주세요.");
-        }
-
+    public UUID deleteMessage(String id) {
+        UUID messageId = convertToUUID(id);
         Message findMessage = messageRepository.findMessageById(messageId);
 
         binaryContentRepository.removeContent(messageId);
         messageRepository.removeMessageById(findMessage.getId());
 
         removeMessageInChannel(messageId);
+
+        return messageId;
     }
 
     private Channel getChannel(MessageUpdateRequest request, Message findMessage) {
@@ -204,5 +205,22 @@ public class BasicMessageService implements MessageService {
                 message.getMessageSendUser().getId(),
                 message.getMessageReceiveUser().getId()
         );
+    }
+
+
+    // 123e4567e89b12d3a456426614174000 이런 형식으로 들어오는 메세지 아이디 uuid 변환
+    private UUID convertToUUID(String messageId) {
+        if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
+            throw new MessageNotFoundException("messageID를 확인해주세요");
+        }
+
+        String uuid = new StringBuilder(messageId)
+                .insert(8, "-")
+                .insert(13, "-")
+                .insert(18, "-")
+                .insert(23, "-")
+                .toString();
+
+        return UUID.fromString(uuid);
     }
 }

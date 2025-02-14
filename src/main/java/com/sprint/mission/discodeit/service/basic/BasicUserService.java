@@ -237,7 +237,7 @@ public class BasicUserService implements UserService {
 
         boolean isSameEmail = allUsers.values().stream().anyMatch(users -> users.getUserEmail().equals(user.userEmail()));
 
-        if (isSameUser && isSameEmail) {
+        if (isSameUser || isSameEmail) {
             throw new IllegalUserException("username 또는 email이 다른 유저와 같습니다.");
         }
     }

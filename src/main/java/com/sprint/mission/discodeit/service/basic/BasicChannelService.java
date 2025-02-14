@@ -266,7 +266,7 @@ public class BasicChannelService implements ChannelService {
         if (!messageMap.isEmpty()) {
             List<UUID> messageIds = new ArrayList<>(messageMap.keySet());
             for (UUID messageId : messageIds) {
-                messageService.deleteMessage(messageId);
+                messageService.deleteMessage(String.valueOf(messageId));
             }
         }
 

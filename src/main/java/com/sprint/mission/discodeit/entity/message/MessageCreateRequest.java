@@ -1,11 +1,17 @@
 package com.sprint.mission.discodeit.entity.message;
 
-import com.sprint.mission.discodeit.entity.user.User;
+import jakarta.validation.constraints.NotBlank;
 
 public record MessageCreateRequest(
+
+        @NotBlank
         String title,
         String content,
-        User sender,
-        User receiver
+
+        @NotBlank
+        String sender,
+
+        @NotBlank
+        String receiver
 ) {
 }

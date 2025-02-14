@@ -12,7 +12,7 @@ public interface MessageService {
 
     Map<UUID, MessageResponse> findAllByChannelId(UUID channelId);
 
-    MessageResponse updateMessage(MessageUpdateRequest updateRequest);
+    MessageResponse updateMessage(String messageId, MessageUpdateRequest updateRequest);
 
-    void deleteMessage(UUID messageId);
+    UUID deleteMessage(String messageId);
 }
