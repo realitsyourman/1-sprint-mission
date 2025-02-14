@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -24,8 +25,13 @@ public class MessageController {
         return messageService.updateMessage(messageId, request);
     }
 
-    @RequestMapping(value = "/{messageId}", method = RequestMethod.DELETE)
-    public UUID deleteMessage(@PathVariable("messageId") String messageId) {
-        return messageService.deleteMessage(messageId);
+    @RequestMapping(value = "/{channelName}", method = RequestMethod.DELETE)
+    public UUID deleteMessage(@PathVariable("channelName") String channelName) {
+        return messageService.deleteMessage(channelName);
+    }
+
+    @RequestMapping(value = "/ch/{channelId}", method = RequestMethod.GET)
+    public Map<UUID, MessageResponse> getAllMessages(@PathVariable("channelId") String channelId) {
+        return messageService.findAllMessageByChannelId(channelId);
     }
 }

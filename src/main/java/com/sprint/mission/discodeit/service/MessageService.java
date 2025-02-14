@@ -10,7 +10,7 @@ public interface MessageService {
 
     MessageResponse getMessageById(UUID messageId);
 
-    Map<UUID, MessageResponse> findAllByChannelId(UUID channelId);
+    Map<UUID, MessageResponse> findAllMessageByChannelId(String channelId);
 
     MessageResponse updateMessage(String messageId, MessageUpdateRequest updateRequest);
 

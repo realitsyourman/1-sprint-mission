@@ -67,6 +67,9 @@ public class BasicMessageService implements MessageService {
 
         Message message = entityFactory.createMessage(request.title(), request.content(), sender, receiver);
         messageRepository.saveMessage(message);
+
+        addMessageInChannel(request, message);
+
         return new MessageCreateResponse(message.getId(), message.getMessageTitle(), message.getMessageContent(), message.getMessageSendUser().getId(), message.getMessageReceiveUser().getId());
 
     }
@@ -77,7 +80,8 @@ public class BasicMessageService implements MessageService {
      * `findAllByChannelId`
      */
     @Override
-    public Map<UUID, MessageResponse> findAllByChannelId(UUID channelId) {
+    public Map<UUID, MessageResponse> findAllMessageByChannelId(String id) {
+        UUID channelId = convertToUUID(id);
         Channel findChannel = channelRepository.findChannelById(channelId);
 
         if (findChannel == null) {
@@ -159,6 +163,12 @@ public class BasicMessageService implements MessageService {
                 .filter(channel -> channel.getChannelMessages().containsKey(messageId))
                 .peek(channel -> channel.getChannelMessages().remove(messageId))
                 .forEach(channelRepository::saveChannel);
+    }
+
+    private void addMessageInChannel(MessageCreateRequest request, Message message) {
+        Channel findChannel = channelRepository.findChannelById(request.channelId());
+        findChannel.addMessageInChannel(message);
+        channelRepository.saveChannel(findChannel);
     }
 
     private static MessageResponse convertToMessageResponse(Message findMessage) {
