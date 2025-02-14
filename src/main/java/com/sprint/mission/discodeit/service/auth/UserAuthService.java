@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.auth;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserLoginRequest;
 import com.sprint.mission.discodeit.entity.user.UserLoginResponse;
-import com.sprint.mission.discodeit.exception.user.IllegalUserException;
+import com.sprint.mission.discodeit.exception.user.UserAuthException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class UserAuthService implements AuthService {
                 .orElseThrow(() -> {
                     log.error("아이디 또는 비밀번호가 잘못되었습니다.");
 
-                    return new IllegalUserException("userAuth login error!!");
+                    return new UserAuthException("userAuth login error!!");
                 });
     }
 }

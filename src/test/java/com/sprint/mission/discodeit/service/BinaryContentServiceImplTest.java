@@ -2,7 +2,7 @@
 //
 //import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 //import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentCreateRequest;
-//import com.sprint.mission.discodeit.exception.BinaryContentException;
+//import com.sprint.mission.discodeit.exception.binary.BinaryContentException;
 //import com.sprint.mission.discodeit.repository.file.json.JsonBinaryContentRepository;
 //import org.junit.jupiter.api.BeforeEach;
 //import org.junit.jupiter.api.DisplayName;

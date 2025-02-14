@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.repository.jcf;
 
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
-import com.sprint.mission.discodeit.exception.BinaryContentException;
+import com.sprint.mission.discodeit.exception.binary.BinaryContentException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
