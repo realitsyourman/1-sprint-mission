@@ -76,4 +76,15 @@ public abstract class JsonRepository<K, V> {
     private String getFilePath() {
         return new File(properties.getFileDirectory(), fileName).getAbsolutePath();
     }
+
+
+    // 데이터 초기화 메서드 추가
+    public void clearData() {
+        this.map.clear();
+    }
+
+    // 또는 data 필드를 직접 새로 할당
+    public void resetData() {
+        this.map = new HashMap<>();
+    }
 }

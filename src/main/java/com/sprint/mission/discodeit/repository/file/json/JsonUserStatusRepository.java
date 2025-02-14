@@ -43,6 +43,13 @@ public class JsonUserStatusRepository extends JsonRepository<UUID, UserStatus> i
          return map.get(userId);
     }
 
+    public UserStatus findByUserName(String userName) {
+        return map.values().stream()
+                .filter(userStatus -> userStatus.getUserName().equals(userName))
+                .findFirst()
+                .orElse(null);
+    }
+
     @Override
     public Map<UUID, UserStatus> findAll() {
         return map;
@@ -51,15 +58,17 @@ public class JsonUserStatusRepository extends JsonRepository<UUID, UserStatus> i
     @Override
     public UserStatus updateState(UUID userId, UserStatus userStatus) {
         UserStatus findState = findById(userId);
-        if (findState == null) {
-            throw new IllegalUserException("updateState 실패");
-        }
 
-        findState.updateUserStatus();
+        return getUserStatus(findState);
+    }
 
-        map.put(findState.getUserId(), findState);
+    @Override
+    public UserStatus updateState(String userName, UserStatus userStatus) {
+        UserStatus findState = findByUserName(userName);
 
-        return map.get(findState.getUserId());
+        saveToJson();
+
+        return findState;
     }
 
     @Override
@@ -69,5 +78,29 @@ public class JsonUserStatusRepository extends JsonRepository<UUID, UserStatus> i
         }
 
         map.remove(userId);
+        saveToJson();
+    }
+
+    private UserStatus getUserStatus(UserStatus findState) {
+        if (findState == null) {
+            throw new IllegalUserException("updateState 실패");
+        }
+
+        findState.updateUserStatus();
+
+        map.put(findState.getUserId(), findState);
+        saveToJson();
+
+        return map.get(findState.getUserId());
+    }
+
+    @Override
+    public void clearData() {
+        super.clearData();
+    }
+
+    @Override
+    public void resetData() {
+        super.resetData();
     }
 }

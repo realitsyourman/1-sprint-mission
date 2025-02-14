@@ -1,7 +1,9 @@
 package com.sprint.mission.discodeit.service.status;
 
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
+import com.sprint.mission.discodeit.entity.status.user.UserStatusReponse;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
+import com.sprint.mission.discodeit.entity.status.user.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -31,7 +33,7 @@ public class UserStateService implements StatusService<UserStatus> {
 
         hasUserState(userStatusRequest);
 
-        UserStatus userStatus = new UserStatus(userStatusRequest.userId());
+        UserStatus userStatus = new UserStatus(userStatusRequest.userId(), userStatusRequest.userName());
         return userStatusRepository.save(userStatus);
     }
 
@@ -82,6 +84,34 @@ public class UserStateService implements StatusService<UserStatus> {
     }
 
     /**
+     * userName으로 상태 업데이트
+     */
+    public UserStatus updateByUserName(String userName) {
+        if (userName == null) {
+            throw new IllegalArgumentException("유저를 입력해주세요.");
+        }
+
+        UserStatus userStatus = userStatusRepository.findByUserName(userName);
+        userStatus.updateUserStatus();
+        return userStatusRepository.updateState(userName, userStatus);
+    }
+
+    /**
+     * userName과 state를 받아서 업데이트
+     */
+    public UserStatusReponse updateByUserName(String userName, UserStatusUpdateRequest state) {
+        if (userName == null) {
+            throw new IllegalArgumentException("유저를 입력해주세요.");
+        }
+
+
+        UserStatus userStatus = userStatusRepository.findByUserName(userName);
+        userStatus.updateUserStatus(state.state());
+
+        return getUserStatusReponse(userName, userStatus);
+    }
+
+    /**
      * userId로 상태 업데이트
      */
     public UserStatus updateByUserId(UUID userId) {
@@ -117,5 +147,10 @@ public class UserStateService implements StatusService<UserStatus> {
         if (findUser == null) {
             throw new UserNotFoundException("유저가 존재하지 않습니다.");
         }
+    }
+
+    private UserStatusReponse getUserStatusReponse(String userName, UserStatus userStatus) {
+        UserStatus updateState = userStatusRepository.updateState(userName, userStatus);
+        return new UserStatusReponse(updateState.getUserName(), updateState.getState(), updateState.getLastAccessTime());
     }
 }

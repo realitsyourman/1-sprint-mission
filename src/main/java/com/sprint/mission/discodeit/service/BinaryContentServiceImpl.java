@@ -41,6 +41,10 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     public BinaryContentResponse find(UUID id) {
         BinaryContent findContent = binaryRepository.findById(id);
 
+        if (findContent == null) {
+            return null;
+        }
+
         return new BinaryContentResponse(findContent.getUserId(), findContent.getMessageId(), findContent.getFileName(), findContent.getFileType());
     }
 
@@ -64,10 +68,6 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     @Override
     public void delete(UUID id) {
         BinaryContentResponse findContent = find(id);
-
-        if (findContent == null) {
-            throw new BinaryContentException("찾는 binaryContent가 없습니다.");
-        }
 
         binaryRepository.remove(id);
     }

@@ -72,7 +72,7 @@ public class JsonBinaryContentRepository extends JsonRepository<UUID, BinaryCont
         return map.values().stream()
                 .filter(v -> v.getUserId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new BinaryContentException("찾는 binaryConetent가 없습니다."));
+                .orElse(null);
 
     }
 

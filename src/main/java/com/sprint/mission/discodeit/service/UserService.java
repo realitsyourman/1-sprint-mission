@@ -23,9 +23,11 @@ public interface UserService {
      */
     UserResponse find(UUID userId); // 유저 찾기
 
+    UserCommonResponse find(String userName);
+
     Map<UUID, UserResponse> findAll(); // 유저 전부 찾기
 
-    UserCommonResponse update(UUID updateUserId, UserCommonRequest updateDto); // 유저 정보 업데이트
+    UserCommonResponse update(String userName, UserCommonRequest updateDto); // 유저 정보 업데이트
 
     default UserCommonResponse updateUserWithProfile(UUID userId, BinaryContentRequest binaryContent) {
         return null;
@@ -35,6 +37,6 @@ public interface UserService {
      * 관련된 도메인도 같이 삭제합니다.
      * - `BinaryContent`(프로필), `UserStatus`
      */
-    void deleteUser(UUID userId);
+    UUID deleteUser(UUID userId);
 
 }
