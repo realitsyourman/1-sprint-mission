@@ -15,7 +15,17 @@ public interface ChannelRepository {
     // 채널 조회
     Channel findChannelById(UUID channelId);
 
+    // 채널 이름으로 조회
+    default Channel findChannelByName(String channelName){
+        return null;
+    }
+
+
     // 모든 채널 조회
     Map<UUID, Channel> findAllChannel();
+
+    // 데이터 초기화 메서드 추가
+    void clearData();
+    void resetData();
 
 }

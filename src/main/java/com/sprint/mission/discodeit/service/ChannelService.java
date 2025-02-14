@@ -7,9 +7,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public interface ChannelService {
-    ChannelResponse createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList);
 
-    ChannelResponse createPrivateChannel(ChannelPrivateRequest request, Map<UUID, User> userList);
+    ChannelResponse createChannel(ChannelCreateRequest request);
+
+    ChannelResponse createPublicChannel(ChannelCreateRequest request, Map<UUID, User> userList);
+
+    ChannelResponse createPrivateChannel(ChannelCreateRequest request, Map<UUID, User> userList);
 
 //    Map<UUID, Channel> getChannelByName(String channelName);
 
@@ -17,9 +20,17 @@ public interface ChannelService {
 
     Map<UUID, ChannelFindResponse> getAllChannels(UUID userId);
 
-    ChannelUpdateResponse updateChannel(ChannelUpdateRequest request);
+    default Map<UUID, ChannelListResponse> getAllChannelsOfUser(String userName) {
+        return null;
+    }
+
+    ChannelUpdateResponse updateChannel(String channelName, ChannelUpdateRequest request);
 
     void removeChannelById(UUID channelUUID);
+
+    default UUID removeChannelByName(String channelName) {
+        return null;
+    }
 
 //    void addUserChannel(UUID channelUUID, User addUser);
 //

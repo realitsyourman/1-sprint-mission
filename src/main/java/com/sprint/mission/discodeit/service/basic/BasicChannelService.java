@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.message.MessageResponse;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.entity.user.UserChannelOwnerResponse;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
@@ -50,12 +51,26 @@ public class BasicChannelService implements ChannelService {
     }
 
 
+    @Override
+    public ChannelResponse createChannel(ChannelCreateRequest request) {
+        User owner = userRepository.findUserByName(request.ownerName());
+
+        ChannelResponse channelCreateRequest = new ChannelResponse(
+                UUID.randomUUID(),
+                request.channelName(),
+                request.type(),
+                new UserChannelOwnerResponse(owner.getId(), owner.getUserName(), owner.getUserRole()));
+
+        return getUserChannelResponse(channelCreateRequest);
+    }
+
+
     /**
      * 일반 public 채널 생성
      */
     @Override
-    public ChannelResponse createPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList) {
-        if (request.getChannelName() == null || request.getOwner() == null) {
+    public ChannelResponse createPublicChannel(ChannelCreateRequest request, Map<UUID, User> userList) {
+        if (request.channelName() == null || request.ownerName() == null) {
             throw new IllegalChannelException();
         }
 
@@ -71,30 +86,34 @@ public class BasicChannelService implements ChannelService {
         return convertToChannelResponse(channel);
     }
 
+
+
     /**
      * private 채널 생성
      */
     @Override
-    public ChannelResponse createPrivateChannel(ChannelPrivateRequest privateRequest, Map<UUID, User> userList) {
-        if (privateRequest.getOwner() == null || privateRequest.getChannelType().equals(CHANNEL_TYPE_PUB)) {
+    public ChannelResponse createPrivateChannel(ChannelCreateRequest privateRequest, Map<UUID, User> userList) {
+        if (privateRequest.ownerName() == null || privateRequest.type().equals(CHANNEL_TYPE_PUB)) {
             throw new IllegalChannelException();
         }
 
         // 채널 자체의 시간 정보
-        ReadStatus channelReadState = new ReadStatus(privateRequest.getChannelId(), privateRequest.getChannelId());
+        ReadStatus channelReadState = new ReadStatus(privateRequest.channelId(), privateRequest.channelId());
         readStatusRepository.save(channelReadState);
 
         // 각각 유저에 대한 시간 정보
         userList.values()
                 .forEach(entry -> {
-                    ReadStatus readStatus = new ReadStatus(entry.getId(), privateRequest.getChannelId());
+                    ReadStatus readStatus = new ReadStatus(entry.getId(), privateRequest.channelId());
                     readStatusRepository.save(readStatus);
                 });
 
         Channel channel = setPrivateChannel(privateRequest, userList);
         channelRepository.saveChannel(channel);
 
-        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser());
+        UserChannelOwnerResponse userChannelOwnerResponse = getUserChannelOwnerResponse(privateRequest);
+
+        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), userChannelOwnerResponse);
     }
 
     /**
@@ -158,6 +177,19 @@ public class BasicChannelService implements ChannelService {
 
     }
 
+    @Override
+    public Map<UUID, ChannelListResponse> getAllChannelsOfUser(String userName) {
+        User findUser = userRepository.findUserByName(userName);
+        Map<UUID, ChannelFindResponse> allChannels = getAllChannels(findUser.getId());
+
+        // ChannelFindResponse를 ChannelListResponse로 바뀐 뒤 리턴
+        return allChannels.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> new ChannelListResponse(entry.getValue().getChannelId(), entry.getValue().getChannelName(), entry.getValue().getChannelType())
+                ));
+    }
+
     /**
      * 특정 `User`가 볼 수 있는 Channel 목록을 조회하도록 조회 조건
      */
@@ -169,7 +201,7 @@ public class BasicChannelService implements ChannelService {
                         .anyMatch(user -> user.getId().equals(userId)))
                 .collect(Collectors.toMap(
                         Channel::getId,
-                        channel -> new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser())
+                        channel -> new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), new UserChannelOwnerResponse(channel.getChannelOwnerUser().getId(), channel.getChannelOwnerUser().getUserName(), channel.getChannelOwnerUser().getUserRole()))
                 ));
 
         return filteredChannels;
@@ -181,11 +213,13 @@ public class BasicChannelService implements ChannelService {
      * - [ ] PRIVATE 채널은 수정할 수 없습니다.
      */
     @Override
-    public ChannelUpdateResponse updateChannel(ChannelUpdateRequest request) {
-        Channel channel = channelRepository.findChannelById(request.channelUUID());
+    public ChannelUpdateResponse updateChannel(String channelName, ChannelUpdateRequest request) {
+        Channel channel = channelRepository.findChannelByName(channelName);
+        User owner = userRepository.findUserByName(request.ownerName());
+
         channel.updateChannelName(request.channelName());
         channel.setChannelType(request.channelType());
-        channel.updateOwnerUser(request.owner());
+        channel.updateOwnerUser(owner);
 
         if (channel.getChannelType().equals(CHANNEL_TYPE_PRI)) {
             throw new IllegalChannelException("PRIVATE 채널은 수정할 수 없습니다.");
@@ -256,20 +290,34 @@ public class BasicChannelService implements ChannelService {
         channelRepository.removeChannelById(findChannel.getId());
     }
 
-    private static Channel setPublicChannel(ChannelCommonRequest request, Map<UUID, User> userList) {
-        Channel channel = new Channel(request.getChannelId());
-        channel.updateChannelName(request.getChannelName());
-        channel.updateOwnerUser(request.getOwner());
+    @Override
+    public UUID removeChannelByName(String channelName) {
+        Channel findChannel = channelRepository.findChannelByName(channelName);
+
+        removeChannelById(findChannel.getId());
+
+        return findChannel.getId();
+    }
+
+    private Channel setPublicChannel(ChannelCreateRequest request, Map<UUID, User> userList) {
+        Channel channel = new Channel(request.channelId());
+        channel.updateChannelName(request.channelName());
+        channel.updateOwnerUser(userRepository.findUserByName(request.ownerName()));
         channel.setChannelType("PUBLIC");
         channel.updateChannelUsers(userList);
         channel.setChannelMessages(new HashMap<>());
         return channel;
     }
 
-    private static Channel setPrivateChannel(ChannelPrivateRequest privateRequest, Map<UUID, User> userList) {
-        Channel channel = new Channel(privateRequest.getChannelId());
-        channel.updateChannelName(privateRequest.getChannelName());
-        channel.updateOwnerUser(privateRequest.getOwner());
+    private UserChannelOwnerResponse getUserChannelOwnerResponse(ChannelCreateRequest privateRequest) {
+        User owner = userRepository.findUserByName(privateRequest.ownerName());
+        return new UserChannelOwnerResponse(owner.getId(), owner.getUserName(), owner.getUserRole());
+    }
+
+    private Channel setPrivateChannel(ChannelCreateRequest privateRequest, Map<UUID, User> userList) {
+        Channel channel = new Channel(privateRequest.channelId());
+        channel.updateChannelName(privateRequest.channelName());
+        channel.updateOwnerUser(userRepository.findUserByName(privateRequest.ownerName()));
         channel.setChannelType("PRIVATE");
         channel.updateChannelUsers(userList);
         channel.setChannelMessages(new HashMap<>());
@@ -292,7 +340,7 @@ public class BasicChannelService implements ChannelService {
     }
 
     private static ChannelResponse convertToChannelResponse(Channel channel) {
-        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), channel.getChannelOwnerUser());
+        return new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), new UserChannelOwnerResponse(channel.getChannelOwnerUser().getId(), channel.getChannelOwnerUser().getUserName(), channel.getChannelOwnerUser().getUserRole()));
     }
 
     private static ChannelFindResponse toFindResponse(Channel findChannel, ReadStatus status) {
@@ -304,18 +352,34 @@ public class BasicChannelService implements ChannelService {
         return response;
     }
 
-    private void createChannelReadStatus(ChannelCommonRequest request) {
-        ReadStatus channelReadState = new ReadStatus(request.getOwner().getId(), request.getChannelId());
+    private void createChannelReadStatus(ChannelCreateRequest request) {
+        User findUser = userRepository.findUserByName(request.ownerName());
+        ReadStatus channelReadState = new ReadStatus(findUser.getId(), request.channelId());
         readStatusRepository.save(channelReadState);
     }
 
-    private void validateDuplicateChannelName(ChannelCommonRequest request) {
+    private void validateDuplicateChannelName(ChannelCreateRequest request) {
         boolean isDuplicate = channelRepository.findAllChannel().values().stream()
-                .anyMatch(ch -> ch.getChannelName().equals(request.getChannelName()));
+                .anyMatch(ch -> ch.getChannelName().equals(request.channelName()));
 
         if (isDuplicate) {
             throw new IllegalChannelException("중복된 채널 이름입니다.");
         }
+    }
+
+    private ChannelResponse getUserChannelResponse(ChannelResponse request) {
+        ChannelResponse response;
+        ChannelCreateRequest channelCreateRequest = new ChannelCreateRequest(request.channelId(), request.channelName(), request.owner().userName(), request.channelType());
+
+        if (request.channelType().equals("PUBLIC")) {
+            response = createPublicChannel(channelCreateRequest, new HashMap<>());
+        } else if (request.channelType().equals("PRIVATE")) {
+            response = createPrivateChannel(channelCreateRequest, new HashMap<>());
+        } else {
+            throw new IllegalChannelException();
+        }
+
+        return response;
     }
 
     private static ReadStatus findRecentMessageReadStatus(Map<UUID, ReadStatus> allReadStatus, Channel findChannel) {

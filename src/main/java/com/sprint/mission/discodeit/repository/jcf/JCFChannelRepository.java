@@ -35,4 +35,14 @@ public class JCFChannelRepository implements ChannelRepository{
     public Map<UUID, Channel> findAllChannel() {
         return channelMap;
     }
+
+    @Override
+    public void clearData() {
+
+    }
+
+    @Override
+    public void resetData() {
+
+    }
 }

@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity.status.read;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sprint.mission.discodeit.entity.BaseObject;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -17,12 +18,15 @@ import java.util.UUID;
 public class ReadStatus extends BaseObject {
 
     @NotNull
-    private final UUID userId;
+    @JsonProperty("userId")
+    private UUID userId;
 
     @NotNull
-    private final UUID channelId;
+    private UUID channelId;
 
     private Instant lastReadAt;
+
+    public ReadStatus() {}
 
     public ReadStatus(UUID userId, UUID channelId) {
         super();

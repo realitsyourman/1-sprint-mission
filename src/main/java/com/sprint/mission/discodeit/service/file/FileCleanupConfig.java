@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.file;
 
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import jakarta.annotation.PostConstruct;
@@ -15,10 +16,13 @@ public class FileCleanupConfig {
     private static final Logger logger = LoggerFactory.getLogger(FileCleanupConfig.class);
 
     @Autowired
-    private UserRepository userRepository;  // 사용하는 repository들을 주입
+    private UserRepository userRepository;
 
     @Autowired
     private UserStatusRepository userStatusRepository;
+
+    @Autowired
+    private ChannelRepository channelRepository;
 
     @PostConstruct
     public void cleanupFiles() {
@@ -59,6 +63,7 @@ public class FileCleanupConfig {
             // 저장소 데이터 초기화
             userRepository.clearData();
             userStatusRepository.clearData();
+            channelRepository.clearData();
 
         } catch (Exception e) {
             logger.error("Error while cleaning up .discodeit directory", e);

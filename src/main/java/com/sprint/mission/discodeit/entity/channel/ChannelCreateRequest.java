@@ -1,21 +1,19 @@
 package com.sprint.mission.discodeit.entity.channel;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record ChannelUpdateRequest(
-        UUID id,
+public record ChannelCreateRequest (
+        UUID channelId,
 
         @NotBlank
         String channelName,
 
         @NotBlank
-        String channelType,
+        String ownerName,
 
-        @NotNull
-        String ownerName
-
+        @NotBlank
+        String type
 ) {
 }

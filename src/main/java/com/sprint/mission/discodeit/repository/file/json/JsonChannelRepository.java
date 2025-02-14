@@ -39,6 +39,14 @@ public class JsonChannelRepository extends JsonRepository<UUID, Channel> impleme
     }
 
     @Override
+    public Channel findChannelByName(String channelName) {
+        return map.values().stream()
+                .filter(ch -> ch.getChannelName().equals(channelName))
+                .findFirst()
+                .orElse(null);
+    }
+
+    @Override
     public Map<UUID, Channel> findAllChannel() {
         loadFromJson();
         return map;
@@ -48,5 +56,15 @@ public class JsonChannelRepository extends JsonRepository<UUID, Channel> impleme
     public void removeChannelById(UUID channelId) {
         map.remove(channelId);
         saveToJson();
+    }
+
+    @Override
+    public void clearData() {
+        super.clearData();
+    }
+
+    @Override
+    public void resetData() {
+        super.resetData();
     }
 }

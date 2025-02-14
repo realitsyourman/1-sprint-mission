@@ -40,4 +40,14 @@ public class FileChannelRepository implements ChannelRepository, FileService<Cha
     public Map<UUID, Channel> findAllChannel() {
         return load(CHANNEL_PATH, channelMap);
     }
+
+    @Override
+    public void clearData() {
+
+    }
+
+    @Override
+    public void resetData() {
+
+    }
 }
