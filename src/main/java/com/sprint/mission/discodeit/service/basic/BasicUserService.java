@@ -209,7 +209,7 @@ public class BasicUserService implements UserService {
         saveUser(userId, user);
         saveUserStatus(userId, user);
 
-        log.debug("유저 등록: {}", user.userName());
+        log.warn("유저 등록: {}", user.userName());
 
         return new UserCommonResponse(userId, user.userName(), user.userEmail());
     }
