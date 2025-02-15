@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
+import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
 import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.message.*;
 import com.sprint.mission.discodeit.entity.user.User;
@@ -9,10 +11,10 @@ import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.service.MessageService;
 import com.sprint.mission.discodeit.service.validate.MessageServiceValidator;
 import com.sprint.mission.discodeit.service.validate.ServiceValidator;
@@ -22,6 +24,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -33,7 +38,7 @@ public class BasicMessageService implements MessageService {
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     private final ChannelRepository channelRepository;
-    private final BinaryContentRepository binaryContentRepository;
+    private final BinaryContentService binaryContentService;
 
     private static final EntityFactory entityFactory = BaseEntityFactory.getInstance();
     private static final ServiceValidator<Message> messageValidator = new MessageServiceValidator();
@@ -50,28 +55,60 @@ public class BasicMessageService implements MessageService {
      * - [x] DTO를 활용해 파라미터를 그룹화합니다.
      */
     @Override
-    public MessageCreateResponse createMessage(MessageCreateRequest request, MessageSendFileRequest... fileRequests) {
-
+    public MessageCreateResponse createMessage(MessageCreateRequest request, MessageSendFileRequest fileRequest) throws IOException {
         if (messageValidator.isNullParam(request.title())) {
             throw new NullMessageTitleException();
         }
 
+        // 사용자 검증
         User sender = userValidator.entityValidate(userRepository.findUserByName(request.sender()));
         User receiver = userValidator.entityValidate(userRepository.findUserByName(request.receiver()));
 
-        MessageCreateResponse fileMessage = createMessageWithFile(request, fileRequests, sender, receiver);
-        if (fileMessage != null) {
-            return fileMessage;
-        }
-
-
+        // 메시지 생성 및 저장
         Message message = entityFactory.createMessage(request.title(), request.content(), sender, receiver);
         messageRepository.saveMessage(message);
 
+        // 채널에 메시지 추가
         addMessageInChannel(request, message);
 
-        return new MessageCreateResponse(message.getId(), message.getMessageTitle(), message.getMessageContent(), message.getMessageSendUser().getId(), message.getMessageReceiveUser().getId());
+        List<BinaryContentResponse> attachments = new ArrayList<>();
 
+        // 첨부파일 처리
+        if (fileRequest != null) {
+            try {
+                // BinaryContentRequest 생성
+                BinaryContentRequest binaryRequest = new BinaryContentRequest(
+                        fileRequest.getFileName(),
+                        fileRequest.getFile(),
+                        fileRequest.getFiles()
+                );
+
+                // 파일 업로드
+                List<UploadBinaryContent> uploadedFiles = binaryContentService.create(binaryRequest);
+
+                // 업로드된 파일들의 응답 생성
+                for (UploadBinaryContent uploadedFile : uploadedFiles) {
+                    attachments.add(new BinaryContentResponse(
+                            message.getId(),  // fileId를 messageId와 연결
+                            uploadedFile.getUploadFileName()
+                    ));
+                }
+
+                log.info("Uploaded {} files for message: {}", uploadedFiles.size(), message.getId());
+            } catch (IOException e) {
+                log.error("Failed to upload files for message: {}", message.getId(), e);
+                throw e;
+            }
+        }
+
+        return new MessageCreateResponse(
+                message.getId(),
+                message.getMessageTitle(),
+                message.getMessageContent(),
+                message.getMessageSendUser().getId(),
+                message.getMessageReceiveUser().getId(),
+                attachments
+        );
     }
 
 
@@ -89,21 +126,30 @@ public class BasicMessageService implements MessageService {
         }
 
         Map<UUID, Message> channelMessages = findChannel.getChannelMessages();
-        return convertResponseMap(channelMessages);
+        return channelMessages.entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> {
+                            Message message = entry.getValue();
+                            List<BinaryContentResponse> attachments =
+                                    binaryContentService.findAllById(message.getId());
+                            return convertToMessageResponseWithAttachments(message, attachments);
+                        }
+                ));
     }
 
 
     @Override
     public MessageResponse getMessageById(UUID messageId) {
-        Map<UUID, Message> messages = messageRepository.findAllMessage();
-
-        if (messages == null) {
-            throw new MessageNotFoundException("찾는 메세지가 없습니다.");
+        Message findMessage = messageRepository.findMessageById(messageId);
+        if (findMessage == null) {
+            throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
         }
 
-        Message findMessage = messageValidator.entityValidate(messages.get(messageId));
+        // 첨부파일 조회
+        List<BinaryContentResponse> attachments = binaryContentService.findAllById(messageId);
 
-        return convertToMessageResponse(findMessage);
+        return convertToMessageResponseWithAttachments(findMessage, attachments);
     }
 
     /**
@@ -120,16 +166,18 @@ public class BasicMessageService implements MessageService {
         }
 
         Message findMessage = messageRepository.findMessageById(updateMessageId);
+        if (findMessage == null) {
+            throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
+        }
 
-        // 찾은 메세지 업데이트 후 저장
         findMessage.updateMessage(request.newTitle(), request.newContent());
         messageRepository.saveMessage(findMessage);
 
-        // 채널 messageList에도 반영 해줘야함
         Channel findChannel = getChannel(request, findMessage);
         channelRepository.saveChannel(findChannel);
 
-        return convertToMessageResponse(findMessage);
+        List<BinaryContentResponse> attachments = binaryContentService.findAllById(updateMessageId);
+        return convertToMessageResponseWithAttachments(findMessage, attachments);
     }
 
 
@@ -142,12 +190,21 @@ public class BasicMessageService implements MessageService {
     public UUID deleteMessage(String id) {
         UUID messageId = convertToUUID(id);
         Message findMessage = messageRepository.findMessageById(messageId);
+        if (findMessage == null) {
+            throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
+        }
 
-        binaryContentRepository.removeContent(messageId);
-        messageRepository.removeMessageById(findMessage.getId());
+        // 첨부파일 삭제
+        List<BinaryContentResponse> attachments = binaryContentService.findAllById(messageId);
+        for (BinaryContentResponse attachment : attachments) {
+            binaryContentService.delete(attachment.fileId());
+        }
 
+        // 메시지 삭제
+        messageRepository.removeMessageById(messageId);
         removeMessageInChannel(messageId);
 
+        log.info("Deleted message and {} attachments: {}", attachments.size(), messageId);
         return messageId;
     }
 
@@ -171,53 +228,6 @@ public class BasicMessageService implements MessageService {
         channelRepository.saveChannel(findChannel);
     }
 
-    private static MessageResponse convertToMessageResponse(Message findMessage) {
-        return new MessageResponse(findMessage.getId(),
-                findMessage.getMessageTitle(),
-                findMessage.getMessageContent(),
-                findMessage.getMessageSendUser().getId(),
-                findMessage.getMessageReceiveUser().getId()
-        );
-    }
-
-    private MessageCreateResponse createMessageWithFile(MessageCreateRequest request, MessageSendFileRequest[] fileRequests, User sender, User receiver) {
-        if (fileRequests != null) {
-            for (MessageSendFileRequest fileRequest : fileRequests) {
-
-                // 파일들 저장
-                binaryContentRepository.save(new BinaryContent(fileRequest.getUserId(),
-                        fileRequest.getMessageId(),
-                        fileRequest.getFileName(),
-                        fileRequest.getFileType())
-                );
-
-                Message fileMessage = new Message(fileRequest.getMessageId(), request.title(), request.content(), sender, receiver);
-                messageRepository.saveMessage(fileMessage);
-                return new MessageCreateResponse(fileMessage.getId(), fileMessage.getMessageTitle(), fileMessage.getMessageContent(), fileMessage.getMessageSendUser().getId(), fileMessage.getMessageReceiveUser().getId());
-
-            }
-        }
-        return null;
-    }
-
-    private Map<UUID, MessageResponse> convertResponseMap(Map<UUID, Message> channelMessages) {
-        return channelMessages.entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> converToMessageResponse(entry.getValue())
-                ));
-    }
-
-    private MessageResponse converToMessageResponse(Message message) {
-        return new MessageResponse(message.getId(),
-                message.getMessageTitle(),
-                message.getMessageContent(),
-                message.getMessageSendUser().getId(),
-                message.getMessageReceiveUser().getId()
-        );
-    }
-
-
     // 123e4567e89b12d3a456426614174000 이런 형식으로 들어오는 메세지 아이디 uuid 변환
     private UUID convertToUUID(String messageId) {
         if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
@@ -232,5 +242,16 @@ public class BasicMessageService implements MessageService {
                 .toString();
 
         return UUID.fromString(uuid);
+    }
+
+    private MessageResponse convertToMessageResponseWithAttachments(Message message, List<BinaryContentResponse> attachments) {
+        return new MessageResponse(
+                message.getId(),
+                message.getMessageTitle(),
+                message.getMessageContent(),
+                message.getMessageSendUser().getId(),
+                message.getMessageReceiveUser().getId(),
+                attachments
+        );
     }
 }

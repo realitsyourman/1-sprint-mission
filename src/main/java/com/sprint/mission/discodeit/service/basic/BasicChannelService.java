@@ -6,9 +6,11 @@ import com.sprint.mission.discodeit.entity.message.MessageResponse;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserChannelOwnerResponse;
+import com.sprint.mission.discodeit.entity.user.UserRole;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -54,6 +56,10 @@ public class BasicChannelService implements ChannelService {
     @Override
     public ChannelResponse createChannel(ChannelCreateRequest request) {
         User owner = userRepository.findUserByName(request.ownerName());
+
+        if (owner == null) {
+            throw new UserNotFoundException();
+        }
 
         ChannelResponse channelCreateRequest = new ChannelResponse(
                 UUID.randomUUID(),
@@ -245,7 +251,7 @@ public class BasicChannelService implements ChannelService {
         User sender = userRepository.findUserById(message.senderId());
         User receiver = userRepository.findUserById(message.receiverId());
 
-        Message createdMessage = new Message(message.messageId(), message.title(), message.content(), sender, receiver);
+        Message createdMessage = new Message(message.messageId(), message.messageTitle(), message.messageContent(), sender, receiver);
         findChannel.addMessageInChannel(createdMessage);
         channelRepository.saveChannel(findChannel);
 
@@ -300,13 +306,11 @@ public class BasicChannelService implements ChannelService {
     }
 
     private Channel setPublicChannel(ChannelCreateRequest request, Map<UUID, User> userList) {
-        Channel channel = new Channel(request.channelId());
-        channel.updateChannelName(request.channelName());
-        channel.updateOwnerUser(userRepository.findUserByName(request.ownerName()));
-        channel.setChannelType("PUBLIC");
-        channel.updateChannelUsers(userList);
-        channel.setChannelMessages(new HashMap<>());
-        return channel;
+        return buildChannel(request, "PUBLIC", userList);
+    }
+
+    private Channel setPrivateChannel(ChannelCreateRequest privateRequest, Map<UUID, User> userList) {
+        return buildChannel(privateRequest, "PRIVATE", userList);
     }
 
     private UserChannelOwnerResponse getUserChannelOwnerResponse(ChannelCreateRequest privateRequest) {
@@ -314,16 +318,16 @@ public class BasicChannelService implements ChannelService {
         return new UserChannelOwnerResponse(owner.getId(), owner.getUserName(), owner.getUserRole());
     }
 
-    private Channel setPrivateChannel(ChannelCreateRequest privateRequest, Map<UUID, User> userList) {
+    private Channel buildChannel(ChannelCreateRequest privateRequest, String channelType, Map<UUID, User> userList) {
         Channel channel = new Channel(privateRequest.channelId());
         channel.updateChannelName(privateRequest.channelName());
         channel.updateOwnerUser(userRepository.findUserByName(privateRequest.ownerName()));
-        channel.setChannelType("PRIVATE");
+        channel.setChannelType(channelType);
         channel.updateChannelUsers(userList);
+        channel.getChannelOwnerUser().updateUserRole(UserRole.ROLE_ADMIN);
         channel.setChannelMessages(new HashMap<>());
         return channel;
     }
-
 
 
     private static ChannelFindPrivateResponse toChannelPrivateResponse(Channel findChannel, ReadStatus status) {
@@ -378,6 +382,8 @@ public class BasicChannelService implements ChannelService {
         } else {
             throw new IllegalChannelException();
         }
+
+        log.warn("채널 생성 [{}][{}]", response.channelType(), response.channelName());
 
         return response;
     }

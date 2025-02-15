@@ -43,7 +43,7 @@ public class JsonBinaryContentRepository extends JsonRepository<UUID, BinaryCont
         checkId(id);
 
         return map.values().stream()
-                .filter(v -> v.getId().equals(id))
+                .filter(v -> v.getFileId().equals(id))
                 .findFirst()
                 .orElse(null);
 

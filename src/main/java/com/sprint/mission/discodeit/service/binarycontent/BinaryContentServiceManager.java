@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.binarycontent;
 
 import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
 import com.sprint.mission.discodeit.exception.binary.BinaryContentException;
+import com.sprint.mission.discodeit.exception.binary.BinaryContentNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -9,29 +10,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Component
 @Slf4j
+@Component
 public class BinaryContentServiceManager {
     @Value("${file.dir}")
     private String fileDir;
 
     public UploadBinaryContent saveFile(MultipartFile multipartFile) throws IOException {
-        if (multipartFile == null) {
-            throw new BinaryContentException("File is null");
-        }
-
-        if (multipartFile.isEmpty()) {
-            throw new BinaryContentException("File is empty");
+        if (multipartFile == null || multipartFile.isEmpty()) {
+            throw new BinaryContentNotFoundException();
         }
 
         // 파일 이름 가져오기
         String originalFilename = multipartFile.getOriginalFilename();
         if (originalFilename.isEmpty()) {
-            throw new BinaryContentException("Original filename is null or empty");
+            throw new BinaryContentException("파일 이름이 잘못되었습니다.");
         }
 
         try {
@@ -48,12 +46,12 @@ public class BinaryContentServiceManager {
             File destFile = new File(getFullPath(savedFileName));
             multipartFile.transferTo(destFile);
 
-            log.info("File saved successfully: {}", savedFileName);
+            log.info("파일 저장 완료, 파일 이름: {}", savedFileName);
             return new UploadBinaryContent(originalFilename, savedFileName);
 
         } catch (IOException e) {
-            log.error("Failed to save file: {}", originalFilename, e);
-            throw new BinaryContentException("Failed to save file: " + e.getMessage());
+            log.error("파일 업로드 실패: {}", originalFilename, e);
+            throw new BinaryContentException("파일 업로드 실패: " + e.getMessage());
         }
     }
 
@@ -93,7 +91,7 @@ public class BinaryContentServiceManager {
         return originalFilename.substring(idx + 1);
     }
 
-    private String getFullPath(String fileName) {
-        return fileDir + File.separator + fileName;
+    public String getFullPath(String fileName) {
+        return Paths.get(fileDir, fileName).toString();
     }
 }

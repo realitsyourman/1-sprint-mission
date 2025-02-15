@@ -1,11 +1,18 @@
 package com.sprint.mission.discodeit.entity.user;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.UUID;
 
-public record UserCreateWithBinaryContentResponse(
-        UUID userId,
-        UUID messageId,
-        String fileName,
-        String fileType
-) {
+@Getter
+@AllArgsConstructor
+public class UserCreateWithBinaryContentResponse {
+    private UUID id;
+    private String userName;
+    private String userEmail;
+
+    @Setter
+    private String fileName;
 }

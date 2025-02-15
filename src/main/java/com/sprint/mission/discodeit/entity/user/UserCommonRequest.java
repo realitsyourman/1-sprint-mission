@@ -17,7 +17,6 @@ public record UserCommonRequest(
 
         @Length(min = 6, max = 32)
         String userPassword
-
 )
 {
 }

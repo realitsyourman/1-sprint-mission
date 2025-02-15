@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service("binaryContentService")
 @RequiredArgsConstructor
@@ -42,10 +39,13 @@ public class BinaryContentServiceImpl implements BinaryContentService {
             throw new BinaryContentException("No files were provided for upload");
         }
 
+        UUID fileId = convertToUUID(uploadFiles.get(0).getSavedFileName());
+
+
         BinaryContent binaryContent = new BinaryContent(
-                UUID.randomUUID(),
+                fileId,
                 request.getFileName(),
-                uploadFiles.get(0),  // 첫 번째 파일을 대표 파일로
+                uploadFiles.get(0),
                 uploadFiles
         );
 
@@ -65,7 +65,19 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         return new BinaryContentResponse(findFile.getFileId(), findFile.getBinaryContentName());
     }
 
+    @Override
+    public BinaryContent findBinaryContentById(UUID id) {
+        BinaryContent findFile = binaryContentRepository.findById(id);
+
+        if (findFile == null) {
+            throw new BinaryContentNotFoundException();
+        }
+
+        return findFile;
+    }
+
     // id로 검색
+
     @Override
     public List<BinaryContentResponse> findAllById(UUID id) {
         Map<UUID, BinaryContent> findAllFiles = binaryContentRepository.findAll();
@@ -75,11 +87,31 @@ public class BinaryContentServiceImpl implements BinaryContentService {
                 .map(file -> new BinaryContentResponse(file.getFileId(), file.getBinaryContentName()))
                 .toList();
     }
-
     @Override
     public UUID delete(UUID id) {
         binaryContentRepository.delete(id);
 
         return id;
+    }
+
+    public static UUID convertToUUID(String fileId) {
+        int idx = fileId.lastIndexOf(".");
+        String fileName = fileId.substring(0, idx);
+
+        // 표준 UUID 형식으로 변환
+        String formattedUUID = new StringBuilder(36)
+                .append(fileName.substring(0, 8))
+                .append('-')
+                .append(fileName.substring(8, 12))
+                .append('-')
+                .append(fileName.substring(12, 16))
+                .append('-')
+                .append(fileName.substring(16, 20))
+                .append('-')
+                .append(fileName.substring(20))
+                .toString();
+
+        // 문자열을 UUID 객체로 변환
+        return UUID.fromString(formattedUUID);
     }
 }
