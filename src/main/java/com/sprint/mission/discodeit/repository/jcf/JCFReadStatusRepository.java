@@ -71,4 +71,14 @@ public class JCFReadStatusRepository implements ReadStatusRepository {
     public ReadStatus update(UUID channelId) {
         return null;
     }
+
+    @Override
+    public void clearData() {
+
+    }
+
+    @Override
+    public void resetData() {
+
+    }
 }

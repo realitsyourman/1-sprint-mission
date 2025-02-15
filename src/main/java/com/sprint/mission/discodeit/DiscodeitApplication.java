@@ -5,6 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.io.IOException;
 
+/**
+ * TODO: userService create(선택적으로 프로필 이미지를 같이 등록할 수 있습니다.)
+ */
 @SpringBootApplication
 public class DiscodeitApplication {
 

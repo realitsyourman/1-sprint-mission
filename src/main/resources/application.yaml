@@ -6,3 +6,6 @@ discodeit:
   repository:
     type: file  # jcf or file
     file-directory: .discodeit
+
+file:
+  dir: C:/Users/leeco/Desktop/codeit_sprint/mission/1-sprint-mission/data_storage/

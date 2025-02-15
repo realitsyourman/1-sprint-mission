@@ -1,8 +1,6 @@
 package com.sprint.mission.discodeit.service.file;
 
-import com.sprint.mission.discodeit.repository.ChannelRepository;
-import com.sprint.mission.discodeit.repository.UserRepository;
-import com.sprint.mission.discodeit.repository.UserStatusRepository;
+import com.sprint.mission.discodeit.repository.*;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,15 @@ public class FileCleanupConfig {
 
     @Autowired
     private ChannelRepository channelRepository;
+
+    @Autowired
+    private MessageRepository messageRepository;
+
+    @Autowired
+    private ReadStatusRepository readStatusRepository;
+
+    @Autowired
+    private BinaryContentRepository binaryContentRepository;
 
     @PostConstruct
     public void cleanupFiles() {
@@ -64,7 +71,9 @@ public class FileCleanupConfig {
             userRepository.clearData();
             userStatusRepository.clearData();
             channelRepository.clearData();
-
+            messageRepository.clearData();
+            readStatusRepository.clearData();
+            binaryContentRepository.clearData();
         } catch (Exception e) {
             logger.error("Error while cleaning up .discodeit directory", e);
             throw new RuntimeException("Failed to initialize application", e);

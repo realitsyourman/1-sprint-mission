@@ -24,4 +24,9 @@ public interface ReadStatusRepository {
 
     // 채널 메세지 수신 정보 수정
     ReadStatus update(UUID channelId);
+
+
+    // 테스트용
+    void clearData();
+    void resetData();
 }
