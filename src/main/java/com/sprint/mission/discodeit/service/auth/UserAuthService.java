@@ -38,7 +38,7 @@ public class UserAuthService implements AuthService {
                 .orElseThrow(() -> {
                     log.error("아이디 또는 비밀번호가 잘못되었습니다.");
 
-                    return new UserAuthException("userAuth login error!!");
+                    return new UserAuthException("유저 인증 실패");
                 });
     }
 }

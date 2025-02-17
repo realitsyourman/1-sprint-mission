@@ -7,7 +7,7 @@ import com.sprint.mission.discodeit.entity.user.UserCreateWithBinaryContentRespo
 import com.sprint.mission.discodeit.entity.user.UserResponse;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService {
@@ -26,7 +26,7 @@ public interface UserService {
 
     UserCommonResponse find(String userName);
 
-    Map<UUID, UserResponse> findAll(); // 유저 전부 찾기
+    List<UserResponse> findAll(); // 유저 전부 찾기
 
     UserCommonResponse update(String userName, UserCommonRequest updateDto); // 유저 정보 업데이트
 

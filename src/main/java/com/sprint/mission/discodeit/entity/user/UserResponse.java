@@ -11,4 +11,11 @@ public class UserResponse {
     private String userName;
     private String userEmail;
     private String userStatus;
+    private String profileImg;
+
+    public UserResponse(String userName, String userEmail, String userStatus) {
+        this.userName = userName;
+        this.userEmail = userEmail;
+        this.userStatus = userStatus;
+    }
 }

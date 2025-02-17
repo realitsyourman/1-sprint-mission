@@ -30,6 +30,10 @@ public class User extends BaseObject implements Serializable {
     @JsonProperty("userRole")
     private UserRole userRole;
 
+    public static User createUser(UUID userId, UserCommonRequest user, UserRole userRole) {
+        return new User(userId, user.userName(), user.userEmail(), user.userPassword(), userRole);
+    }
+
     public User() {}
 
     public User(UUID userid) {

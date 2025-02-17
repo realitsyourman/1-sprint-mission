@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
@@ -55,6 +56,8 @@ public class BasicUserService implements UserService {
     @Override
     public UserCreateWithBinaryContentResponse createUserWithProfile(UserCommonRequest createDto, BinaryContentRequest request) {
         UserCommonResponse userResponse = createUser(createDto);
+        request.updateUserId(userResponse.id());
+
         UserCreateWithBinaryContentResponse userWithFileResponse = new UserCreateWithBinaryContentResponse(
                 userResponse.id(),
                 userResponse.userName(),
@@ -122,11 +125,21 @@ public class BasicUserService implements UserService {
      * 패스워드 정보 X
      */
     @Override
-    public Map<UUID, UserResponse> findAll() {
+    public List<UserResponse> findAll() {
         Map<UUID, User> allUsersMap = Optional.ofNullable(userRepository.findAllUser())
                 .orElseThrow(() -> new UserNotFoundException("유저가 아무도 없습니다."));
 
-        return convertToUserResponseMap(allUsersMap);
+        return allUsersMap.entrySet().stream()
+                .map(entry -> new UserResponse(
+                        entry.getValue().getUserName(),
+                        entry.getValue().getUserEmail(),
+                        userStateService.find(entry.getKey()).getState(),
+                        binaryContentService.findBinaryContentByUserId(entry.getKey())
+                                .map(bin -> bin.getUploadFile().getSavedFileName())
+                                .orElse("default_profile.png")
+                )).toList();
+
+        //return convertToUserResponseMap(allUsersMap);
     }
 
 
@@ -237,12 +250,12 @@ public class BasicUserService implements UserService {
     }
 
     private void saveUserStatus(UUID userId, UserCommonRequest user) {
-        UserStatus userStatus = new UserStatus(userId, user.userName());
+        UserStatus userStatus = UserStatus.createUserStatus(userId, user.userName());
         userStateService.create(new UserStatusRequest(userStatus.getUserId(), userStatus.getUserName(), userStatus.getState()));
     }
 
     private void saveUser(UUID userId, UserCommonRequest user) {
-        User createUser = new User(userId, user.userName(), user.userEmail(), user.userPassword(), UserRole.ROLE_COMMON);
+        User createUser = User.createUser(userId, user, UserRole.ROLE_COMMON);
         userRepository.userSave(createUser);
     }
 
@@ -264,23 +277,27 @@ public class BasicUserService implements UserService {
         }
     }
 
+    private static UserCommonResponse convertToUserResponse(UUID id, String userName, String userEmail) {
+        return new UserCommonResponse(id, userName, userEmail);
+    }
+
     private Map<UUID, UserResponse> convertToUserResponseMap(Map<UUID, User> allUsersMap) {
-        Map<UUID, UserResponse> convertMap = allUsersMap.entrySet().stream()
+        return allUsersMap.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         entry -> {
                             UserStatus status = userStateService.find(entry.getKey());
-                            return new UserResponse(entry.getValue().getUserName(),
+                            Optional<BinaryContent> binaryContentByUserId = binaryContentService.findBinaryContentByUserId(entry.getValue().getId());
+                            return new UserResponse(
+                                    entry.getValue().getUserName(),
                                     entry.getValue().getUserEmail(),
-                                    status.getState());
+                                    status.getState(),
+                                    binaryContentByUserId
+                                            .map(content -> content.getUploadFile().getSavedFileName())
+                                            .orElse(null)
+                            );
                         }
                 ));
-
-        return convertMap;
-    }
-
-    private static UserCommonResponse convertToUserResponse(UUID id, String userName, String userEmail) {
-        return new UserCommonResponse(id, userName, userEmail);
     }
 
 /*    private static User convertToUser(UserCommonRequest updateDto, UserResponse findUser) {
