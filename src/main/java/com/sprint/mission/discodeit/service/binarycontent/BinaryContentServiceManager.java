@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.binarycontent;
 
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
 import com.sprint.mission.discodeit.exception.binary.BinaryContentException;
 import com.sprint.mission.discodeit.exception.binary.BinaryContentNotFoundException;
@@ -21,13 +22,13 @@ public class BinaryContentServiceManager {
     @Value("${file.dir}")
     private String fileDir;
 
-    public UploadBinaryContent saveFile(MultipartFile multipartFile) throws IOException {
-        if (multipartFile == null || multipartFile.isEmpty()) {
+    public UploadBinaryContent saveFile(BinaryContentRequest request) throws IOException {
+        if (request.getFile() == null) {
             throw new BinaryContentNotFoundException();
         }
 
         // 파일 이름 가져오기
-        String originalFilename = multipartFile.getOriginalFilename();
+        String originalFilename = request.getFile().getOriginalFilename();
         if (originalFilename.isEmpty()) {
             throw new BinaryContentException("파일 이름이 잘못되었습니다.");
         }
@@ -44,10 +45,10 @@ public class BinaryContentServiceManager {
 
             // 업로드
             File destFile = new File(getFullPath(savedFileName));
-            multipartFile.transferTo(destFile);
+            request.getFile().transferTo(destFile);
 
             log.info("파일 저장 완료, 파일 이름: {}", savedFileName);
-            return new UploadBinaryContent(originalFilename, savedFileName);
+            return new UploadBinaryContent(request.getRequestUserId(), originalFilename, savedFileName);
 
         } catch (IOException e) {
             log.error("파일 업로드 실패: {}", originalFilename, e);
@@ -55,21 +56,23 @@ public class BinaryContentServiceManager {
         }
     }
 
-    public List<UploadBinaryContent> saveFiles(List<MultipartFile> multipartFiles) throws IOException {
-        if (multipartFiles == null) {
+    public List<UploadBinaryContent> saveFiles(BinaryContentRequest request) throws IOException {
+        if (request.getFiles() == null) {
             return new ArrayList<>();
         }
 
         List<UploadBinaryContent> uploadList = new ArrayList<>();
 
-        for (MultipartFile multipartFile : multipartFiles) {
+        for (MultipartFile multipartFile : request.getFiles()) {
             if (multipartFile != null && !multipartFile.isEmpty()) {
                 try {
-                    UploadBinaryContent uploadBinaryContent = saveFile(multipartFile);
+                    BinaryContentRequest binaryContentRequest = new BinaryContentRequest(multipartFile.getOriginalFilename(), multipartFile, null);
+                    binaryContentRequest.updateUserId(request.getRequestUserId());
+
+                    UploadBinaryContent uploadBinaryContent = saveFile(binaryContentRequest);
                     uploadList.add(uploadBinaryContent);
                 } catch (IOException e) {
-                    log.error("Failed to save one of multiple files", e);
-                    // 개별 파일 실패는 전체 업로드를 중단하지 않음
+                    log.error("파일 저장 실패: ", e);
                 }
             }
         }
@@ -93,5 +96,16 @@ public class BinaryContentServiceManager {
 
     public String getFullPath(String fileName) {
         return Paths.get(fileDir, fileName).toString();
+    }
+
+    public UUID formatToUUID(String uuidString) {
+        // 입력된 문자열에서 하이픈을 모두 제거하고 하이픈이 포함된 표준 UUID 형식으로 변환
+        String formattedUUID = uuidString.replaceAll(
+                "(.{8})(.{4})(.{4})(.{4})(.+)",
+                "$1-$2-$3-$4-$5"
+        );
+
+        // 포맷된 문자열을 UUID 객체로 변환
+        return UUID.fromString(formattedUUID);
     }
 }

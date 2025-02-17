@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BinaryContentService {
@@ -16,6 +17,8 @@ public interface BinaryContentService {
     BinaryContentResponse find(UUID id);
 
     BinaryContent findBinaryContentById(UUID id);
+
+    Optional<BinaryContent> findBinaryContentByUserId(UUID userId);
 
     List<BinaryContentResponse> findAllById(UUID id);
 

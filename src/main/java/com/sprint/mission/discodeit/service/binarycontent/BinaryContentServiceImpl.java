@@ -26,17 +26,18 @@ public class BinaryContentServiceImpl implements BinaryContentService {
 
         // 단일 파일 처리
         if (request.getFile() != null) {
-            UploadBinaryContent uploadFile = fileManager.saveFile(request.getFile());
+            UploadBinaryContent uploadFile = fileManager.saveFile(request);
+            //uploadFile.updateUserId(request.getRequestUserId());
             uploadFiles.add(uploadFile);
         }
 
         // 다중 파일 처리
         if (request.getFiles() != null && !request.getFiles().isEmpty()) {
-            uploadFiles.addAll(fileManager.saveFiles(request.getFiles()));
+            uploadFiles.addAll(fileManager.saveFiles(request));
         }
 
         if (uploadFiles.isEmpty()) {
-            throw new BinaryContentException("No files were provided for upload");
+            throw new BinaryContentException("업로드 할 파일이 없습니다.");
         }
 
         UUID fileId = convertToUUID(uploadFiles.get(0).getSavedFileName());
@@ -76,17 +77,26 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         return findFile;
     }
 
+    @Override
+    public Optional<BinaryContent> findBinaryContentByUserId(UUID userId) {
+        return binaryContentRepository.findAll().values().stream()
+                .filter(bin -> bin.getUploadFile().getRequestUserId().equals(userId))
+                .findFirst();
+    }
+
     // id로 검색
 
     @Override
     public List<BinaryContentResponse> findAllById(UUID id) {
         Map<UUID, BinaryContent> findAllFiles = binaryContentRepository.findAll();
 
-        return findAllFiles.values().stream()
-                .filter(upload -> upload.getFileId().equals(id))
-                .map(file -> new BinaryContentResponse(file.getFileId(), file.getBinaryContentName()))
+        return findAllFiles.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(id))
+                .flatMap(entry -> entry.getValue().getUploadFiles().stream())
+                .map(uploadFile -> new BinaryContentResponse(id, uploadFile.getSavedFileName()))
                 .toList();
     }
+
     @Override
     public UUID delete(UUID id) {
         binaryContentRepository.delete(id);
