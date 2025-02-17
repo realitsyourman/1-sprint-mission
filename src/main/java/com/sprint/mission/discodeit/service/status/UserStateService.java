@@ -33,7 +33,7 @@ public class UserStateService implements StatusService<UserStatus> {
 
         hasUserState(userStatusRequest);
 
-        UserStatus userStatus = new UserStatus(userStatusRequest.userId(), userStatusRequest.userName());
+        UserStatus userStatus = UserStatus.createUserStatus(userStatusRequest.userId(), userStatusRequest.userName());
         return userStatusRepository.save(userStatus);
     }
 

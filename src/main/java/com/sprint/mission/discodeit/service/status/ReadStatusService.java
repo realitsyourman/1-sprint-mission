@@ -123,7 +123,7 @@ public class ReadStatusService implements StatusService<ReadStatus> {
         // 같은 channel과 user와 관련된 객체가 있으면 예외
         isExistsChannelOrUser(createRequest);
 
-        ReadStatus readStatus = new ReadStatus(createRequest.userId(), createRequest.channelId());
+        ReadStatus readStatus = ReadStatus.createReadStatus(createRequest.userId(), createRequest.channelId());
         readStatusRepository.save(readStatus);
 
         return readStatus;

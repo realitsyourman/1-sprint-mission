@@ -30,6 +30,10 @@ public class UserStatus extends BaseObject {
     @Setter
     private Instant lastAccessTime;
 
+    public static UserStatus createUserStatus(UUID userId, String userName) {
+        return new UserStatus(userId, userName);
+    }
+
     public UserStatus(UUID userId) {
         super();
         this.userId = userId;

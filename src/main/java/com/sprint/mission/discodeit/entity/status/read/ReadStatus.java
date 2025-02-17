@@ -26,6 +26,10 @@ public class ReadStatus extends BaseObject {
 
     private Instant lastReadAt;
 
+    public static ReadStatus createReadStatus(UUID userId, UUID channelId) {
+        return new ReadStatus(userId, channelId);
+    }
+
     public ReadStatus() {}
 
     public ReadStatus(UUID userId, UUID channelId) {
