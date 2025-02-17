@@ -17,7 +17,6 @@ import java.util.UUID;
 @Repository
 @ConditionalOnProperty(name = "discodeit.repository.type", havingValue = "file")
 public class JsonBinaryContentRepository extends JsonRepository<UUID, BinaryContent> implements BinaryContentRepository {
-    private long seq = 0L;
 
     public JsonBinaryContentRepository(RepositoryProperties properties) {
         super(

@@ -48,7 +48,7 @@ public abstract class JsonRepository<K, V> {
         try {
             objectMapper.writeValue(new File(getFilePath()), map);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to save data to JSON: " + fileName, e);
+            throw new RuntimeException("Json 저장에 실패했습니다: " + fileName, e);
         }
     }
 
@@ -58,7 +58,7 @@ public abstract class JsonRepository<K, V> {
             try {
                 map = objectMapper.readValue(file, typeReference);
             } catch (IOException e) {
-                throw new RuntimeException("Failed to load data from JSON: " + fileName, e);
+                throw new RuntimeException("Json을 불러오지 못했습니다: " + fileName, e);
             }
         }
     }
@@ -68,7 +68,7 @@ public abstract class JsonRepository<K, V> {
         if (!directory.exists()) {
             boolean isCreatedDirectory = directory.mkdirs();
             if (!isCreatedDirectory) {
-                throw new RuntimeException("Failed to create directory: " + properties.getFileDirectory());
+                throw new RuntimeException("디렉토리 생성 오류: " + properties.getFileDirectory());
             }
         }
     }

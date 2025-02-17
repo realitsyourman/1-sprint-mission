@@ -358,7 +358,7 @@ public class BasicChannelService implements ChannelService {
 
     private void createChannelReadStatus(ChannelCreateRequest request) {
         User findUser = userRepository.findUserByName(request.ownerName());
-        ReadStatus channelReadState = new ReadStatus(findUser.getId(), request.channelId());
+        ReadStatus channelReadState = ReadStatus.createReadStatus(findUser.getId(), request.channelId());
         readStatusRepository.save(channelReadState);
     }
 
