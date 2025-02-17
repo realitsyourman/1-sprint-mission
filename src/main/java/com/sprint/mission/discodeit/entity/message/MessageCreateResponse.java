@@ -11,6 +11,6 @@ public record MessageCreateResponse(
         String messageContent,
         UUID senderId,
         UUID receiverId,
-        List<BinaryContentResponse> attachments
+        List<BinaryContentResponse> files
 ) {
 }

@@ -71,35 +71,8 @@ public class BasicMessageService implements MessageService {
         // 채널에 메시지 추가
         addMessageInChannel(request, message);
 
-        List<BinaryContentResponse> attachments = new ArrayList<>();
-
-        // 첨부파일 처리
-        if (fileRequest != null) {
-            try {
-                // BinaryContentRequest 생성
-                BinaryContentRequest binaryRequest = new BinaryContentRequest(
-                        fileRequest.getFileName(),
-                        fileRequest.getFile(),
-                        fileRequest.getFiles()
-                );
-
-                // 파일 업로드
-                List<UploadBinaryContent> uploadedFiles = binaryContentService.create(binaryRequest);
-
-                // 업로드된 파일들의 응답 생성
-                for (UploadBinaryContent uploadedFile : uploadedFiles) {
-                    attachments.add(new BinaryContentResponse(
-                            message.getId(),  // fileId를 messageId와 연결
-                            uploadedFile.getUploadFileName()
-                    ));
-                }
-
-                log.info("Uploaded {} files for message: {}", uploadedFiles.size(), message.getId());
-            } catch (IOException e) {
-                log.error("Failed to upload files for message: {}", message.getId(), e);
-                throw e;
-            }
-        }
+        // 메세지에 파일 추가
+        List<BinaryContentResponse> files = createBinaryFile(fileRequest, message);
 
         return new MessageCreateResponse(
                 message.getId(),
@@ -107,7 +80,7 @@ public class BasicMessageService implements MessageService {
                 message.getMessageContent(),
                 message.getMessageSendUser().getId(),
                 message.getMessageReceiveUser().getId(),
-                attachments
+                files
         );
     }
 
@@ -195,16 +168,16 @@ public class BasicMessageService implements MessageService {
         }
 
         // 첨부파일 삭제
-        List<BinaryContentResponse> attachments = binaryContentService.findAllById(messageId);
-        for (BinaryContentResponse attachment : attachments) {
-            binaryContentService.delete(attachment.fileId());
+        List<BinaryContentResponse> files = binaryContentService.findAllById(messageId);
+        for (BinaryContentResponse file : files) {
+            binaryContentService.delete(file.fileId());
         }
 
         // 메시지 삭제
         messageRepository.removeMessageById(messageId);
         removeMessageInChannel(messageId);
 
-        log.info("Deleted message and {} attachments: {}", attachments.size(), messageId);
+        log.info("메세지 삭제 완료: {}", messageId);
         return messageId;
     }
 
@@ -229,6 +202,7 @@ public class BasicMessageService implements MessageService {
     }
 
     // 123e4567e89b12d3a456426614174000 이런 형식으로 들어오는 메세지 아이디 uuid 변환
+
     private UUID convertToUUID(String messageId) {
         if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
             throw new MessageNotFoundException("messageID를 확인해주세요");
@@ -243,7 +217,6 @@ public class BasicMessageService implements MessageService {
 
         return UUID.fromString(uuid);
     }
-
     private MessageResponse convertToMessageResponseWithAttachments(Message message, List<BinaryContentResponse> attachments) {
         return new MessageResponse(
                 message.getId(),
@@ -253,5 +226,37 @@ public class BasicMessageService implements MessageService {
                 message.getMessageReceiveUser().getId(),
                 attachments
         );
+    }
+
+    private List<BinaryContentResponse> createBinaryFile(MessageSendFileRequest fileRequest, Message message) throws IOException {
+        List<BinaryContentResponse> files = new ArrayList<>();
+
+        // 첨부파일 처리
+        if (fileRequest != null) {
+            try {
+                // BinaryContentRequest 생성
+                BinaryContentRequest binaryRequest = new BinaryContentRequest(
+                        fileRequest.getFileName(),
+                        fileRequest.getFile(),
+                        fileRequest.getFiles()
+                );
+
+                // 파일 업로드
+                List<UploadBinaryContent> uploadedFiles = binaryContentService.create(binaryRequest);
+
+                // 업로드된 파일들의 응답 생성
+                for (UploadBinaryContent uploadedFile : uploadedFiles) {
+                    files.add(new BinaryContentResponse(
+                            message.getId(),  // fileId를 messageId와 연결
+                            uploadedFile.getSavedFileName()
+                    ));
+                }
+
+            } catch (IOException e) {
+                log.error("메세지 생성 실패: {}", message.getId(), e);
+                throw e;
+            }
+        }
+        return files;
     }
 }

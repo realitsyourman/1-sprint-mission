@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.entity.message.*;
+import com.sprint.mission.discodeit.factory.MessageRequestMapper;
 import com.sprint.mission.discodeit.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MessageController {
     private final MessageService messageService;
+    private final MessageRequestMapper messageRequestMapper;
+
     @RequestMapping(method = RequestMethod.POST)
     public MessageCreateResponse sendMessage(@RequestBody MessageCreateRequest request) throws IOException {
         return messageService.createMessage(request, null);
@@ -31,8 +33,8 @@ public class MessageController {
             @RequestPart(value = "request") String requestStr,
             @RequestPart(value = "file") List<MultipartFile> files) throws IOException {
 
-        ObjectMapper mapper = new ObjectMapper();
-        MessageCreateRequest request = mapper.readValue(requestStr, MessageCreateRequest.class);
+        // string -> MessageCreateRequest
+        MessageCreateRequest request = messageRequestMapper.stringToJson(requestStr, MessageCreateRequest.class);
 
         MessageSendFileRequest fileRequest = new MessageSendFileRequest(files.get(0).getOriginalFilename(), null, files);
 
