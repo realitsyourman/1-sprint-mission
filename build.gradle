@@ -2,6 +2,9 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.4.2'
 	id 'io.spring.dependency-management' version '1.1.7'
+
+	//front
+	id 'com.github.node-gradle.node' version '7.0.1'
 }
 
 group = 'com.sprint.mission'
@@ -37,3 +40,39 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
+// front
+node {
+	version = '20.11.1'
+	download = true
+
+	// 프론트엔드 디렉토리 설정
+	nodeProjectDir = file("${project.projectDir}/frontend")
+}
+
+// npm build 태스크 수정
+tasks.named('npmInstall') {
+	workingDir = file('./frontend')
+}
+
+// 프론트엔드 빌드 태스크
+tasks.register('buildFrontend') {
+	dependsOn 'npmInstall'
+	group = 'frontend'
+	description = 'Build frontend application'
+
+	doLast {
+		exec {
+			workingDir = file('./frontend')
+			if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+				commandLine 'npm.cmd', 'run', 'build'
+			} else {
+				commandLine 'npm', 'run', 'build'
+			}
+		}
+	}
+}
+
+// 스프링 리소스 처리 전에 프론트엔드 빌드 실행
+processResources.dependsOn 'buildFrontend'
