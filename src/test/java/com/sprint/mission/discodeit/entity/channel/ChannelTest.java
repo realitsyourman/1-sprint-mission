@@ -1,31 +1,52 @@
-//package com.sprint.mission.discodeit.entity;
-//
-//import com.sprint.mission.discodeit.entity.channel.Channel;
-//import com.sprint.mission.discodeit.entity.user.User;
-//import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-//import com.sprint.mission.discodeit.factory.BaseEntityFactory;
-//import com.sprint.mission.discodeit.factory.EntityFactory;
-//import com.sprint.mission.discodeit.service.ChannelService;
-//import com.sprint.mission.discodeit.service.jcf.JCFChannelService;
-//import org.junit.jupiter.api.Assertions;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.Test;
-//
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.UUID;
-//
-//public class ChannelTest {
-//    EntityFactory entityFactory = BaseEntityFactory.getInstance();
-//    ChannelService channelService = new JCFChannelService();
-//    Map<UUID, User> userList = new HashMap<>();
-//
-//    @BeforeEach
-//    void init() {
-//        userList = new HashMap<>();
-//    }
-//
+package com.sprint.mission.discodeit.entity.channel;
+
+import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
+import com.sprint.mission.discodeit.service.basic.BasicChannelService;
+import com.sprint.mission.discodeit.service.basic.BasicUserService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+@SpringBootTest
+public class ChannelTest {
+    Map<UUID, User> userList = new HashMap<>();
+
+    @Autowired
+    private BasicChannelService channelService;
+
+    @Autowired
+    private ChannelRepository channelRepository;
+
+    @Autowired
+    private BasicUserService basicUserService;
+    @BeforeEach
+    void init() {
+        userList = new HashMap<>();
+    }
+
+    @Test
+    @DisplayName("채널에 유저가 없을 때 검증")
+    void check() {
+        Map<UUID, User> userList = new HashMap<>();
+        User user = new User("userA", "test@gmail.com", "passwword!!");
+        userList.put(user.getId(), user);
+
+        Channel channel1 = channelRepository.saveChannel(new Channel("channelA", user, "PUBLIC", userList));
+
+        System.out.println("channel1 = " + channel1.getChannelUsers());
+
+        boolean thereUserHere = channel1.isThereUserHere(user);
+        System.out.println("thereUserHere = " + thereUserHere);
+
+    }
+
 //    @Test
 //    @DisplayName("채널이 제대로 생성되었는지 확인")
 //    void checkChannel() {
@@ -76,4 +97,4 @@
 //        Assertions.assertThrows(UserNotFoundException.class, () -> channelService.kickUserChannel(channel.getId(), user));
 //
 //    }
-//}
+}

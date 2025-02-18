@@ -32,7 +32,7 @@ public interface ChannelService {
         return null;
     }
 
-//    void addUserChannel(UUID channelUUID, User addUser);
+    ChannelAddUserResponse addUserChannel(UUID channelUUID, String username);
 //
 //    void kickUserChannel(UUID channelUUID, User kickUser);
 //

@@ -6,6 +6,7 @@ import com.sprint.mission.discodeit.entity.BaseObject;
 import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -45,6 +46,9 @@ public class Channel extends BaseObject implements Serializable {
     @JsonProperty("channelMessages")
     private Map<UUID, Message> channelMessages;
 
+    public boolean isThereUserHere(User user) {
+        return channelUsers.containsValue(user);
+    }
 
     public Channel() {
     }
@@ -89,14 +93,21 @@ public class Channel extends BaseObject implements Serializable {
     }
 
 
-    public void addUser(User user) {
+    public UUID addUser(User user) {
         if (user == null) {
             throw new UserNotFoundException();
+        }
+
+        // 채널에 해당하는 유저 있으면 안됨
+        if (channelUsers.containsValue(user)) {
+            throw new IllegalUserException("채널에 유저가 이미 존재합니다.");
         }
 
         channelUsers.put(user.getId(), user);
 
         setUpdatedAt();
+
+        return user.getId();
     }
 
 

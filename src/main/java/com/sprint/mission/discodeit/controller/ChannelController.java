@@ -29,12 +29,27 @@ public class ChannelController {
     }
 
     @RequestMapping(value = "/{channelName}", method = RequestMethod.DELETE)
-    public UUID deleteChannel(@PathVariable("channelName") String channelName) {
-        return channelService.removeChannelByName(channelName);
+    public Result<UUID> deleteChannel(@PathVariable("channelName") String channelName) {
+        return new Result<>(channelService.removeChannelByName(channelName));
     }
 
+    // 유저가 가입한 모든 채널 뿌리기
+
+    /**
+     * 유저가 가입한 모들 채널 뿌리기
+     */
     @RequestMapping(value = "/{userName}", method = RequestMethod.GET)
     public Map<UUID, ChannelListResponse> getAllChannelOfUser(@PathVariable("userName") String userName) {
         return channelService.getAllChannelsOfUser(userName);
+    }
+
+    /**
+     * 채널에 유저 초대
+     */
+    @RequestMapping(value = "/{channelId}/{userName}", method = RequestMethod.POST)
+    public Result<ChannelAddUserResponse> addUser(@PathVariable("channelId") UUID channelId, @PathVariable("userName") String userName) {
+        ChannelAddUserResponse channelAddUserResponse = channelService.addUserChannel(channelId, userName);
+
+        return new Result<>(channelAddUserResponse);
     }
 }

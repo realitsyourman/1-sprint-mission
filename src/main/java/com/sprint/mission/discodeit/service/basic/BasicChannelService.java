@@ -123,6 +123,21 @@ public class BasicChannelService implements ChannelService {
     }
 
     /**
+     * 채널에 유저 추가
+     */
+    @Override
+    public ChannelAddUserResponse addUserChannel(UUID channelUUID, String username) {
+        Channel findChannel = channelRepository.findChannelById(channelUUID);
+        User findUser = userRepository.findUserByName(username);
+
+        addUserInChannel(findChannel, findUser);
+
+        Channel savedChannel = channelRepository.saveChannel(findChannel);
+
+        return new ChannelAddUserResponse(savedChannel.getId(), savedChannel.getChannelName(), findUser.getUserName());
+    }
+
+    /**
      * 채널 ID로 찾기
      */
     @Override
@@ -153,33 +168,12 @@ public class BasicChannelService implements ChannelService {
     @Override
     public Map<UUID, ChannelFindResponse> getAllChannels(UUID userId) {
         // 채널을 findChannelById를 이용해 ChannelFindResponse DTO로 변경
-        Map<UUID, ChannelFindResponse> channels = channelRepository.findAllChannel().values().stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getId(),
-                        entry -> findChannelById(entry.getId())
-                ));
-
+        Map<UUID, ChannelFindResponse> channels = convertToChannelFindResponseMap();
 
         // DTO로 바꾼 새로운 맵을 전부 출력하는데
         // 채널이 public 타입이면 바로 반환
         // private 채널이면 조회한 유저가 참여한 채널만 조회
-        return channels.entrySet().stream()
-                .filter(entry -> {
-                    ChannelFindResponse response = entry.getValue();
-
-                    if (response.getChannelType().equals(CHANNEL_TYPE_PUB)) {
-                        return true;
-                    } else {
-                        Channel channel = channelRepository.findChannelById(entry.getKey());
-
-                        return channel.getChannelUsers().values().stream()
-                                .anyMatch(user -> user.getId().equals(userId));
-                    }
-                })
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        entry -> entry.getValue()
-                ));
+        return getFindChannels(userId, channels);
 
     }
 
@@ -192,25 +186,12 @@ public class BasicChannelService implements ChannelService {
         return allChannels.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> new ChannelListResponse(entry.getValue().getChannelId(), entry.getValue().getChannelName(), entry.getValue().getChannelType())
+                        entry -> new ChannelListResponse(
+                                entry.getValue().getChannelId(),
+                                entry.getValue().getChannelName(),
+                                entry.getValue().getChannelType()
+                        )
                 ));
-    }
-
-    /**
-     * 특정 `User`가 볼 수 있는 Channel 목록을 조회하도록 조회 조건
-     */
-    private Map<UUID, ChannelResponse> findAllByUserId(UUID userId) {
-        Map<UUID, Channel> channels = channelRepository.findAllChannel();
-
-        Map<UUID, ChannelResponse> filteredChannels = channels.values().stream()
-                .filter(ch -> ch.getChannelUsers().values().stream()
-                        .anyMatch(user -> user.getId().equals(userId)))
-                .collect(Collectors.toMap(
-                        Channel::getId,
-                        channel -> new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), new UserChannelOwnerResponse(channel.getChannelOwnerUser().getId(), channel.getChannelOwnerUser().getUserName(), channel.getChannelOwnerUser().getUserRole()))
-                ));
-
-        return filteredChannels;
     }
 
     /**
@@ -309,8 +290,56 @@ public class BasicChannelService implements ChannelService {
         return buildChannel(request, "PUBLIC", userList);
     }
 
+    private Map<UUID, ChannelFindResponse> getFindChannels(UUID userId, Map<UUID, ChannelFindResponse> channels) {
+        return channels.entrySet().stream()
+                .filter(entry -> {
+                    ChannelFindResponse response = entry.getValue();
+
+                    return checkPublicOrPrivateChannel(userId, entry, response);
+                })
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+    }
+
+    /**
+     * 특정 `User`가 볼 수 있는 Channel 목록을 조회하도록 조회 조건
+     */
+    private Map<UUID, ChannelResponse> findAllByUserId(UUID userId) {
+        Map<UUID, Channel> channels = channelRepository.findAllChannel();
+
+        return channels.values().stream()
+                .filter(ch -> ch.getChannelUsers().values().stream()
+                        .anyMatch(user -> user.getId().equals(userId)))
+                .collect(Collectors.toMap(
+                        Channel::getId,
+                        channel -> new ChannelResponse(channel.getId(), channel.getChannelName(), channel.getChannelType(), new UserChannelOwnerResponse(channel.getChannelOwnerUser().getId(), channel.getChannelOwnerUser().getUserName(), channel.getChannelOwnerUser().getUserRole()))
+                ));
+    }
+
+    private boolean checkPublicOrPrivateChannel(UUID userId, Map.Entry<UUID, ChannelFindResponse> entry, ChannelFindResponse response) {
+        if (response.getChannelType().equals(CHANNEL_TYPE_PUB)) { // 퍼블릭 채널이면 그냥 반환
+            return true;
+        } else {
+            Channel channel = channelRepository.findChannelById(entry.getKey());
+
+            return userId.equals(channel.getChannelOwnerUser().getId()) ||
+                    channel.getChannelUsers().values().stream()
+                            .anyMatch(user -> user.getId().equals(userId));
+        }
+    }
+
     private Channel setPrivateChannel(ChannelCreateRequest privateRequest, Map<UUID, User> userList) {
         return buildChannel(privateRequest, "PRIVATE", userList);
+    }
+
+    private Map<UUID, ChannelFindResponse> convertToChannelFindResponseMap() {
+        return channelRepository.findAllChannel().values().stream()
+                .collect(Collectors.toMap(
+                        entry -> entry.getId(),
+                        entry -> findChannelById(entry.getId())
+                ));
     }
 
     private UserChannelOwnerResponse getUserChannelOwnerResponse(ChannelCreateRequest privateRequest) {
@@ -371,6 +400,14 @@ public class BasicChannelService implements ChannelService {
         }
     }
 
+    private static void addUserInChannel(Channel findChannel, User findUser) {
+        if(!findChannel.getChannelOwnerUser().equals(findUser)) {
+            findUser.updateUserRole(UserRole.ROLE_COMMON);
+        }
+
+        findChannel.addUser(findUser);
+    }
+
     private ChannelResponse getUserChannelResponse(ChannelResponse request) {
         ChannelResponse response;
         ChannelCreateRequest channelCreateRequest = new ChannelCreateRequest(request.channelId(), request.channelName(), request.owner().userName(), request.channelType());
@@ -405,8 +442,8 @@ public class BasicChannelService implements ChannelService {
 //                    return entry.getId().equals(channelUUID);
 //                })
 //                .forEach(entry -> {
-//                    entry.getChannelMessages().values().forEach(message -> messageService.deleteMessage(message.getId()));
 
+//                    entry.getChannelMessages().values().forEach(message -> messageService.deleteMessage(message.getId()));
 //                });
     /*@Override
     public void addUserChannel(UUID channelUUID, User addUser) {
