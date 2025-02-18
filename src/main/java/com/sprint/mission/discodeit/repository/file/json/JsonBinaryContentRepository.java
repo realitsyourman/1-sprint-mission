@@ -51,8 +51,9 @@ public class JsonBinaryContentRepository extends JsonRepository<UUID, BinaryCont
     @Override
     public void delete(UUID id) {
         checkId(id);
-
         map.remove(id);
+
+        saveToJson();
     }
 
 

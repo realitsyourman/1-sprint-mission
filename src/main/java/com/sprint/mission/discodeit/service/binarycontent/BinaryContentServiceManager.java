@@ -67,7 +67,7 @@ public class BinaryContentServiceManager {
             if (multipartFile != null && !multipartFile.isEmpty()) {
                 try {
                     BinaryContentRequest binaryContentRequest = new BinaryContentRequest(multipartFile.getOriginalFilename(), multipartFile, null);
-                    binaryContentRequest.updateUserId(request.getRequestUserId());
+                    binaryContentRequest.updateId(request.getRequestUserId());
 
                     UploadBinaryContent uploadBinaryContent = saveFile(binaryContentRequest);
                     uploadList.add(uploadBinaryContent);

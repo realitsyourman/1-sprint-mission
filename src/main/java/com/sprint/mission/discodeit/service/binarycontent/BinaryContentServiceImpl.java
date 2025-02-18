@@ -4,7 +4,6 @@ import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
-import com.sprint.mission.discodeit.exception.binary.BinaryContentException;
 import com.sprint.mission.discodeit.exception.binary.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -24,27 +23,21 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     public List<UploadBinaryContent> create(BinaryContentRequest request) throws IOException {
         List<UploadBinaryContent> uploadFiles = new ArrayList<>();
 
+        // 여기서 보낸 사람의 uuid를 저장해서 넘겨야함
+
         // 단일 파일 처리
         if (request.getFile() != null) {
             UploadBinaryContent uploadFile = fileManager.saveFile(request);
             //uploadFile.updateUserId(request.getRequestUserId());
             uploadFiles.add(uploadFile);
-        }
-
-        // 다중 파일 처리
-        if (request.getFiles() != null && !request.getFiles().isEmpty()) {
+        } else if (request.getFiles() != null && !request.getFiles().isEmpty()) { // 다중 파일 처리
             uploadFiles.addAll(fileManager.saveFiles(request));
-        }
-
-        if (uploadFiles.isEmpty()) {
-            throw new BinaryContentException("업로드 할 파일이 없습니다.");
         }
 
         UUID fileId = convertToUUID(uploadFiles.get(0).getSavedFileName());
 
-
         BinaryContent binaryContent = new BinaryContent(
-                fileId,
+                request.getChannelId(), // fileId, 여기는 나중에 보낸 메세지의 uuid가 들어가야함
                 request.getFileName(),
                 uploadFiles.get(0),
                 uploadFiles

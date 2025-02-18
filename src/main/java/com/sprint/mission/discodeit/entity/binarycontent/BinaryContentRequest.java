@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.entity.binarycontent;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +13,9 @@ import java.util.UUID;
  */
 
 @Getter
+@AllArgsConstructor
 public class BinaryContentRequest {
+    private UUID channelId;
     private UUID requestUserId;
 
     @NotBlank
@@ -26,11 +29,12 @@ public class BinaryContentRequest {
         this.files = files;
     }
 
-    public UUID updateUserId(UUID requestUserId) {
+    public UUID updateId(UUID requestUserId) {
         if (this.requestUserId != null) {
             return requestUserId;
         }
 
+        this.channelId = requestUserId;
         this.requestUserId = requestUserId;
 
         return this.requestUserId;
