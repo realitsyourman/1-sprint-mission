@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -63,6 +64,7 @@ public class BasicMessageService implements MessageService {
         // 사용자 검증
         User sender = userValidator.entityValidate(userRepository.findUserByName(request.sender()));
         User receiver = userValidator.entityValidate(userRepository.findUserByName(request.receiver()));
+        checkInChannel(request, sender, receiver);
 
         // 메시지 생성 및 저장
         Message message = entityFactory.createMessage(request.title(), request.content(), sender, receiver);
@@ -168,6 +170,9 @@ public class BasicMessageService implements MessageService {
         }
 
         // 첨부파일 삭제
+        // TODO : 첨부파일이 있는 메세지를 삭제하는데는 메세지 아이디가 아니라 첫번째 파일의 이름으로 삭제해야함 ->
+
+
         List<BinaryContentResponse> files = binaryContentService.findAllById(messageId);
         for (BinaryContentResponse file : files) {
             binaryContentService.delete(file.fileId());
@@ -201,10 +206,12 @@ public class BasicMessageService implements MessageService {
         channelRepository.saveChannel(findChannel);
     }
 
-    // 123e4567e89b12d3a456426614174000 이런 형식으로 들어오는 메세지 아이디 uuid 변환
 
+    // 123e4567e89b12d3a456426614174000 이런 형식으로 들어오는 메세지 아이디 uuid 변환
     private UUID convertToUUID(String messageId) {
-        if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
+        if (messageId.length() == 36) {
+            return UUID.fromString(messageId);
+        } else if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
             throw new MessageNotFoundException("messageID를 확인해주세요");
         }
 
@@ -217,6 +224,7 @@ public class BasicMessageService implements MessageService {
 
         return UUID.fromString(uuid);
     }
+
     private MessageResponse convertToMessageResponseWithAttachments(Message message, List<BinaryContentResponse> attachments) {
         return new MessageResponse(
                 message.getId(),
@@ -227,7 +235,6 @@ public class BasicMessageService implements MessageService {
                 attachments
         );
     }
-
     private List<BinaryContentResponse> createBinaryFile(MessageSendFileRequest fileRequest, Message message) throws IOException {
         List<BinaryContentResponse> files = new ArrayList<>();
 
@@ -236,6 +243,8 @@ public class BasicMessageService implements MessageService {
             try {
                 // BinaryContentRequest 생성
                 BinaryContentRequest binaryRequest = new BinaryContentRequest(
+                        message.getId(),
+                        message.getMessageSendUser().getId(),
                         fileRequest.getFileName(),
                         fileRequest.getFile(),
                         fileRequest.getFiles()
@@ -258,5 +267,12 @@ public class BasicMessageService implements MessageService {
             }
         }
         return files;
+    }
+
+    private void checkInChannel(MessageCreateRequest request, User sender, User receiver) {
+        Channel findChannel = channelRepository.findChannelById(request.channelId());
+        if (!(findChannel.isThereUserHere(sender) && findChannel.isThereUserHere(receiver))) {
+            throw new UserNotFoundException("채널에 해당 유저가 없습니다.");
+        }
     }
 }

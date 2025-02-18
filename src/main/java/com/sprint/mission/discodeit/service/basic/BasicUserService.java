@@ -56,7 +56,7 @@ public class BasicUserService implements UserService {
     @Override
     public UserCreateWithBinaryContentResponse createUserWithProfile(UserCommonRequest createDto, BinaryContentRequest request) {
         UserCommonResponse userResponse = createUser(createDto);
-        request.updateUserId(userResponse.id());
+        request.updateId(userResponse.id()); // channelId는 null인 상태, requestUserId는 있음
 
         UserCreateWithBinaryContentResponse userWithFileResponse = new UserCreateWithBinaryContentResponse(
                 userResponse.id(),

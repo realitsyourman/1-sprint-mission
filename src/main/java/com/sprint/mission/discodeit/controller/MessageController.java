@@ -35,7 +35,6 @@ public class MessageController {
 
         // string -> MessageCreateRequest
         MessageCreateRequest request = messageRequestMapper.stringToJson(requestStr, MessageCreateRequest.class);
-
         MessageSendFileRequest fileRequest = new MessageSendFileRequest(files.get(0).getOriginalFilename(), null, files);
 
         return messageService.createMessage(request, fileRequest);
@@ -45,6 +44,7 @@ public class MessageController {
     public MessageResponse updateMessage(
             @PathVariable("messageId") String messageId,
             @Validated @RequestBody MessageUpdateRequest request) {
+
         return messageService.updateMessage(messageId, request);
     }
 
