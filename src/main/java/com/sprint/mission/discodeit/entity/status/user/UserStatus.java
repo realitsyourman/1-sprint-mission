@@ -34,6 +34,13 @@ public class UserStatus extends BaseObject {
         return new UserStatus(userId, userName);
     }
 
+    public UserStatus changeUserStatus(String userName) {
+        this.userName = userName;
+        updateUserStatus();
+
+        return this;
+    }
+
     public UserStatus(UUID userId) {
         super();
         this.userId = userId;
@@ -42,7 +49,7 @@ public class UserStatus extends BaseObject {
     }
 
     public UserStatus(UUID userId, String userName) {
-        super();
+        super(userId);
         this.userId = userId;
         this.userName = userName;
         this.state = USER_ONLINE;

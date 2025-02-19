@@ -35,7 +35,7 @@ public class JsonUserStatusRepository extends JsonRepository<UUID, UserStatus> i
 
         map.put(userStatus.getUserId(), userStatus);
         saveToJson();
-        return map.get(userStatus.getUserId());
+        return userStatus;
     }
 
     @Override
@@ -64,7 +64,7 @@ public class JsonUserStatusRepository extends JsonRepository<UUID, UserStatus> i
 
     @Override
     public UserStatus updateState(String userName, UserStatus userStatus) {
-        UserStatus findState = findByUserName(userName);
+        UserStatus findState = findByUserName(userStatus.getUserName());
 
         saveToJson();
 

@@ -17,7 +17,7 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/message")
+@RequestMapping("/api/v1/messages")
 @RequiredArgsConstructor
 public class MessageController {
     private final MessageService messageService;
@@ -40,7 +40,7 @@ public class MessageController {
         return messageService.createMessage(request, fileRequest);
     }
 
-    @PutMapping("/{messageId}")
+    @RequestMapping(value = "/{messageId}", method = RequestMethod.PUT)
     public MessageResponse updateMessage(
             @PathVariable("messageId") String messageId,
             @Validated @RequestBody MessageUpdateRequest request) {
@@ -48,7 +48,7 @@ public class MessageController {
         return messageService.updateMessage(messageId, request);
     }
 
-    @DeleteMapping("/{messageId}")
+    @RequestMapping(value = "/{messageId}", method = RequestMethod.DELETE)
     public UUID deleteMessage(@PathVariable("messageId") String messageId) {
         return messageService.deleteMessage(messageId);
     }

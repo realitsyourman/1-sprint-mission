@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.status.user.UserStatusReponse;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
@@ -86,14 +87,15 @@ public class UserStateService implements StatusService<UserStatus> {
     /**
      * userName으로 상태 업데이트
      */
-    public UserStatus updateByUserName(String userName) {
+    public UserStatus updateByUserName(String userName, UserCommonRequest request) {
         if (userName == null) {
             throw new IllegalArgumentException("유저를 입력해주세요.");
         }
 
         UserStatus userStatus = userStatusRepository.findByUserName(userName);
-        userStatus.updateUserStatus();
-        return userStatusRepository.updateState(userName, userStatus);
+        UserStatus updateUserStatus = userStatus.changeUserStatus(request.userName());
+
+        return userStatusRepository.updateState(userName, updateUserStatus);
     }
 
     /**

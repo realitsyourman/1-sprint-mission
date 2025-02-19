@@ -64,8 +64,20 @@ public class ReadStatusService implements StatusService<ReadStatus> {
             throw new IllegalArgumentException("readStatus를 찾지 못했습니다.");
         }
 
+        // 디버깅을 위한 로그 추가
+        System.out.println("Finding ReadStatus for user: " + userName + " (ID: " + userId + ")");
+        allReadStatus.values().forEach(status ->
+                System.out.println("ReadStatus - ChannelId: " + status.getChannelId() +
+                        ", UserId: " + status.getUserId())
+        );
+
         return allReadStatus.values().stream()
-                .filter(stat -> stat.getUserId().equals(userId))
+                .filter(stat -> {
+                    boolean matches = stat.getUserId().equals(userId);
+                    System.out.println("Checking ReadStatus - UserId: " + stat.getUserId() +
+                            " matches user " + userId + ": " + matches);
+                    return matches;
+                })
                 .collect(Collectors.toMap(
                         ReadStatus::getChannelId,
                         s -> new UserReadStatusResponse(s.getChannelId(), s.getLastReadAt())

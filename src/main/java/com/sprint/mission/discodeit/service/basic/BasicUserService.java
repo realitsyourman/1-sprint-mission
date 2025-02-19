@@ -159,7 +159,7 @@ public class BasicUserService implements UserService {
         findUser.updateEmail(updateDto.userEmail());
         findUser.updatePassword(updateDto.userPassword());
 
-        userStateService.updateByUserName(userName);
+        userStateService.updateByUserName(userName, updateDto);
         userRepository.userSave(findUser);
 
         return new UserCommonResponse(findUser.getId(), findUser.getUserName(), findUser.getUserEmail());

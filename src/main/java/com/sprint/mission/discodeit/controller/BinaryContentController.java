@@ -20,23 +20,23 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/bin")
+@RequestMapping("/api/v1/files")
 @RequiredArgsConstructor
 public class BinaryContentController {
     private final BinaryContentService binaryContentService;
     private final BinaryContentServiceManager fileManager;
 
-    // 파일 단건 조회
+    // 파일 단건 조회(file ID로)
     @ResponseBody
-    @RequestMapping("/{fileName}")
-    public BinaryContentResponse findFile(@PathVariable("fileName") String fileName) {
-        UUID fileId = fileManager.formatToUUID(fileName);
-        return binaryContentService.find(fileId);
+    @RequestMapping(value ="/{fileId}", method = RequestMethod.GET)
+    public BinaryContentResponse findFile(@PathVariable("fileId") String fileId) {
+        UUID convertFileId = fileManager.formatToUUID(fileId);
+        return binaryContentService.find(convertFileId);
     }
 
-    // 특정 uuid로 모든 파일 검색
+    // fileId로 모든 파일 검색
     @ResponseBody
-    @RequestMapping("/{fileName}/all")
+    @RequestMapping(value = "/{fileName}/all", method = RequestMethod.GET)
     public List<BinaryContentResponse> findAllFiles(@PathVariable("fileName") String fileName) {
         UUID fileId = fileManager.formatToUUID(fileName);
         return binaryContentService.findAllById(fileId);
@@ -49,7 +49,7 @@ public class BinaryContentController {
         return new UrlResource("file:" + fileManager.getFullPath(fileName));
     }
 
-    // 파일 다운로드
+    // fileId 파일 1개 다운로드
     @RequestMapping(value = "/download/{fileId}", method = RequestMethod.GET)
     public ResponseEntity<Resource> downloadFile(@PathVariable("fileId") UUID fileId) throws MalformedURLException {
         BinaryContent findFile = binaryContentService.findBinaryContentById(fileId);

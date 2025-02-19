@@ -12,6 +12,7 @@ import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.status.UserStateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,6 +34,7 @@ public class UserController {
     /**
      * 프사 없는 유저 등록
      */
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(method = RequestMethod.POST)
     public UserCommonResponse joinUser(@Validated @RequestBody UserCommonRequest request) {
         return userService.createUser(request);
@@ -41,6 +43,7 @@ public class UserController {
     /**
      * 프로필 사진과 함께 유저 등록
      */
+    @ResponseStatus(HttpStatus.CREATED)
     @RequestMapping(value = "/profile", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UserCreateWithBinaryContentResponse joinUserWithImg(@Validated @RequestPart("json") String request,
                                                                @RequestPart("file") MultipartFile file) throws IOException {
