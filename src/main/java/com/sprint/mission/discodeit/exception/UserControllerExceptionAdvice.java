@@ -13,27 +13,27 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class UserControllerExceptionAdvice {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UserNotFoundException.class)
-    public ErrorResult userNotFound(UserNotFoundException e) {
-        log.error("User exception: {}", e.getMessage());
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(UserNotFoundException.class)
+  public ErrorResult userNotFound(UserNotFoundException e) {
+    log.error("User exception: {}", e.getMessage());
 
-        return new ErrorResult(ErrorCode.USER_NOT_FOUND);
-    }
+    return new ErrorResult(ErrorCode.USER_NOT_FOUND);
+  }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalUserException.class)
-    public ErrorResult userIllegal(IllegalUserException e) {
-        log.error("User Illegal exception: {}", e.getMessage());
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(IllegalUserException.class)
+  public ErrorResult userIllegal(IllegalUserException e) {
+    log.error("User Illegal exception: {}", e.getMessage());
 
-        return new ErrorResult(ErrorCode.ILLEGAL_USER);
-    }
+    return new ErrorResult(ErrorCode.ILLEGAL_USER);
+  }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(UserAuthException.class)
-    public ErrorResult userAuth(UserAuthException e) {
-        log.error("User Illegal exception: {}", e.getMessage());
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(UserAuthException.class)
+  public ErrorResult userAuth(UserAuthException e) {
+    log.error("User Illegal exception: {}", e.getMessage());
 
-        return new ErrorResult(ErrorCode.USER_AUTH_FAIL);
-    }
+    return new ErrorResult(ErrorCode.USER_AUTH_FAIL);
+  }
 }

@@ -1,5 +1,6 @@
-package com.sprint.mission.discodeit.controller;
+package com.sprint.mission.discodeit.controller.legacy;
 
+import com.sprint.mission.discodeit.controller.Result;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusReponse;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusUpdateRequest;

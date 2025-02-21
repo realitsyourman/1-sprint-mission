@@ -141,7 +141,7 @@ public class BasicUserService implements UserService {
     UserStatus status = userStateService.find(userId);
     BinaryContentResponse profileImage = null;
     try {
-      profileImage = binaryContentService.find(userId);
+      profileImage = binaryContentService.find(userId.toString());
     } catch (Exception e) {
       log.debug("No profile image found for user: {}", userId);
     }
@@ -245,7 +245,7 @@ public class BasicUserService implements UserService {
 
     // 기존 프로필 이미지 삭제
     for (BinaryContentResponse profile : existingProfiles) {
-      binaryContentService.delete(profile.fileId());
+      binaryContentService.delete(profile.id());
     }
 
     // 새 프로필 이미지 업로드
@@ -294,7 +294,7 @@ public class BasicUserService implements UserService {
     // 프로필 이미지 삭제
     List<BinaryContentResponse> profiles = binaryContentService.findAllById(userId);
     for (BinaryContentResponse profile : profiles) {
-      binaryContentService.delete(profile.fileId());
+      binaryContentService.delete(profile.id());
     }
 
     userRepository.removeUserById(userId);
@@ -329,7 +329,9 @@ public class BasicUserService implements UserService {
 
   private UserUpdateResponse savedNoneProfileImgUser(UUID userId, UserUpdateRequest request) {
     User user = userRepository.findUserById(userId);
-    user.updateUserInfo(request.username(), request.email(), request.password(), null);
+
+    checkNullAndUpdateUser(request, user);
+
     userRepository.userSave(user);
     return getUserUpdateResponse(user);
   }
@@ -426,10 +428,27 @@ public class BasicUserService implements UserService {
 
   private User updateUserInfo(UUID userId, UserUpdateRequest request, String savedFile) {
     User findUser = userRepository.findUserById(userId);
-    findUser.updateUserInfo(request.username(), request.email(), request.password(),
-        savedFile);
+
+    checkNullAndUpdateUser(request, findUser);
+    if (savedFile != null) {
+      findUser.setProfileId(savedFile);
+    }
 
     return userRepository.userSave(findUser);
+  }
+
+  private static void checkNullAndUpdateUser(UserUpdateRequest request, User findUser) {
+    if (request.newUsername() != null && !request.newUsername().isEmpty()) {
+      findUser.setUserName(request.newUsername());
+    }
+
+    if (request.newEmail() != null && !request.newEmail().isEmpty()) {
+      findUser.setUserEmail(request.newEmail());
+    }
+
+    if (request.newPassword() != null && !request.newPassword().isEmpty()) {
+      findUser.setUserPassword(request.newPassword());
+    }
   }
 
 /*    private static User convertToUser(UserCommonRequest updateDto, UserResponse findUser) {

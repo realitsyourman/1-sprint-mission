@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.controller;
+package com.sprint.mission.discodeit.controller.legacy;
 
 import com.sprint.mission.discodeit.entity.user.UserLoginRequest;
 import com.sprint.mission.discodeit.entity.user.UserLoginResponse;
@@ -11,13 +11,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class UserAuthController {
-    private final AuthService authService;
 
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public UserLoginResponse login(@Validated @RequestBody UserLoginRequest request) {
-        return authService.login(request);
-    }
+  private final AuthService authService;
+
+  @RequestMapping(value = "/login", method = RequestMethod.POST)
+  public UserLoginResponse login(@Validated @RequestBody UserLoginRequest request) {
+    return authService.login(request);
+  }
 }

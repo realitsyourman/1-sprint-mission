@@ -12,6 +12,7 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.Setter;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,6 +33,7 @@ public class User extends BaseObject implements Serializable {
   @JsonProperty("userRole")
   private UserRole userRole;
 
+  @Setter
   private String profileId;
 
   public static User createUser(UUID userId, UserCommonRequest user, UserRole userRole) {
@@ -42,8 +44,6 @@ public class User extends BaseObject implements Serializable {
     this.userName = username;
     this.userEmail = email;
     this.userPassword = password;
-
-    System.out.println("profileId = " + profileId);
     this.profileId = profileId;
   }
 
@@ -101,19 +101,19 @@ public class User extends BaseObject implements Serializable {
     this.userRole = userRole;
   }
 
-  private void setUserName(String userName) {
+  public void setUserName(String userName) {
     checkUserName(userName);
     this.userName = userName;
     setUpdatedAt();
   }
 
-  private void setUserEmail(String userEmail) {
+  public void setUserEmail(String userEmail) {
     checkUserEmail(userEmail);
     this.userEmail = userEmail;
     setUpdatedAt();
   }
 
-  private void setUserPassword(String userPassword) {
+  public void setUserPassword(String userPassword) {
     checkUserPassword(userPassword);
     this.userPassword = userPassword;
     setUpdatedAt();
