@@ -1,7 +1,7 @@
 //package com.sprint.mission.discodeit.service.status;
 //
 //import com.sprint.mission.discodeit.entity.channel.Channel;
-//import com.sprint.mission.discodeit.entity.channel.ChannelFindResponse;
+//import com.sprint.mission.discodeit.entity.channel.find.ChannelFindResponse;
 //import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 //import com.sprint.mission.discodeit.entity.status.read.ReadStatusCreateRequest;
 //import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
