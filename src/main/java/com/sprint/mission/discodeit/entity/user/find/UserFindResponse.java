@@ -10,7 +10,7 @@ public record UserFindResponse(
     String username,
     String email,
     String profileId,
-    boolean online
+    Boolean online
 ) {
 
 }

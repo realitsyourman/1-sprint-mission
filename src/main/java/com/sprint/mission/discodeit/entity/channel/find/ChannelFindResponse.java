@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.entity.channel;
+package com.sprint.mission.discodeit.entity.channel.find;
 
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
@@ -10,9 +10,10 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 public class ChannelFindResponse {
-    private final UUID channelId;
-    private String channelName;
-    private User owner;
-    private String channelType;
-    private ReadStatus readStatus;
+
+  private final UUID channelId;
+  private String channelName;
+  private User owner;
+  private String channelType;
+  private ReadStatus readStatus;
 }
