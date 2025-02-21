@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.status;
 
+import com.sprint.mission.discodeit.entity.status.user.UserStatUpdateRequest;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusReponse;
 import com.sprint.mission.discodeit.entity.status.user.UserStatusRequest;
@@ -116,12 +117,17 @@ public class UserStateService implements StatusService<UserStatus> {
   /**
    * userId로 상태 업데이트
    */
-  public UserStatusUpdateResponse updateByUserId(UUID userId) {
+  public UserStatusUpdateResponse updateByUserId(UUID userId, UserStatUpdateRequest request) {
     if (userId == null) {
       throw new IllegalArgumentException("id를 입력해주세요.");
     }
 
     UserStatus userStatus = userStatusRepository.findById(userId);
+    if (userStatus == null) {
+      userStatus = new UserStatus(userId);
+      userStatusRepository.save(userStatus);
+    }
+
     userStatus.updateUserStatus();
     UserStatus updateState = userStatusRepository.updateState(userId, userStatus);
     return new UserStatusUpdateResponse(updateState.getLastAccessTime());
