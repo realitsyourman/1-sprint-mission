@@ -4,23 +4,25 @@ import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentRequest;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContentResponse;
 import com.sprint.mission.discodeit.entity.binarycontent.UploadBinaryContent;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface BinaryContentService {
 
-    List<UploadBinaryContent> create(BinaryContentRequest request) throws IOException;
+  List<UploadBinaryContent> create(BinaryContentRequest request) throws IOException;
 
-    BinaryContentResponse find(UUID id);
+  List<UploadBinaryContent> createFiles(List<MultipartFile> files, UUID messageId);
 
-    BinaryContent findBinaryContentById(UUID id);
+  BinaryContentResponse find(String id);
 
-    Optional<BinaryContent> findBinaryContentByUserId(UUID userId);
+  BinaryContent findBinaryContentById(UUID id);
 
-    List<BinaryContentResponse> findAllById(UUID id);
+  Optional<BinaryContent> findBinaryContentByUserId(UUID userId);
 
-    UUID delete(UUID id);
+  List<BinaryContentResponse> findAllById(UUID id);
+
+  UUID delete(UUID id);
 }

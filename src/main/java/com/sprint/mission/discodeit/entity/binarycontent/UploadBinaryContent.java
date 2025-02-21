@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.entity.binarycontent;
 
+import java.time.Instant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,13 +14,18 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadBinaryContent {
-    private UUID requestUserId;
-    private String uploadFileName;
-    private String savedFileName;
 
-    public UUID updateUserId(UUID requestUserId) {
-        this.requestUserId = requestUserId;
+  private UUID requestUserId;
+  private String uploadFileName;
+  private String savedFileName;
+  private Instant createdAt;
+  private Long size;
+  private String contentType;
+  private String bytes;
 
-        return requestUserId;
-    }
+  public UUID updateUserId(UUID requestUserId) {
+    this.requestUserId = requestUserId;
+
+    return requestUserId;
+  }
 }
