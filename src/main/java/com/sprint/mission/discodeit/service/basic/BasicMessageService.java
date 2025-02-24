@@ -62,43 +62,6 @@ public class BasicMessageService implements MessageService {
     log.error("주입된 messageRepository: {}", messageRepository.getClass().getSimpleName());
   }
 
-
-  /**
-   * - [x] 선택적으로 여러 개의 첨부파일을 같이 등록할 수 있습니다. - [x] DTO를 활용해 파라미터를 그룹화합니다.
-   */
-  @Override
-  public MessageCreateResponse create(MessageCreateRequest request,
-      MessageSendFileRequest fileRequest) throws IOException {
-    if (messageValidator.isNullParam(request.title())) {
-      throw new NullMessageTitleException();
-    }
-
-    // 사용자 검증
-    User sender = userValidator.entityValidate(userRepository.findUserByName(request.sender()));
-    User receiver = userValidator.entityValidate(userRepository.findUserByName(request.receiver()));
-    checkInChannel(request, sender, receiver);
-
-    // 메시지 생성 및 저장
-    Message message = entityFactory.createMessage(request.title(), request.content(), sender,
-        receiver);
-    messageRepository.saveMessage(message);
-
-    // 채널에 메시지 추가
-    addMessageInChannel(request, message);
-
-    // 메세지에 파일 추가
-    List<BinaryContentResponse> files = createBinaryFile(fileRequest, message);
-
-    return new MessageCreateResponse(
-        message.getId(),
-        message.getMessageTitle(),
-        message.getMessageContent(),
-        message.getMessageSendUser().getId(),
-        message.getMessageReceiveUser().getId(),
-        files
-    );
-  }
-
   /**
    * 스프린트 미션 5, 메세지 생성
    */
@@ -107,7 +70,7 @@ public class BasicMessageService implements MessageService {
       List<MultipartFile> files) {
 
     List<UUID> filesUUID = new ArrayList<>();
-    
+
     Channel findChannel = channelRepository.findChannelById(request.channelId());
     checkChannelAndUser(request, findChannel);
 
@@ -134,31 +97,6 @@ public class BasicMessageService implements MessageService {
   }
 
   /**
-   * 특정 `Channel`의 Message 목록을 조회하도록 조회 조건을 추가하고, 메소드 명을 변경합니다. `findAllByChannelId`
-   */
-  @Override
-  public Map<UUID, MessageResponse> findAllMessageByChannelId(String id) {
-    UUID channelId = convertToUUID(id);
-    Channel findChannel = channelRepository.findChannelById(channelId);
-
-    if (findChannel == null) {
-      throw new ChannelNotFoundException(channelId);
-    }
-
-    Map<UUID, Message> channelMessages = findChannel.getChannelMessages();
-    return channelMessages.entrySet().stream()
-        .collect(Collectors.toMap(
-            Entry::getKey,
-            entry -> {
-              Message message = entry.getValue();
-              List<BinaryContentResponse> attachments =
-                  binaryContentService.findAllById(message.getId());
-              return convertToMessageResponseWithAttachments(message, attachments);
-            }
-        ));
-  }
-
-  /**
    * 스프린트 미션 5, 채널의 메세지 목록 조회
    */
   @Override
@@ -178,47 +116,6 @@ public class BasicMessageService implements MessageService {
         .toList();
   }
 
-
-  @Override
-  public MessageResponse getMessageById(UUID messageId) {
-    Message findMessage = messageRepository.findMessageById(messageId);
-    if (findMessage == null) {
-      throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
-    }
-
-    // 첨부파일 조회
-    List<BinaryContentResponse> attachments = binaryContentService.findAllById(messageId);
-
-    return convertToMessageResponseWithAttachments(findMessage, attachments);
-  }
-
-  /**
-   * DTO를 활용해 파라미터를 그룹화합니다.
-   * <p>
-   * - 수정 대상 객체의 id 파라미터, 수정할 값 파라미터
-   */
-  @Override
-  public MessageResponse updateMessage(String messageId, MessageUpdateRequest request) {
-    UUID updateMessageId = convertToUUID(messageId);
-
-    if (messageValidator.isNullParam(request.newTitle(), request.newContent())) {
-      throw new MessageNotFoundException();
-    }
-
-    Message findMessage = messageRepository.findMessageById(updateMessageId);
-    if (findMessage == null) {
-      throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
-    }
-
-    findMessage.updateMessage(request.newTitle(), request.newContent());
-    messageRepository.saveMessage(findMessage);
-
-    Channel findChannel = getChannel(request, findMessage);
-    channelRepository.saveChannel(findChannel);
-
-    List<BinaryContentResponse> attachments = binaryContentService.findAllById(updateMessageId);
-    return convertToMessageResponseWithAttachments(findMessage, attachments);
-  }
 
   /**
    * 스프린트 미션 5, 메세지 업데이트
@@ -264,6 +161,111 @@ public class BasicMessageService implements MessageService {
     removeMessageInChannel(messageId);
   }
 
+
+  /**
+   * - [x] 선택적으로 여러 개의 첨부파일을 같이 등록할 수 있습니다. - [x] DTO를 활용해 파라미터를 그룹화합니다.
+   */
+  @Override
+  public MessageCreateResponse create(MessageCreateRequest request,
+      MessageSendFileRequest fileRequest) throws IOException {
+    if (messageValidator.isNullParam(request.title())) {
+      throw new NullMessageTitleException();
+    }
+
+    // 사용자 검증
+    User sender = userValidator.entityValidate(userRepository.findUserByName(request.sender()));
+    User receiver = userValidator.entityValidate(userRepository.findUserByName(request.receiver()));
+    checkInChannel(request, sender, receiver);
+
+    // 메시지 생성 및 저장
+    Message message = entityFactory.createMessage(request.title(), request.content(), sender,
+        receiver);
+    messageRepository.saveMessage(message);
+
+    // 채널에 메시지 추가
+    addMessageInChannel(request, message);
+
+    // 메세지에 파일 추가
+    List<BinaryContentResponse> files = createBinaryFile(fileRequest, message);
+
+    return new MessageCreateResponse(
+        message.getId(),
+        message.getMessageTitle(),
+        message.getMessageContent(),
+        message.getMessageSendUser().getId(),
+        message.getMessageReceiveUser().getId(),
+        files
+    );
+  }
+
+
+  /**
+   * 특정 `Channel`의 Message 목록을 조회하도록 조회 조건을 추가하고, 메소드 명을 변경합니다. `findAllByChannelId`
+   */
+  @Override
+  public Map<UUID, MessageResponse> findAllMessageByChannelId(String id) {
+    UUID channelId = convertToUUID(id);
+    Channel findChannel = channelRepository.findChannelById(channelId);
+
+    if (findChannel == null) {
+      throw new ChannelNotFoundException(channelId);
+    }
+
+    Map<UUID, Message> channelMessages = findChannel.getChannelMessages();
+    return channelMessages.entrySet().stream()
+        .collect(Collectors.toMap(
+            Entry::getKey,
+            entry -> {
+              Message message = entry.getValue();
+              List<BinaryContentResponse> attachments =
+                  binaryContentService.findAllById(message.getId());
+              return convertToMessageResponseWithAttachments(message, attachments);
+            }
+        ));
+  }
+
+
+  @Override
+  public MessageResponse getMessageById(UUID messageId) {
+    Message findMessage = messageRepository.findMessageById(messageId);
+    if (findMessage == null) {
+      throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
+    }
+
+    // 첨부파일 조회
+    List<BinaryContentResponse> attachments = binaryContentService.findAllById(messageId);
+
+    return convertToMessageResponseWithAttachments(findMessage, attachments);
+  }
+
+  /**
+   * DTO를 활용해 파라미터를 그룹화합니다.
+   * <p>
+   * - 수정 대상 객체의 id 파라미터, 수정할 값 파라미터
+   */
+  @Override
+  public MessageResponse updateMessage(String messageId, MessageUpdateRequest request) {
+    UUID updateMessageId = convertToUUID(messageId);
+
+    if (messageValidator.isNullParam(request.newTitle(), request.newContent())) {
+      throw new MessageNotFoundException();
+    }
+
+    Message findMessage = messageRepository.findMessageById(updateMessageId);
+    if (findMessage == null) {
+      throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
+    }
+
+    findMessage.updateMessage(request.newTitle(), request.newContent());
+    messageRepository.saveMessage(findMessage);
+
+    Channel findChannel = getChannel(request, findMessage);
+    channelRepository.saveChannel(findChannel);
+
+    List<BinaryContentResponse> attachments = binaryContentService.findAllById(updateMessageId);
+    return convertToMessageResponseWithAttachments(findMessage, attachments);
+  }
+
   /**
    * 관련된 도메인도 같이 삭제합니다.
    * <p>
@@ -276,9 +278,6 @@ public class BasicMessageService implements MessageService {
     if (findMessage == null) {
       throw new MessageNotFoundException("메시지를 찾을 수 없습니다.");
     }
-
-    // 첨부파일 삭제
-    // TODO : 첨부파일이 있는 메세지를 삭제하는데는 메세지 아이디가 아니라 첫번째 파일의 이름으로 삭제해야함 ->
 
     List<BinaryContentResponse> files = binaryContentService.findAllById(messageId);
     for (BinaryContentResponse file : files) {

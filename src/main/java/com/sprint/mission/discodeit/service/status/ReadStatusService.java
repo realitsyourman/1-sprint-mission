@@ -87,6 +87,26 @@ public class ReadStatusService implements StatusService<ReadStatus> {
         .toList();
   }
 
+
+  /**
+   * 스프린트 미션 5, readStatus id로 수정
+   */
+  @Override
+  public ReadStatusModifyResponse updateReadStatus(UUID readStatusId,
+      ReadStatusModifyRequest request) {
+
+    ReadStatus readStatus = readStatusRepository.find(readStatusId);
+    if (readStatus == null) {
+      throw new ReadStatusNotFoundException(readStatusId);
+    }
+
+    readStatus.updateLastReadAt();
+
+    readStatusRepository.save(readStatus);
+
+    return new ReadStatusModifyResponse(readStatus.getLastReadAt());
+  }
+
   /**
    * `id`로 조회합니다.
    */
@@ -155,26 +175,7 @@ public class ReadStatusService implements StatusService<ReadStatus> {
 
     return new ChannelReadStatus(update.getChannelId(), update.getLastReadAt());
   }
-
-  /**
-   * 스프린트 미션 5, readStatus id로 수정
-   */
-  @Override
-  public ReadStatusModifyResponse updateReadStatus(UUID readStatusId,
-      ReadStatusModifyRequest request) {
-
-    ReadStatus readStatus = readStatusRepository.find(readStatusId);
-    if (readStatus == null) {
-      throw new ReadStatusNotFoundException(readStatusId);
-    }
-
-    readStatus.updateLastReadAt();
-
-    readStatusRepository.save(readStatus);
-
-    return new ReadStatusModifyResponse(readStatus.getLastReadAt());
-  }
-
+  
 
   /**
    * `id`로 삭제합니다.

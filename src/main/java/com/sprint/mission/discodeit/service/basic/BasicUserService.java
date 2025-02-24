@@ -56,6 +56,75 @@ public class BasicUserService implements UserService {
     log.error("주입된 userRepository: {}", userRepository.getClass().getSimpleName());
   }
 
+  /**
+   * 스프린트 미션 5 요구사항 user 등록
+   */
+  @Override
+  public UserCreateResponse createUserWithProfile(UserCreateRequest request,
+      MultipartFile file) throws IOException {
+
+    // 중복 체크
+    checkDuplicated(request.username(), request.email());
+
+    if (file == null) {
+      User user = buildUser(request, null);
+      saveUserStatus(user.getId(), user.getUserName());
+
+      userRepository.userSave(user);
+      return getUserCreateResponse(user);
+    }
+
+    String savedFileName = getSavedFile(file);
+
+    User user = buildUser(request, savedFileName);
+
+    saveUserStatus(user.getId(), user.getUserName());
+    userRepository.userSave(user);
+
+    return getUserCreateResponse(user);
+  }
+
+  /**
+   * 스프린트 미션 5 요구사항, user 목록 조회
+   */
+  @Override
+  public List<UserFindResponse> findAllUsers() {
+    Map<UUID, User> allUser = userRepository.findAllUser();
+
+    return allUser.values().stream()
+        .map(user -> new UserFindResponse(
+            user.getId(),
+            user.getCreatedAt(),
+            user.getUpdatedAt(),
+            user.getUserName(),
+            user.getUserEmail(),
+            user.getProfileId(),
+            userStateService.find(user.getId()).getState().equals("online")
+        ))
+        .toList();
+  }
+
+  /**
+   * 스프린트 미션 5, 유저 업데이트, 프사도 같이 가능
+   */
+  @Override
+  public UserUpdateResponse updateUser(UUID userId, UserUpdateRequest request, MultipartFile file)
+      throws IOException {
+
+    checkNull(userId);
+    checkDuplicated(request.newUsername(), request.newEmail());
+
+    if (file == null) {
+      return savedNoneProfileImgUser(userId, request);
+    }
+
+    String savedFileName = getSavedFile(file);
+
+    User updateUser = updateUserInfo(userId, request, savedFileName);
+
+    return getUserUpdateResponse(updateUser);
+  }
+
   @Override
   public UserCommonResponse createUser(UserCommonRequest user) {
     if (user == null) {
@@ -103,34 +172,6 @@ public class BasicUserService implements UserService {
       log.error("유저 생성 실패: {}", createDto.userName(), e);
       throw new IllegalUserException("프로필 이미지 업로드 중 오류가 발생했습니다: " + e.getMessage());
     }
-  }
-
-  /**
-   * 스프린트 미션 5 요구사항 user 등록
-   */
-  @Override
-  public UserCreateResponse createUserWithProfile(UserCreateRequest request,
-      MultipartFile file) throws IOException {
-
-    // 중복 체크
-    checkDuplicated(request.username(), request.email());
-
-    if (file == null) {
-      User user = buildUser(request, null);
-      saveUserStatus(user.getId(), user.getUserName());
-
-      userRepository.userSave(user);
-      return getUserCreateResponse(user);
-    }
-
-    String savedFileName = getSavedFile(file);
-
-    User user = buildUser(request, savedFileName);
-
-    saveUserStatus(user.getId(), user.getUserName());
-    userRepository.userSave(user);
-
-    return getUserCreateResponse(user);
   }
 
   @Override
@@ -183,26 +224,6 @@ public class BasicUserService implements UserService {
         )).toList();
 
     //return convertToUserResponseMap(allUsersMap);
-  }
-
-  /**
-   * 스프린트 미션 5 요구사항, user 목록 조회
-   */
-  @Override
-  public List<UserFindResponse> findAllUsers() {
-    Map<UUID, User> allUser = userRepository.findAllUser();
-
-    return allUser.values().stream()
-        .map(user -> new UserFindResponse(
-            user.getId(),
-            user.getCreatedAt(),
-            user.getUpdatedAt(),
-            user.getUserName(),
-            user.getUserEmail(),
-            user.getProfileId(),
-            userStateService.find(user.getId()).getState().equals("online")
-        ))
-        .toList();
   }
 
   /**
@@ -266,26 +287,6 @@ public class BasicUserService implements UserService {
     return convertToUserResponse(user.getId(), user.getUserName(), user.getUserEmail());
   }
 
-  /**
-   * 스프린트 미션 5, 유저 업데이트, 프사도 같이 가능
-   */
-  @Override
-  public UserUpdateResponse updateUser(UUID userId, UserUpdateRequest request, MultipartFile file)
-      throws IOException {
-
-    checkNull(userId);
-    checkDuplicated(request.newUsername(), request.newEmail());
-
-    if (file == null) {
-      return savedNoneProfileImgUser(userId, request);
-    }
-
-    String savedFileName = getSavedFile(file);
-
-    User updateUser = updateUserInfo(userId, request, savedFileName);
-
-    return getUserUpdateResponse(updateUser);
-  }
 
   /**
    * 관련된 도메인도 같이 삭제합니다. - `BinaryContent`(프로필), `UserStatus`

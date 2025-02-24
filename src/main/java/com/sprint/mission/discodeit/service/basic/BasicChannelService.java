@@ -76,6 +76,80 @@ public class BasicChannelService implements ChannelService {
   }
 
 
+  /**
+   * 스프린트 미션 5 심화 요구사항을 위한 PUBLIC 채널 생성 로직
+   */
+  public PublicChannelCreateResponse createPublicChannel(PublicChannelCreateRequest request) {
+
+    Channel channel = Channel.builder()
+        .channelName(request.name())
+        .channelType(CHANNEL_TYPE_PUB)
+        .description(request.description())
+        .build();
+
+    channelRepository.saveChannel(channel);
+
+    return getPublicChannelCreateResponse(channel);
+  }
+
+
+  /**
+   * 스프린트 미션 5 심화 요구사항을 위한 **PRIVATE** 채널 생성 로직
+   */
+  @Override
+  public PrivateChannelCreateResponse createPrivateChannel(PrivateChannelCreateRequest request) {
+    Channel channel = Channel.builder()
+        .channelType(CHANNEL_TYPE_PRI)
+        .build();
+    channel.getParticipantIds().addAll(request.participantIds());
+
+    request.participantIds().forEach(uuid -> {
+      readStatusRepository.save(new ReadStatus(uuid, channel.getId()));
+    });
+
+    channelRepository.saveChannel(channel);
+
+    return new PrivateChannelCreateResponse(channel.getId(), channel.getCreatedAt(),
+        channel.getUpdatedAt(), channel.getChannelType(), channel.getChannelName(),
+        channel.getDescription());
+  }
+
+  /**
+   * 스프린트 미션 5, 유저가 참여중인 channel 목록 조회
+   */
+  @Override
+  public List<ChannelFindOfUserResponse> findAllChannelsFindByUserId(UUID userId) {
+    List<ChannelFindOfUserResponse> responses = new ArrayList<>();
+    Map<UUID, Channel> channel = channelRepository.findAllChannel();
+
+    setChannelList(userId, channel, responses);
+
+    return responses;
+  }
+
+
+  /**
+   * 스프린트 미션 5, 채널 수정
+   */
+  @Override
+  public ChannelModifyResponse modifyChannel(UUID channelId, ChannelModifyRequest request) {
+    Channel findChannel = channelRepository.findChannelById(channelId);
+    if (findChannel == null) {
+      throw new ChannelNotFoundException(channelId);
+    }
+
+    if (findChannel.getChannelType().equals("PRIVATE")) {
+      throw new PrivateChannelCanNotModifyException();
+    }
+
+    findChannel.modifyChannel(request.newName(), request.newDescription());
+    channelRepository.saveChannel(findChannel);
+
+    return new ChannelModifyResponse(findChannel.getId(), findChannel.getCreatedAt(),
+        findChannel.getUpdatedAt(), findChannel.getChannelType(), findChannel.getChannelName(),
+        findChannel.getDescription());
+  }
+
   @Override
   public ChannelResponse createChannel(ChannelCreateRequest request) {
     User owner = userRepository.findUserByName(request.ownerName());
@@ -114,44 +188,6 @@ public class BasicChannelService implements ChannelService {
     channelRepository.saveChannel(channel);
 
     return convertToChannelResponse(channel);
-  }
-
-  /**
-   * 스프린트 미션 5 심화 요구사항을 위한 PUBLIC 채널 생성 로직
-   */
-  public PublicChannelCreateResponse createPublicChannel(PublicChannelCreateRequest request) {
-
-    Channel channel = Channel.builder()
-        .channelName(request.name())
-        .channelType(CHANNEL_TYPE_PUB)
-        .description(request.description())
-        .build();
-
-    channelRepository.saveChannel(channel);
-
-    return getPublicChannelCreateResponse(channel);
-  }
-
-
-  /**
-   * 스프린트 미션 5 심화 요구사항을 위한 **PRIVATE** 채널 생성 로직
-   */
-  @Override
-  public PrivateChannelCreateResponse createPrivateChannel(PrivateChannelCreateRequest request) {
-    Channel channel = Channel.builder()
-        .channelType(CHANNEL_TYPE_PRI)
-        .build();
-    channel.getParticipantIds().addAll(request.participantIds());
-
-    request.participantIds().forEach(uuid -> {
-      readStatusRepository.save(new ReadStatus(uuid, channel.getId()));
-    });
-
-    channelRepository.saveChannel(channel);
-
-    return new PrivateChannelCreateResponse(channel.getId(), channel.getCreatedAt(),
-        channel.getUpdatedAt(), channel.getChannelType(), channel.getChannelName(),
-        channel.getDescription());
   }
 
   /**
@@ -259,18 +295,6 @@ public class BasicChannelService implements ChannelService {
         ));
   }
 
-  /**
-   * 스프린트 미션 5, 유저가 참여중인 channel 목록 조회
-   */
-  @Override
-  public List<ChannelFindOfUserResponse> findAllChannelsFindByUserId(UUID userId) {
-    List<ChannelFindOfUserResponse> responses = new ArrayList<>();
-    Map<UUID, Channel> channel = channelRepository.findAllChannel();
-
-    setChannelList(userId, channel, responses);
-
-    return responses;
-  }
 
   private void setChannelList(UUID userId, Map<UUID, Channel> channel,
       List<ChannelFindOfUserResponse> responses) {
@@ -312,27 +336,6 @@ public class BasicChannelService implements ChannelService {
         channel.getChannelOwnerUser().getId(), channel.getChannelType());
   }
 
-  /**
-   * 스프린트 미션 5, 채널 수정
-   */
-  @Override
-  public ChannelModifyResponse modifyChannel(UUID channelId, ChannelModifyRequest request) {
-    Channel findChannel = channelRepository.findChannelById(channelId);
-    if (findChannel == null) {
-      throw new ChannelNotFoundException(channelId);
-    }
-
-    if (findChannel.getChannelType().equals("PRIVATE")) {
-      throw new PrivateChannelCanNotModifyException();
-    }
-
-    findChannel.modifyChannel(request.newName(), request.newDescription());
-    channelRepository.saveChannel(findChannel);
-
-    return new ChannelModifyResponse(findChannel.getId(), findChannel.getCreatedAt(),
-        findChannel.getUpdatedAt(), findChannel.getChannelType(), findChannel.getChannelName(),
-        findChannel.getDescription());
-  }
 
   /**
    * 채널에 메세지 추가
