@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -36,18 +38,13 @@ public class BinaryContentServiceImpl implements BinaryContentService {
       uploadFiles.addAll(fileManager.saveFiles(request));
     }
 
-//    UUID fileId = convertToUUID(uploadFiles.get(0).getSavedFileName());
     String savedFileName = uploadFiles.get(0).getSavedFileName();
     int index = savedFileName.lastIndexOf(".");
 
     UUID fileId = UUID.fromString(savedFileName.substring(0, index));
 
-    BinaryContent binaryContent = BinaryContent.builder()
-        .fileId(fileId)
-        .binaryContentName(request.getFileName())
-        .uploadFile(uploadFiles.get(0))
-        .uploadFiles(uploadFiles)
-        .build();
+    BinaryContent binaryContent = saveBinaryContent(
+        request, fileId, uploadFiles);
 
     binaryContentRepository.save(binaryContent);
 
@@ -124,8 +121,26 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         .findFirst();
   }
 
-  // id로 검색
+  /**
+   * 스프린트 미션 5, 여러 첨부파일 조회
+   */
+  @Override
+  public List<BinaryContentResponse> findAll(List<String> binaryContentIds) {
+    Map<UUID, BinaryContent> files = binaryContentRepository.findAll();
 
+    Set<UUID> setIds = binaryContentIds.stream()
+        .map(UUID::fromString)
+        .collect(Collectors.toSet());
+
+    return files.values().stream()
+        .filter(binaryContent -> setIds.contains(binaryContent.getFileId()))
+        .map(bin -> new BinaryContentResponse(bin.getFileId(), bin.getCreatedAt(),
+            bin.getBinaryContentName(), bin.getSize(), bin.getContentType(), bin.getBytes()))
+        .toList();
+  }
+
+
+  // id로 검색
   @Override
   public List<BinaryContentResponse> findAllById(UUID id) {
     Map<UUID, BinaryContent> findAllFiles = binaryContentRepository.findAll();
@@ -135,10 +150,6 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         .map(f -> new BinaryContentResponse(f.getFileId(), f.getCreatedAt(),
             f.getBinaryContentName(), f.getSize(), f.getContentType(), f.getBytes()))
         .toList();
-//        .filter(entry -> entry.getKey().equals(id))
-//        .flatMap(entry -> entry.getValue().getUploadFiles().stream())
-//        .map(uploadFile -> new BinaryContentResponse(id, uploadFile.getSavedFileName()))
-//        .toList();
   }
 
   @Override
@@ -148,7 +159,7 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     return id;
   }
 
-  public static UUID convertToUUID(String fileId) {
+  protected static UUID convertToUUID(String fileId) {
     int idx = fileId.lastIndexOf(".");
     String fileName = fileId.substring(0, idx);
 
@@ -168,4 +179,18 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     // 문자열을 UUID 객체로 변환
     return UUID.fromString(formattedUUID);
   }
+
+  private static BinaryContent saveBinaryContent(BinaryContentRequest request, UUID fileId,
+      List<UploadBinaryContent> uploadFiles) {
+    return BinaryContent.builder()
+        .fileId(fileId)
+        .size(uploadFiles.get(0).getSize())
+        .contentType(uploadFiles.get(0).getContentType())
+        .bytes(uploadFiles.get(0).getBytes())
+        .binaryContentName(request.getFileName())
+        .uploadFile(uploadFiles.get(0))
+        .uploadFiles(uploadFiles)
+        .build();
+  }
+  
 }

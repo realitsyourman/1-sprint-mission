@@ -140,6 +140,7 @@ public class BasicChannelService implements ChannelService {
     Channel channel = Channel.builder()
         .channelType(CHANNEL_TYPE_PRI)
         .build();
+    channel.getParticipantIds().addAll(request.participantIds());
 
     request.participantIds().forEach(uuid -> {
       readStatusRepository.save(new ReadStatus(uuid, channel.getId()));
@@ -273,16 +274,17 @@ public class BasicChannelService implements ChannelService {
 
     responses.addAll(
         channel.values().stream()
-            .filter(chan -> chan.getChannelUsers().containsKey(userId))
+            .filter(chan -> chan.getParticipantIds().contains(userId))
             .map(ch -> new ChannelFindOfUserResponse(
                 ch.getId(),
                 ch.getChannelType(),
                 ch.getChannelName(),
                 ch.getDescription(),
-                new ArrayList<>(ch.getChannelUsers().keySet())
+                ch.getParticipantIds()
             ))
             .toList()
     );
+
   }
 
   /**
