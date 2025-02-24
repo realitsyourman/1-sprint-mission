@@ -4,14 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sprint.mission.discodeit.entity.BaseObject;
 import com.sprint.mission.discodeit.exception.user.IllegalUserException;
-import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.Setter;
 
 @Getter
@@ -121,7 +119,7 @@ public class User extends BaseObject implements Serializable {
 
   private boolean checkUserName(String userName) {
     if (userName == null || userName.isEmpty()) {
-      throw new UserNotFoundException("이름을 작성해주세요.");
+      throw new IllegalUserException("이름을 작성해주세요.");
     }
     return true;
   }
@@ -130,9 +128,9 @@ public class User extends BaseObject implements Serializable {
     final String EMAIL_REGEX = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-zA-Z0-9]+$";
 
     if (userEmail == null || userEmail.isEmpty()) {
-      throw new UserNotFoundException("이메일을 적어주세요.");
+      throw new IllegalUserException("이메일을 적어주세요.");
     } else if (!userEmail.matches(EMAIL_REGEX)) {
-      throw new UserNotFoundException("이메일 형식이 잘못되었습니다.");
+      throw new IllegalUserException("이메일 형식이 잘못되었습니다.");
     }
 
     return true;
@@ -141,7 +139,7 @@ public class User extends BaseObject implements Serializable {
 
   private boolean checkUserPassword(String userPassword) {
     if (userPassword == null || userPassword.length() < 6) {
-      throw new UserNotFoundException("비밀번호가 잘못되었습니다.");
+      throw new IllegalUserException("비밀번호가 잘못되었습니다.");
     }
     return true;
   }

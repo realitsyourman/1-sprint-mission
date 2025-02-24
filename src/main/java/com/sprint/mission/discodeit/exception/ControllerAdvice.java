@@ -11,12 +11,11 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @RestControllerAdvice
 public class ControllerAdvice {
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(NoResourceFoundException.class)
-    public ErrorResult userNotFound(NoResourceFoundException e) {
-        log.error("Request exception: {}", e.getMessage());
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ErrorResult userNotFound(NoResourceFoundException e) {
 
-        return new ErrorResult(ErrorCode.RESOURCE_NOT_FOUND);
-    }
+    return new ErrorResult(ErrorCode.RESOURCE_NOT_FOUND);
+  }
 
 }

@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.auth.ResponseLogin;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserLoginRequest;
 import com.sprint.mission.discodeit.entity.user.UserLoginResponse;
+import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.exception.user.UserAuthException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -42,12 +43,12 @@ public class UserAuthService implements AuthService {
     User findUser = userRepository.findUserByName(request.username());
 
     if (findUser == null) {
-      throw new UserNotFoundException("찾는 유저가 없습니다.");
+      throw new UserNotFoundException(request.username());
     }
 
     if (!findUser.getUserName().equals(request.username()) || !findUser.getUserPassword()
         .equals(request.password())) {
-      throw new UserAuthException("아이디 또는 비밀버호가 잘못 되었습니다.");
+      throw new IllegalUserException("아이디 또는 비밀버호가 잘못 되었습니다.");
     }
 
     return new ResponseLogin(findUser.getId(), findUser.getCreatedAt(), findUser.getUpdatedAt(),

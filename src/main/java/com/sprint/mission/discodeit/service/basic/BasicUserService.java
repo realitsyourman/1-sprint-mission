@@ -18,6 +18,7 @@ import com.sprint.mission.discodeit.entity.user.find.UserFindResponse;
 import com.sprint.mission.discodeit.entity.user.update.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.update.UserUpdateResponse;
 import com.sprint.mission.discodeit.exception.user.IllegalUserException;
+import com.sprint.mission.discodeit.exception.user.UserExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
@@ -58,7 +59,7 @@ public class BasicUserService implements UserService {
   @Override
   public UserCommonResponse createUser(UserCommonRequest user) {
     if (user == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("null user");
     }
     checkDuplicated(user.userName(), user.userEmail());
 
@@ -87,7 +88,7 @@ public class BasicUserService implements UserService {
     try {
       User user = userRepository.findUserByEmail(createDto.userEmail());
       if (user == null) {
-        throw new UserNotFoundException("방금 생성한 사용자를 찾을 수 없습니다.");
+        throw new UserNotFoundException("null user");
       }
 
       // 프로필 이미지 업로드 및 저장
@@ -111,6 +112,7 @@ public class BasicUserService implements UserService {
   public UserCreateResponse createUserWithProfile(UserCreateRequest request,
       MultipartFile file) throws IOException {
 
+    // 중복 체크
     checkDuplicated(request.username(), request.email());
 
     if (file == null) {
@@ -135,7 +137,7 @@ public class BasicUserService implements UserService {
   public UserResponse find(UUID userId) {
     User user = userRepository.findUserById(userId);
     if (user == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("null user");
     }
 
     UserStatus status = userStateService.find(userId);
@@ -156,7 +158,7 @@ public class BasicUserService implements UserService {
     User findUser = userRepository.findUserByName(userName);
 
     if (findUser == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException(userName);
     }
 
     return convertToUserResponse(findUser.getId(), findUser.getUserName(), findUser.getUserEmail());
@@ -168,7 +170,7 @@ public class BasicUserService implements UserService {
   @Override
   public List<UserResponse> findAll() {
     Map<UUID, User> allUsersMap = Optional.ofNullable(userRepository.findAllUser())
-        .orElseThrow(() -> new UserNotFoundException("유저가 아무도 없습니다."));
+        .orElseThrow(() -> new UserNotFoundException("null"));
 
     return allUsersMap.entrySet().stream()
         .map(entry -> new UserResponse(
@@ -271,6 +273,9 @@ public class BasicUserService implements UserService {
   public UserUpdateResponse updateUser(UUID userId, UserUpdateRequest request, MultipartFile file)
       throws IOException {
 
+    checkNull(userId);
+    checkDuplicated(request.newUsername(), request.newEmail());
+
     if (file == null) {
       return savedNoneProfileImgUser(userId, request);
     }
@@ -366,7 +371,7 @@ public class BasicUserService implements UserService {
         .getSavedFileName();
   }
 
-  private void checkDuplicated(String name, String eamil) {
+  private void checkDuplicated(String name, String email) {
     /**
      * `username`과 `email`은 다른 유저와 같으면 안됩니다.
      */
@@ -379,10 +384,12 @@ public class BasicUserService implements UserService {
         .anyMatch(users -> users.getUserName().equals(name));
 
     boolean isSameEmail = allUsers.values().stream()
-        .anyMatch(users -> users.getUserEmail().equals(eamil));
+        .anyMatch(users -> users.getUserEmail().equals(email));
 
-    if (isSameUser || isSameEmail) {
-      throw new IllegalUserException("username 또는 email이 다른 유저와 같습니다.");
+    if (isSameEmail) {
+      throw new UserExistsException(email);
+    } else if (isSameUser) {
+      throw new UserExistsException(name);
     }
   }
 
@@ -437,6 +444,13 @@ public class BasicUserService implements UserService {
     return userRepository.userSave(findUser);
   }
 
+  private void checkNull(UUID userId) {
+    User user = userRepository.findUserById(userId);
+    if (user == null) {
+      throw new UserNotFoundException(userId.toString());
+    }
+  }
+
   private static void checkNullAndUpdateUser(UserUpdateRequest request, User findUser) {
     if (request.newUsername() != null && !request.newUsername().isEmpty()) {
       findUser.setUserName(request.newUsername());
@@ -450,17 +464,4 @@ public class BasicUserService implements UserService {
       findUser.setUserPassword(request.newPassword());
     }
   }
-
-/*    private static User convertToUser(UserCommonRequest updateDto, UserResponse findUser) {
-        User user = new User(findUser.getUserName(), findUser.getUserEmail(), updateDto.userPassword(), );
-        return user;
-    }
-
-    private UserResponse getUserResponse(UUID userId, UserCommonRequest updateDto) {
-        if(userId == null || updateDto == null) {
-            throw new IllegalUserException();
-        }
-        UserResponse findUser = getUserById(userId);
-        return findUser;
-    }*/
 }

@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.status.user.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.UserCommonRequest;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
+import com.sprint.mission.discodeit.exception.userstatus.UserStatusNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import com.sprint.mission.discodeit.service.StatusService;
@@ -124,9 +125,13 @@ public class UserStateService implements StatusService<UserStatus> {
 
     UserStatus userStatus = userStatusRepository.findById(userId);
     if (userStatus == null) {
-      userStatus = new UserStatus(userId);
-      userStatusRepository.save(userStatus);
+      throw new UserStatusNotFoundException(userId);
     }
+
+//    if (userStatus == null) {
+//      userStatus = new UserStatus(userId);
+//      userStatusRepository.save(userStatus);
+//    }
 
     userStatus.updateUserStatus();
     UserStatus updateState = userStatusRepository.updateState(userId, userStatus);

@@ -16,9 +16,10 @@ import com.sprint.mission.discodeit.entity.message.create.MessageCreateRequest;
 import com.sprint.mission.discodeit.entity.message.create.MessageCreateResponse;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
+import com.sprint.mission.discodeit.exception.message.ChannelAuthorNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
-import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
 import com.sprint.mission.discodeit.factory.EntityFactory;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -34,6 +35,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -104,16 +106,18 @@ public class BasicMessageService implements MessageService {
   public MessageAndFileCreateResponse create(MessageAndFileCreateRequest request,
       List<MultipartFile> files) {
 
+    List<UUID> filesUUID = new ArrayList<>();
+    
     Channel findChannel = channelRepository.findChannelById(request.channelId());
-    if (findChannel.getParticipantIds().contains(request.authorId())) {
-      throw new UserNotFoundException("유저가 있지 않은 채널에 메세지를 보낼 수 없습니다.");
-    }
+    checkChannelAndUser(request, findChannel);
 
     Message message = Message.createMessage(request.authorId(), request.channelId(),
         request.content());
 
     // 파일 처리
-    List<UUID> filesUUID = uploadFiles(files, message.getId());
+    if (files != null) {
+      filesUUID = uploadFiles(files, message.getId());
+    }
 
     message.updateAttachmentIds(filesUUID);
     messageRepository.saveMessage(message);
@@ -138,13 +142,13 @@ public class BasicMessageService implements MessageService {
     Channel findChannel = channelRepository.findChannelById(channelId);
 
     if (findChannel == null) {
-      throw new ChannelNotFoundException("조회하는 채널이 없습니다.");
+      throw new ChannelNotFoundException(channelId);
     }
 
     Map<UUID, Message> channelMessages = findChannel.getChannelMessages();
     return channelMessages.entrySet().stream()
         .collect(Collectors.toMap(
-            Map.Entry::getKey,
+            Entry::getKey,
             entry -> {
               Message message = entry.getValue();
               List<BinaryContentResponse> attachments =
@@ -222,6 +226,9 @@ public class BasicMessageService implements MessageService {
   @Override
   public MessageUpdateResponse updateMessage(UUID messageId, MessageContentUpdateRequest request) {
     Message findMessage = messageRepository.findMessageById(messageId);
+    if (findMessage == null) {
+      throw new MessageNotFoundException(messageId.toString());
+    }
 
     findMessage.updateMessageContent(request.newContent());
 
@@ -245,7 +252,7 @@ public class BasicMessageService implements MessageService {
   public void remove(UUID messageId) {
     Message findMessage = messageRepository.findMessageById(messageId);
     if (findMessage == null) {
-      throw new MessageNotFoundException();
+      throw new MessageNotFoundException(messageId.toString());
     }
 
     List<BinaryContentResponse> files = binaryContentService.findAllById(messageId);
@@ -292,6 +299,7 @@ public class BasicMessageService implements MessageService {
     return findChannel;
   }
 
+
   private List<UUID> uploadFiles(List<MultipartFile> files, UUID messageId) {
     List<UploadBinaryContent> uploadFiles = binaryContentService.createFiles(files, messageId);
     return uploadFiles.stream()
@@ -299,6 +307,16 @@ public class BasicMessageService implements MessageService {
             UUID.fromString(f.getSavedFileName()
                 .substring(0, f.getSavedFileName().lastIndexOf("."))))
         .toList();
+  }
+
+  private void checkChannelAndUser(MessageAndFileCreateRequest request, Channel findChannel) {
+    User author = userRepository.findUserById(request.authorId());
+    if (findChannel == null) {
+      throw new ChannelNotFoundException(request.channelId());
+    }
+    if (author == null) {
+      throw new ChannelAuthorNotFoundException(request.authorId().toString());
+    }
   }
 
   private void removeMessageInChannel(UUID messageId) {
@@ -320,7 +338,7 @@ public class BasicMessageService implements MessageService {
   private UUID convertToUUID(String messageId) {
     if (messageId.length() == 36) {
       return UUID.fromString(messageId);
-    } else if (messageId == null || messageId.length() != 32 || !messageId.matches(
+    } else if (messageId.length() != 32 || !messageId.matches(
         "[0-9a-fA-F]+")) {
       throw new MessageNotFoundException("messageID를 확인해주세요");
     }
@@ -389,7 +407,7 @@ public class BasicMessageService implements MessageService {
   private void checkInChannel(MessageCreateRequest request, User sender, User receiver) {
     Channel findChannel = channelRepository.findChannelById(request.channelId());
     if (!(findChannel.isThereUserHere(sender) && findChannel.isThereUserHere(receiver))) {
-      throw new UserNotFoundException("채널에 해당 유저가 없습니다.");
+      throw new IllegalChannelException("채널에 해당 유저가 없습니다.");
     }
   }
 }

@@ -59,6 +59,7 @@ public class UserControllerV2 {
   /**
    * 유저 삭제
    */
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{userId}")
   public UUID userDelete(@PathVariable("userId") UUID userId) {
     return userService.deleteUser(userId);

@@ -21,8 +21,8 @@ public class BinaryContentsControllerV2 {
    * 첨부파일 조회
    */
   @GetMapping("/{binaryContentId}")
-  public BinaryContentResponse findFile(@PathVariable("binaryContentId") String binaryContentId) {
-    return binaryContentService.find(binaryContentId);
+  public BinaryContentResponse findFile(@PathVariable("binaryContentId") String fileName) {
+    return binaryContentService.find(fileName);
   }
 
   /**

@@ -25,6 +25,7 @@ import com.sprint.mission.discodeit.entity.user.UserChannelOwnerResponse;
 import com.sprint.mission.discodeit.entity.user.UserRole;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
+import com.sprint.mission.discodeit.exception.channel.PrivateChannelCanNotModifyException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.factory.BaseEntityFactory;
@@ -80,7 +81,7 @@ public class BasicChannelService implements ChannelService {
     User owner = userRepository.findUserByName(request.ownerName());
 
     if (owner == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException(request.ownerName());
     }
 
     ChannelResponse channelCreateRequest = new ChannelResponse(
@@ -209,8 +210,10 @@ public class BasicChannelService implements ChannelService {
       throw new IllegalChannelException("채널 아이디가 올바르지 않습니다.");
     }
 
-    Channel findChannel = channelValidator.entityValidate(
-        channelRepository.findChannelById(channelId));
+    Channel findChannel = channelRepository.findChannelById(channelId);
+    if (findChannel == null) {
+      return null;
+    }
 
     // 채널에서 가장 최근의 메세지 시간 정보 뽑기
     Map<UUID, ReadStatus> allReadStatus = readStatusRepository.findAll();
@@ -316,11 +319,11 @@ public class BasicChannelService implements ChannelService {
   public ChannelModifyResponse modifyChannel(UUID channelId, ChannelModifyRequest request) {
     Channel findChannel = channelRepository.findChannelById(channelId);
     if (findChannel == null) {
-      throw new ChannelNotFoundException();
+      throw new ChannelNotFoundException(channelId);
     }
 
     if (findChannel.getChannelType().equals("PRIVATE")) {
-      throw new IllegalChannelException("Private channel cannot be updated");
+      throw new PrivateChannelCanNotModifyException();
     }
 
     findChannel.modifyChannel(request.newName(), request.newDescription());
@@ -340,7 +343,7 @@ public class BasicChannelService implements ChannelService {
     MessageResponse message = messageService.getMessageById(request.messageId());
 
     if (findChannel == null || message == null) {
-      throw new ChannelNotFoundException();
+      throw new ChannelNotFoundException(request.channelId());
     }
 
     User sender = userRepository.findUserById(message.senderId());
@@ -565,121 +568,10 @@ public class BasicChannelService implements ChannelService {
 
   private static ReadStatus findRecentMessageReadStatus(Map<UUID, ReadStatus> allReadStatus,
       Channel findChannel) {
-    ReadStatus status = allReadStatus.values().stream()
+
+    return allReadStatus.values().stream()
         .filter(entry -> entry.getChannelId().equals(findChannel.getId()))
         .max(Comparator.comparing(ReadStatus::getLastReadAt))
-        .orElseThrow(() -> new ChannelNotFoundException("시간 정보를 찾지 못했습니다."));
-    return status;
+        .orElse(null);
   }
-
-  //        channels.values().stream()
-//                .filter(entry -> {
-//                    if(entry.getChannelMessages().isEmpty()) {
-//                        return false;
-//                    }
-//                    return entry.getId().equals(channelUUID);
-//                })
-//                .forEach(entry -> {
-
-//                    entry.getChannelMessages().values().forEach(message -> messageService.deleteMessage(message.getId()));
-//                });
-    /*@Override
-    public void addUserChannel(UUID channelUUID, User addUser) {
-        if (addUser == null) {
-            throw new UserNotFoundException();
-        }
-
-        Channel findChannel = findChannelById(channelUUID);
-
-        findChannel.addUser(addUser);
-
-        channelRepository.saveChannel(findChannel);
-    }
-
-    @Override
-    public void kickUserChannel(UUID channelUUID, User kickUser) {
-        User wantKickUser = userValidator.entityValidate(kickUser);
-
-        Channel findChannel = findChannelById(channelUUID);
-
-        if (findChannel.getChannelOwnerUser().equals(wantKickUser)) {
-            findNextOwnerUser(findChannel);
-        }
-
-        findChannel.removeUser(wantKickUser);
-
-        channelRepository.saveChannel(findChannel);
-    }
-
-    private void findNextOwnerUser(Channel findChannel) {
-        Channel channel = channelValidator.entityValidate(findChannel);
-
-        User nextOwnerUser = channel.getChannelUsers().entrySet().stream()
-                .filter(entry -> !entry.getValue().equals(findChannel.getChannelOwnerUser()))
-                .findAny()
-                .map(Map.Entry::getValue)
-                .orElseThrow(UserNotFoundException::new);
-
-        channel.updateOwnerUser(nextOwnerUser);
-        channel.removeUser(nextOwnerUser);
-    }
-
-    *//**
-   * @param channelId
-   * @param removeMessage
-   * @Description: 메세지 서비스에서 가져온 메세지를 삭제, getMessageById에서 검증할 것임
-   *//*
-    @Override
-    public void removeMessageInCh(UUID channelId, Message removeMessage) {
-        Channel findChannel = findChannelById(channelId);
-
-        Message message = messageValidator.entityValidate(removeMessage);
-
-        findChannel.getChannelMessages().remove(message.getId());
-
-        channelRepository.saveChannel(findChannel);
-
-        messageService.deleteMessage(message.getId());
-    }
-
-    *//**
-   * @param channelId
-   * @param messageId
-   * @return Message
-   * @Description: 채널에서 특정 메세지를 ID로 찾기
-   *//*
-    @Override
-    public Message findChannelMessageById(UUID channelId, UUID messageId) {
-        Channel findChannel = findChannelById(channelId);
-
-        return findChannel.getChannelMessages().entrySet().stream()
-                .filter(entry -> entry.getKey().equals(messageId))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseThrow(MessageNotFoundException::new);
-
-    }
-
-    @Override
-    public Map<UUID, Message> findChannelInMessageAll(UUID channelId) {
-        Channel findChannel = findChannelById(channelId);
-
-        return findChannel.getChannelMessages();
-    }*/
-
-  //    @Override
-//    public Map<UUID, Channel> getChannelByName(String channelName) {
-//        Map<UUID, Channel> allChannels = getAllChannels();
-//
-//        if (allChannels.isEmpty()) {
-//            throw new ChannelNotFoundException();
-//        }
-//
-//        return allChannels.entrySet().stream()
-//                .filter(entry -> entry.getValue().getChannelName().equals(channelName))
-//                .collect(Collectors.toMap(
-//                        Map.Entry::getKey,
-//                        Map.Entry::getValue
-//                ));
-//    }
 }

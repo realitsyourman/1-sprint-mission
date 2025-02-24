@@ -1,11 +1,11 @@
 package com.sprint.mission.discodeit.service.status;
 
-import com.sprint.mission.discodeit.entity.status.read.ReadStatusModifyRequest;
-import com.sprint.mission.discodeit.entity.status.read.ReadStatusModifyResponse;
 import com.sprint.mission.discodeit.entity.status.read.ChannelReadStatus;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusCreateRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusCreateResponse;
+import com.sprint.mission.discodeit.entity.status.read.ReadStatusModifyRequest;
+import com.sprint.mission.discodeit.entity.status.read.ReadStatusModifyResponse;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusResponse;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
@@ -13,6 +13,8 @@ import com.sprint.mission.discodeit.entity.status.read.UserReadStatusResponse;
 import com.sprint.mission.discodeit.entity.user.UserCommonResponse;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusExistsException;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
@@ -58,6 +60,9 @@ public class ReadStatusService implements StatusService<ReadStatus> {
    */
   @Override
   public ReadStatusCreateResponse createReadStatus(ReadStatusRequest request) {
+    isExistsReadStatus(request);
+    isExistsUserOrChannel(request);
+
     ReadStatus readStatus = ReadStatus.createReadStatus(request.userId(), request.channelId(),
         request.lastReadAt());
 
@@ -159,6 +164,10 @@ public class ReadStatusService implements StatusService<ReadStatus> {
       ReadStatusModifyRequest request) {
 
     ReadStatus readStatus = readStatusRepository.find(readStatusId);
+    if (readStatus == null) {
+      throw new ReadStatusNotFoundException(readStatusId);
+    }
+
     readStatus.updateLastReadAt();
 
     readStatusRepository.save(readStatus);
@@ -204,9 +213,23 @@ public class ReadStatusService implements StatusService<ReadStatus> {
 
   private void isNotExistsChannelOrUser(ReadStatusCreateRequest createRequest) {
     Optional.ofNullable(channelService.findChannelById(createRequest.channelId()))
-        .orElseThrow(() -> new ChannelNotFoundException("채널이 존재하지 않습니다."));
+        .orElseThrow(() -> new ChannelNotFoundException(createRequest.channelId()));
     Optional.ofNullable(userService.find(createRequest.userId()))
-        .orElseThrow(() -> new UserNotFoundException("유저가 존재하지 않습니다."));
+        .orElseThrow(() -> new UserNotFoundException(createRequest.userId().toString()));
+  }
+
+  private void isExistsUserOrChannel(ReadStatusRequest request) {
+    if (userService.find(request.userId()) == null) {
+      throw new UserNotFoundException(request.userId().toString());
+    } else if (channelService.findChannelById(request.channelId()) == null) {
+      throw new ChannelNotFoundException(request.channelId());
+    }
+  }
+
+  private void isExistsReadStatus(ReadStatusRequest request) {
+    if (readStatusRepository.find(request.userId()) != null) {
+      throw new ReadStatusExistsException(request.userId(), request.channelId());
+    }
   }
 
   private UUID convertToUUID(String messageId) {

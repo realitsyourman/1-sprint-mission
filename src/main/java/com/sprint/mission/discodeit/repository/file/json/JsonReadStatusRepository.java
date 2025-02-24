@@ -30,12 +30,7 @@ public class JsonReadStatusRepository extends JsonRepository<UUID, ReadStatus> i
 
   @Override
   public ReadStatus save(ReadStatus readStatus) {
-    if (readStatus == null) {
-      throw new IllegalArgumentException("readStatus가 null입니다.");
-    }
-
-    map.put(readStatus.getChannelId(), readStatus);
-
+    map.put(readStatus.getId(), readStatus);
     saveToJson();
 
     return map.get(readStatus.getChannelId());

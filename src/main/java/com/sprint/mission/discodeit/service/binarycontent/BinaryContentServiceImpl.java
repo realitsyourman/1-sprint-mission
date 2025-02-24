@@ -74,7 +74,10 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     //메세지 아이디, 사이즈, contentType, bytes도 만들어서 넣어야함
     uploadFiles.forEach(
         file -> binaryContentRepository.save(
-            BinaryContent.createBinaryContent(messageId, file.getSavedFileName(), file.getSize(),
+            BinaryContent.createBinaryContent(
+                UUID.fromString(
+                    file.getSavedFileName().substring(0, file.getSavedFileName().lastIndexOf("."))),
+                file.getSavedFileName(), file.getSize(),
                 file.getContentType(), file.getBytes(), file, uploadFiles)
         )
     );
@@ -84,7 +87,12 @@ public class BinaryContentServiceImpl implements BinaryContentService {
 
   @Override
   public BinaryContentResponse find(String fileName) {
-    UUID id = UUID.fromString(fileName.substring(0, fileName.lastIndexOf(".")));
+    UUID id;
+    if (fileName.length() > 36) {
+      id = UUID.fromString(fileName.substring(0, fileName.lastIndexOf(".")));
+    } else {
+      id = UUID.fromString(fileName);
+    }
 
     BinaryContent findFile = binaryContentRepository.findById(id);
 
@@ -192,5 +200,5 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         .uploadFiles(uploadFiles)
         .build();
   }
-  
+
 }

@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.exception;
 
+import com.sprint.mission.discodeit.exception.message.ChannelAuthorNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.message.NullMessageContentException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
@@ -13,27 +14,32 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class MessageControllerExceptionAdvice {
 
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    @ExceptionHandler(MessageNotFoundException.class)
-    public ErrorResult messageNotFound(MessageNotFoundException e) {
-        log.error("Message exception: {}", e.getMessage());
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ExceptionHandler(MessageNotFoundException.class)
+  public ErrorResponse messageNotFound(MessageNotFoundException e) {
+    return new ErrorResponse(e.getMessage());
+  }
 
-        return new ErrorResult(ErrorCode.MESSAGE_NOT_FOUND);
-    }
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(NullMessageContentException.class)
+  public ErrorResult messageNullContent(NullMessageContentException e) {
+    log.error("Message exception: {}", e.getMessage());
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NullMessageContentException.class)
-    public ErrorResult messageNullContent(NullMessageContentException e) {
-        log.error("Message exception: {}", e.getMessage());
+    return new ErrorResult(ErrorCode.MESSAGE_NULL_CONTENT);
+  }
 
-        return new ErrorResult(ErrorCode.MESSAGE_NULL_CONTENT);
-    }
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  @ExceptionHandler(NullMessageTitleException.class)
+  public ErrorResult messageNullContent(NullMessageTitleException e) {
+    log.error("Message exception: {}", e.getMessage());
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NullMessageTitleException.class)
-    public ErrorResult messageNullContent(NullMessageTitleException e) {
-        log.error("Message exception: {}", e.getMessage());
+    return new ErrorResult(ErrorCode.MESSAGE_NULL_TITLE);
+  }
 
-        return new ErrorResult(ErrorCode.MESSAGE_NULL_TITLE);
-    }
+
+  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ExceptionHandler(ChannelAuthorNotFoundException.class)
+  public ErrorResponse messageAuthorNotFound(ChannelAuthorNotFoundException e) {
+    return new ErrorResponse(e.getMessage());
+  }
 }

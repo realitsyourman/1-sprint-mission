@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.BaseObject;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.message.NullMessageContentException;
 import com.sprint.mission.discodeit.exception.message.NullMessageTitleException;
+import com.sprint.mission.discodeit.exception.user.IllegalUserException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,21 +136,21 @@ public class Message extends BaseObject implements Serializable {
 
   private void checkSenderAndReceiver(User messageSendUser, User messageReceiveUser) {
     if (messageSendUser == null || messageReceiveUser == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("sender or receiver");
     } else if (messageSendUser.equals(messageReceiveUser)) {
-      throw new UserNotFoundException("메시지를 보내는 사람과 받는 사람이 같습니다.");
+      throw new IllegalUserException("메시지를 보내는 사람과 받는 사람이 같습니다.");
     }
   }
 
   private void checkSender(User sender) {
     if (sender == null) {
-      throw new UserNotFoundException("보낸 사람을 다시 지정하세요.");
+      throw new UserNotFoundException("null user");
     }
   }
 
   private void checkReceiver(User receiver) {
     if (receiver == null) {
-      throw new UserNotFoundException("받는 사람을 다시 지정하세요.");
+      throw new UserNotFoundException("null user");
     }
   }
 

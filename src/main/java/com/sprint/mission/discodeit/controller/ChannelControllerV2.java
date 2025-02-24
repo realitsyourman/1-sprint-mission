@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.service.ChannelService;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -29,6 +31,7 @@ public class ChannelControllerV2 {
 
   private final ChannelService channelService;
 
+  @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/public")
   public PublicChannelCreateResponse createPublicChannel(
       @RequestBody @Validated PublicChannelCreateRequest request) {
@@ -39,6 +42,7 @@ public class ChannelControllerV2 {
   /**
    * 채널에 참여하는 유저의 uuid를 받아 user별 readstatus 정보 생성 근데 name과 description 정보는 빼라고함
    */
+  @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/private")
   public PrivateChannelCreateResponse createPrivateChannel(
       @RequestBody @Validated PrivateChannelCreateRequest request) {
@@ -68,6 +72,7 @@ public class ChannelControllerV2 {
   /**
    * 채널 삭제
    */
+  @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{channelId}")
   public UUID deleteChannel(@PathVariable("channelId") UUID channelId) {
     return channelService.removeChannelById(channelId);

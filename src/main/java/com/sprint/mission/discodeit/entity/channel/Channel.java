@@ -118,7 +118,7 @@ public class Channel extends BaseObject implements Serializable {
 
   public UUID addUser(User user) {
     if (user == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("null user");
     }
 
     // 채널에 해당하는 유저 있으면 안됨
@@ -150,7 +150,7 @@ public class Channel extends BaseObject implements Serializable {
     channelUsers.entrySet().stream()
         .filter(entry -> entry.getKey().equals(user.getId()))
         .findFirst()
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(user.getUserName()));
 
     channelUsers.remove(user.getId());
     setUpdatedAt();
@@ -174,7 +174,7 @@ public class Channel extends BaseObject implements Serializable {
 
   private void checkChannelOwnerUser(User channelOwnerUser) {
     if (channelOwnerUser == null) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("null user");
     }
   }
 
@@ -191,7 +191,7 @@ public class Channel extends BaseObject implements Serializable {
     }
 
     if (!channelUsers.containsKey(sender) || !channelUsers.containsKey(receiver)) {
-      throw new UserNotFoundException();
+      throw new UserNotFoundException("sender or receiver");
     }
   }
 
