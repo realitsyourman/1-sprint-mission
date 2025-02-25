@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.entity.message.create.MessageCreateRequest;
 import com.sprint.mission.discodeit.entity.message.create.MessageCreateResponse;
 import com.sprint.mission.discodeit.factory.MessageRequestMapper;
 import com.sprint.mission.discodeit.service.MessageService;
+import io.swagger.v3.oas.annotations.Hidden;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Hidden
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/messages")

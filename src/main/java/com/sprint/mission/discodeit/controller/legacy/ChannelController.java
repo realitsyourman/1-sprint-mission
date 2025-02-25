@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.channel.create.ChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.channel.update.ChannelUpdateRequest;
 import com.sprint.mission.discodeit.entity.channel.update.ChannelUpdateResponse;
 import com.sprint.mission.discodeit.service.ChannelService;
+import io.swagger.v3.oas.annotations.Hidden;
 import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+@Hidden
 @RestController
 @RequestMapping("/api/v1/channels")
 @RequiredArgsConstructor
@@ -45,8 +47,6 @@ public class ChannelController {
   public Result<UUID> deleteChannel(@PathVariable("channelName") String channelName) {
     return new Result<>(channelService.removeChannelByName(channelName));
   }
-
-  // 유저가 가입한 모든 채널 뿌리기
 
   /**
    * 유저가 가입한 모들 채널 뿌리기
