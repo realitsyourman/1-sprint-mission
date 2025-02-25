@@ -1,4 +1,4 @@
-package com.sprint.mission.discodeit.repository.file.json;
+package com.sprint.mission.discodeit.repository.file;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
