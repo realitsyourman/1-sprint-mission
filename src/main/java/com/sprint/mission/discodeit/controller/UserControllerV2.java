@@ -10,6 +10,8 @@ import com.sprint.mission.discodeit.entity.user.update.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.update.UserUpdateResponse;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.status.UserStateService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+@Tag(name = "User Controller")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/users")
@@ -39,6 +42,7 @@ public class UserControllerV2 {
   /**
    * 유저 생성, 프사 선택
    */
+  @Operation(summary = "유저 생성")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public UserCreateResponse createUser(
@@ -51,6 +55,7 @@ public class UserControllerV2 {
   /**
    * 전체 user 목록 조회
    */
+  @Operation(summary = "전체 유저 목록 조회")
   @GetMapping
   public List<UserFindResponse> findUsers() {
     return userService.findAllUsers();
@@ -59,6 +64,7 @@ public class UserControllerV2 {
   /**
    * 유저 삭제
    */
+  @Operation(summary = "유저 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{userId}")
   public UUID userDelete(@PathVariable("userId") UUID userId) {
@@ -68,6 +74,7 @@ public class UserControllerV2 {
   /**
    * 유저 정보 수정
    */
+  @Operation(summary = "유저 정보 수정")
   @PatchMapping("/{userId}")
   public UserUpdateResponse updateUser(@PathVariable("userId") UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
@@ -79,6 +86,7 @@ public class UserControllerV2 {
   /**
    * user 온라인 상태 업데이트
    */
+  @Operation(summary = "유저 온라인 상태 업데이트")
   @PatchMapping("/{userId}/userStatus")
   public UserStatusUpdateResponse updateUserStatus(@PathVariable("userId") UUID userId,
       @RequestBody UserStatUpdateRequest request) {

@@ -8,6 +8,8 @@ import com.sprint.mission.discodeit.entity.channel.find.ChannelFindOfUserRespons
 import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyResponse;
 import com.sprint.mission.discodeit.service.ChannelService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@Tag(name = "Channel Controller")
 @RestController
 @RequestMapping("/api/channels")
 @RequiredArgsConstructor
@@ -31,6 +34,10 @@ public class ChannelControllerV2 {
 
   private final ChannelService channelService;
 
+  /**
+   * public 채널 생성
+   */
+  @Operation(summary = "공개 채널 생성")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/public")
   public PublicChannelCreateResponse createPublicChannel(
@@ -42,6 +49,7 @@ public class ChannelControllerV2 {
   /**
    * 채널에 참여하는 유저의 uuid를 받아 user별 readstatus 정보 생성 근데 name과 description 정보는 빼라고함
    */
+  @Operation(summary = "private 채널 생성")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/private")
   public PrivateChannelCreateResponse createPrivateChannel(
@@ -53,6 +61,7 @@ public class ChannelControllerV2 {
   /**
    * user가 참여중인 channel 목록 조회
    */
+  @Operation(summary = "유저가 참여 중인 채널 목록 조회")
   @GetMapping
   public List<ChannelFindOfUserResponse> findAllChannelsByUser(
       @RequestParam("userId") UUID userId) {
@@ -62,6 +71,7 @@ public class ChannelControllerV2 {
   /**
    * 채널 수정
    */
+  @Operation(summary = "채널 정보 수정")
   @PatchMapping("/{channelId}")
   public ChannelModifyResponse updateChannel(@PathVariable("channelId") UUID channelId,
       @Validated @RequestBody ChannelModifyRequest request) {
@@ -72,6 +82,7 @@ public class ChannelControllerV2 {
   /**
    * 채널 삭제
    */
+  @Operation(summary = "채널 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{channelId}")
   public UUID deleteChannel(@PathVariable("channelId") UUID channelId) {
