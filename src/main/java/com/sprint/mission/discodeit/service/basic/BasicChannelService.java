@@ -80,16 +80,25 @@ public class BasicChannelService implements ChannelService {
    * 스프린트 미션 5 심화 요구사항을 위한 PUBLIC 채널 생성 로직
    */
   public PublicChannelCreateResponse createPublicChannel(PublicChannelCreateRequest request) {
+    List<UUID> participantIds = findAllUsers();
 
     Channel channel = Channel.builder()
         .channelName(request.name())
         .channelType(CHANNEL_TYPE_PUB)
         .description(request.description())
+        .participantIds(participantIds)
         .build();
-
+    
     channelRepository.saveChannel(channel);
 
     return getPublicChannelCreateResponse(channel);
+  }
+
+  private List<UUID> findAllUsers() {
+    Map<UUID, User> users = userRepository.findAllUser();
+    return users.values().stream()
+        .map(user -> user.getId())
+        .toList();
   }
 
 

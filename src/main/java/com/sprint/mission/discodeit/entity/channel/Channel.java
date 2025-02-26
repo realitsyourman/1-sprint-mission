@@ -56,11 +56,13 @@ public class Channel extends BaseObject implements Serializable {
   private List<UUID> participantIds = new ArrayList<>();
 
   @Builder
-  public Channel(String channelName, String description, String channelType) {
+  public Channel(String channelName, String description, String channelType,
+      List<UUID> participantIds) {
     super(UUID.randomUUID(), Instant.now(), Instant.now());
     this.channelName = channelName;
     this.description = description;
     this.channelType = channelType;
+    this.participantIds = participantIds;
   }
 
   public boolean isThereUserHere(User user) {
