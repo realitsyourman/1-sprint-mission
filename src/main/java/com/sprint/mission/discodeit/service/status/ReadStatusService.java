@@ -24,6 +24,9 @@ public class ReadStatusService {
   private final UserRepository userRepository;
   private final ChannelRepository channelRepository;
 
+  /**
+   * 읽음 상태 생성
+   */
   public ReadStatusDto create(ReadStatusRequest request) {
     User user = userRepository.getReferenceById(request.userId());
     Channel channel = channelRepository.getReferenceById(request.channelId());
@@ -34,6 +37,9 @@ public class ReadStatusService {
     return ReadStatusMapper.toDto(readStatus);
   }
 
+  /**
+   * 읽음 상태 조회
+   */
   public List<ReadStatusDto> findByUserId(UUID userId) {
     List<ReadStatus> readStatuses = readStatusRepository.findAllByUser_Id(userId);
 
@@ -42,6 +48,9 @@ public class ReadStatusService {
         .toList();
   }
 
+  /**
+   * 읽음 상태 수정
+   */
   public ReadStatusDto update(UUID readStatusId, ReadStatusUpdateRequest request) {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
         .orElseThrow(ReadStatusNotFoundException::new);
@@ -50,215 +59,4 @@ public class ReadStatusService {
 
     return ReadStatusMapper.toDto(modifiedStat);
   }
-
-//  @Override
-//  public ReadStatus create(Object request) {
-//    if (!(request instanceof ReadStatusCreateRequest createRequest)) {
-//      throw new IllegalArgumentException("ReadStatusCreateRequest 객체가 아닙니다.");
-//    }
-//    return convertToReadStatus(createRequest);
-//  }
-//
-//  public ChannelReadStatus createChannelReadStatus(String channelId) {
-//    UUID uuid = convertToUUID(channelId);
-//    ReadStatus readStatus = find(uuid);
-//    if (readStatus != null) {
-//      return new ChannelReadStatus(readStatus.getChannelId(), readStatus.getLastReadAt());
-//    }
-//
-//    return new ChannelReadStatus(uuid, Instant.now());
-//  }
-//
-//  /**
-//   * 스프린트 미션 5, message 읽음 상태 생성
-//   */
-//  @Override
-//  public ReadStatusCreateResponse createReadStatus(ReadStatusRequest request) {
-//    isExistsReadStatus(request);
-//    isExistsUserOrChannel(request);
-//
-//    ReadStatus readStatus = ReadStatus.createReadStatus(request.userId(), request.channelId(),
-//        request.lastReadAt());
-//
-//    readStatusRepository.save(readStatus);
-//
-//    return new ReadStatusCreateResponse(readStatus.getId(), readStatus.getCreatedAt(),
-//        readStatus.getUpdatedAt(), readStatus.getUserId(), readStatus.getChannelId(),
-//        readStatus.getLastReadAt());
-//  }
-//
-//  /**
-//   * 스프린트 미션 5, user의 메세지 읽음 상태 목록 조회
-//   */
-//  @Override
-//  public List<ReadStatusResponse> findByUserId(UUID userId) {
-//    List<ReadStatus> allReadStatus = readStatusRepository.findAllReadStatusByUserId(userId);
-//
-//    return allReadStatus.stream()
-//        .map(
-//            read -> new ReadStatusResponse(read.getId(), read.getCreatedAt(), read.getUpdatedAt(),
-//                read.getUserId(), read.getChannelId(), read.getLastReadAt()))
-//        .toList();
-//  }
-//
-//
-//  /**
-//   * 스프린트 미션 5, readStatus id로 수정
-//   */
-//  @Override
-//  public ReadStatusModifyResponse updateReadStatus(UUID readStatusId,
-//      ReadStatusModifyRequest request) {
-//
-//    ReadStatus readStatus = readStatusRepository.find(readStatusId);
-//    if (readStatus == null) {
-//      throw new ReadStatusNotFoundException(readStatusId);
-//    }
-//
-//    readStatus.updateLastReadAt();
-//
-//    readStatusRepository.save(readStatus);
-//
-//    return new ReadStatusModifyResponse(readStatus.getLastReadAt());
-//  }
-//
-//  /**
-//   * `id`로 조회합니다.
-//   */
-//  @Override
-//  public ReadStatus find(UUID channelId) {
-//    return readStatusRepository.findByChannelId(channelId);
-//  }
-//
-//  /**
-//   * userId를 조건으로 전부 조회
-//   */
-//  @Override
-//  public Map<UUID, UserReadStatusResponse> findAllByUserId(String userName) {
-//    UserCommonResponse findUser = userService.find(userName);
-//    UUID userId = findUser.id();
-//    Map<UUID, ReadStatus> allReadStatus = readStatusRepository.findAll();
-//
-//    if (allReadStatus.isEmpty()) {
-//      throw new IllegalArgumentException("readStatus를 찾지 못했습니다.");
-//    }
-//
-//    // 디버깅을 위한 로그 추가
-//    System.out.println("Finding ReadStatus for user: " + userName + " (ID: " + userId + ")");
-//    allReadStatus.values().forEach(status ->
-//        System.out.println("ReadStatus - ChannelId: " + status.getChannelId() +
-//            ", UserId: " + status.getUserId())
-//    );
-//
-//    return allReadStatus.values().stream()
-//        .filter(stat -> {
-//          boolean matches = stat.getUserId().equals(userId);
-//          System.out.println("Checking ReadStatus - UserId: " + stat.getUserId() +
-//              " matches user " + userId + ": " + matches);
-//          return matches;
-//        })
-//        .collect(Collectors.toMap(
-//            ReadStatus::getChannelId,
-//            s -> new UserReadStatusResponse(s.getChannelId(), s.getLastReadAt())
-//        ));
-//  }
-//
-//  /**
-//   * DTO를 활용해 파라미터를 그룹화합니다. - 수정 대상 객체의 `id` 파라미터, 수정할 값 파라미터
-//   */
-//  @Override
-//  public ReadStatus update(Object request) {
-//    if (!(request instanceof ReadStatusUpdateRequest)) {
-//      throw new IllegalArgumentException("ReadStatusUpdateRequest 객체가 아닙니다.");
-//    }
-//    ReadStatusUpdateRequest updateRequest = (ReadStatusUpdateRequest) request;
-//    System.out.println("updateRequest.channelId() = " + updateRequest.channelId());
-//    ReadStatus findByChannelId = readStatusRepository.findByChannelId(updateRequest.channelId());
-//
-//    if (findByChannelId == null) {
-//      throw new IllegalArgumentException("채널에 대한 정보가 없습니다.");
-//    }
-//
-//    findByChannelId.updateLastReadAt();
-//    return findByChannelId;
-//  }
-//
-//  public ChannelReadStatus updateChannelReadStatus(String id) {
-//    UUID channelId = convertToUUID(id);
-//
-//    ReadStatus update = readStatusRepository.update(channelId);
-//
-//    return new ChannelReadStatus(update.getChannelId(), update.getLastReadAt());
-//  }
-//
-//
-//  /**
-//   * `id`로 삭제합니다.
-//   */
-//  @Override
-//  public void delete(UUID channelId) {
-//    ReadStatus findChannelStat = readStatusRepository.findByChannelId(channelId);
-//
-//    if (findChannelStat == null) {
-//      throw new IllegalArgumentException("채널에 대한 정보가 없습니다.");
-//    }
-//
-//    readStatusRepository.remove(channelId);
-//  }
-//
-//  private ReadStatus convertToReadStatus(ReadStatusCreateRequest createRequest) {
-//    // channel이나 user가 존재하지 않으면 예외
-//    isNotExistsChannelOrUser(createRequest);
-//
-//    // 같은 channel과 user와 관련된 객체가 있으면 예외
-//    isExistsChannelOrUser(createRequest);
-//
-//    ReadStatus readStatus = ReadStatus.createReadStatus(createRequest.userId(),
-//        createRequest.channelId());
-//    readStatusRepository.save(readStatus);
-//
-//    return readStatus;
-//  }
-//
-//  private void isExistsChannelOrUser(ReadStatusCreateRequest createRequest) {
-//    ReadStatus byChannelId = readStatusRepository.findByChannelId(createRequest.channelId());
-//    if (byChannelId != null) {
-//      throw new IllegalArgumentException("생성할 수 없습니다. 이미 채널이 존재합니다.");
-//    }
-//  }
-//
-//  private void isNotExistsChannelOrUser(ReadStatusCreateRequest createRequest) {
-//    Optional.ofNullable(channelService.findChannelById(createRequest.channelId()))
-//        .orElseThrow(() -> new ChannelNotFoundException(createRequest.channelId()));
-//    Optional.ofNullable(userService.find(createRequest.userId()))
-//        .orElseThrow(() -> new UserNotFoundException(createRequest.userId().toString()));
-//  }
-//
-//  private void isExistsUserOrChannel(ReadStatusRequest request) {
-//    if (userService.find(request.userId()) == null) {
-//      throw new UserNotFoundException(request.userId().toString());
-//    } else if (channelService.findChannelById(request.channelId()) == null) {
-//      throw new ChannelNotFoundException(request.channelId());
-//    }
-//  }
-//
-//  private void isExistsReadStatus(ReadStatusRequest request) {
-//    if (readStatusRepository.find(request.userId()) != null) {
-//      throw new ReadStatusExistsException(request.userId(), request.channelId());
-//    }
-//  }
-//
-//  private UUID convertToUUID(String messageId) {
-//    if (messageId == null || messageId.length() != 32 || !messageId.matches("[0-9a-fA-F]+")) {
-//      throw new MessageNotFoundException("messageID를 확인해주세요");
-//    }
-//
-//    String uuid = new StringBuilder(messageId)
-//        .insert(8, "-")
-//        .insert(13, "-")
-//        .insert(18, "-")
-//        .insert(23, "-")
-//        .toString();
-//
-//    return UUID.fromString(uuid);
-//  }
 }
