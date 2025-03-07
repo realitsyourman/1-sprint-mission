@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record MessageDto(
     UUID id,
-    Instant createAt,
+    Instant createdAt,
     Instant updatedAt,
     String content,
 

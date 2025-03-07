@@ -43,7 +43,7 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final BinaryContentRepository binaryContentRepository;
-  private PageResponseMapper<Message> pageResponseMapper;
+  private final PageResponseMapper<Message> pageResponseMapper = new PageResponseMapper<>();
 
   /**
    * 메세지 만들기
@@ -71,7 +71,7 @@ public class BasicMessageService implements MessageService {
   public PageResponse<Message> findMessagesWithPaging(UUID channelId, Pageable pageable) {
     PageRequest pageRequest = getPageRequest(pageable);
 
-    Page<Message> messages = messageRepository.findById(channelId, pageRequest);
+    Page<Message> messages = messageRepository.findAllByChannelId(channelId, pageRequest);
 
     return pageResponseMapper.fromPage(messages);
   }
