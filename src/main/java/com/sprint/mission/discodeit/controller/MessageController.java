@@ -8,6 +8,7 @@ import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -50,13 +51,16 @@ public class MessageController {
 
   /**
    * 채널의 메세지 목록 조회
+   * <p>
+   * 커서 기반 페이징
    */
   @Operation(summary = "채널 메세지 목록 조회")
   @GetMapping
-  public PageResponse<Message> findAll(@RequestParam("channelId") UUID channelId,
+  public PageResponse<Message> findAll(@RequestParam(name = "channelId") UUID channelId,
+      @RequestParam(name = "cursor", required = false) Instant cursor,
       Pageable pageable) {
 
-    return messageService.findMessagesWithPaging(channelId, pageable);
+    return messageService.findMessagesWithPaging(channelId, cursor, pageable);
   }
 
   /**
@@ -82,4 +86,15 @@ public class MessageController {
 
     return messageService.update(messageId, request);
   }
+
+  //  /**
+//   * 채널의 메세지 목록 조회
+//   */
+//  @Operation(summary = "채널 메세지 목록 조회")
+//  @GetMapping
+//  public PageResponse<Message> findAll(@RequestParam(name = "channelId") UUID channelId,
+//      Pageable pageable) {
+//
+//    return messageService.findMessagesWithPaging(channelId, pageable);
+//  }
 }
