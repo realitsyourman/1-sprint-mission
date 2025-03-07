@@ -1,16 +1,19 @@
 package com.sprint.mission.discodeit.controller;
 
-import com.sprint.mission.discodeit.entity.message.MessageAndFileCreateRequest;
-import com.sprint.mission.discodeit.entity.message.MessageAndFileCreateResponse;
+import com.sprint.mission.discodeit.dto.response.MessageDto;
+import com.sprint.mission.discodeit.dto.response.PageResponse;
+import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.message.MessageContentUpdateRequest;
-import com.sprint.mission.discodeit.entity.message.MessageUpdateResponse;
+import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -28,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/messages")
 @RequiredArgsConstructor
-public class MessageControllerV2 {
+public class MessageController {
 
   private final MessageService messageService;
 
@@ -38,11 +41,11 @@ public class MessageControllerV2 {
   @Operation(summary = "메세지 생성")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
-  public MessageAndFileCreateResponse sendMessage(
-      @RequestPart("messageCreateRequest") MessageAndFileCreateRequest messageCreateRequest,
+  public MessageDto sendMessage(
+      @RequestPart("messageCreateRequest") MessageCreateRequest request,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
 
-    return messageService.create(messageCreateRequest, attachments);
+    return messageService.create(request, attachments);
   }
 
   /**
@@ -50,8 +53,10 @@ public class MessageControllerV2 {
    */
   @Operation(summary = "채널 메세지 목록 조회")
   @GetMapping
-  public List<MessageAndFileCreateResponse> findAll(@RequestParam("channelId") UUID channelId) {
-    return messageService.findAllMessage(channelId);
+  public PageResponse<Message> findAll(@RequestParam("channelId") UUID channelId,
+      Pageable pageable) {
+
+    return messageService.findMessagesWithPaging(channelId, pageable);
   }
 
   /**
@@ -61,6 +66,7 @@ public class MessageControllerV2 {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{messageId}")
   public String deleteMessage(@PathVariable("messageId") UUID messageId) {
+
     messageService.remove(messageId);
 
     return "삭제 완료";
@@ -71,8 +77,9 @@ public class MessageControllerV2 {
    */
   @Operation(summary = "메세지 수정")
   @PatchMapping("/{messageId}")
-  public MessageUpdateResponse updateMessage(@PathVariable("messageId") UUID messageId,
-      @RequestBody MessageContentUpdateRequest request) {
-    return messageService.updateMessage(messageId, request);
+  public MessageDto updateMessage(@PathVariable("messageId") UUID messageId,
+      @RequestBody @Validated MessageContentUpdateRequest request) {
+
+    return messageService.update(messageId, request);
   }
 }

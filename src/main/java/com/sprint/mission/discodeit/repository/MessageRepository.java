@@ -1,25 +1,20 @@
 package com.sprint.mission.discodeit.repository;
 
+import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.message.Message;
-
-import java.util.Map;
+import com.sprint.mission.discodeit.entity.user.User;
+import java.util.List;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-public interface MessageRepository {
-    // 메세지 저장
-    Message saveMessage(Message message);
+public interface MessageRepository extends JpaRepository<Message, UUID> {
 
-    // 메세지 삭제
-    void removeMessageById(UUID messageId);
+  @Query("select m.author from Message m join m.channel where m.channel = :channel")
+  List<User> findUserByChannel(@Param("channel") Channel channel);
 
-    // 메세지 조회
-    Message findMessageById(UUID messageId);
-
-    // 모든 메세지 조회
-    Map<UUID, Message> findAllMessage();
-
-
-    // 테스트용
-    void clearData();
-    void resetData();
+  Page<Message> findById(UUID id, Pageable pageable);
 }
