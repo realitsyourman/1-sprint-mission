@@ -9,7 +9,7 @@ public class PageResponseMapper<T> {
   public PageResponse<T> fromSlice(Slice<T> slice) {
     return PageResponse.<T>builder()
         .content(slice.getContent())
-        .number(slice.getNumber())
+        .nextCursor(slice.getNumber())
         .size(slice.getSize())
         .hasNext(slice.hasNext())
         .totalElements(null)
@@ -19,7 +19,7 @@ public class PageResponseMapper<T> {
   public PageResponse<T> fromPage(Page<T> page) {
     return PageResponse.<T>builder()
         .content(page.getContent())
-        .number(page.getNumber())
+        .nextCursor(page.getNumber())
         .size(page.getSize())
         .hasNext(page.hasNext())
         .totalElements(page.getTotalElements())
