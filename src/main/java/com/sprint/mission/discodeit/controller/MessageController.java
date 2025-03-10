@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.response.MessageDto;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
-import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.message.MessageContentUpdateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.service.MessageService;
@@ -56,7 +55,7 @@ public class MessageController {
    */
   @Operation(summary = "채널 메세지 목록 조회")
   @GetMapping
-  public PageResponse<Message> findAll(@RequestParam(name = "channelId") UUID channelId,
+  public PageResponse<MessageDto> findAll(@RequestParam(name = "channelId") UUID channelId,
       @RequestParam(name = "cursor", required = false) Instant cursor,
       Pageable pageable) {
 
@@ -86,15 +85,4 @@ public class MessageController {
 
     return messageService.update(messageId, request);
   }
-
-  //  /**
-//   * 채널의 메세지 목록 조회
-//   */
-//  @Operation(summary = "채널 메세지 목록 조회")
-//  @GetMapping
-//  public PageResponse<Message> findAll(@RequestParam(name = "channelId") UUID channelId,
-//      Pageable pageable) {
-//
-//    return messageService.findMessagesWithPaging(channelId, pageable);
-//  }
 }

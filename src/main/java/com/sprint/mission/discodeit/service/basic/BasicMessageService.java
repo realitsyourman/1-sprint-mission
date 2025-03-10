@@ -29,13 +29,16 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BasicMessageService implements MessageService {
 
@@ -43,7 +46,7 @@ public class BasicMessageService implements MessageService {
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
   private final BinaryContentRepository binaryContentRepository;
-  private final PageResponseMapper<Message> pageResponseMapper = new PageResponseMapper<>();
+  private final PageResponseMapper<MessageDto> mapper = new PageResponseMapper<>();
 
   /**
    * 메세지 만들기
@@ -68,15 +71,17 @@ public class BasicMessageService implements MessageService {
    * 커서 기반 페이징해서 메세지 가져오기
    */
   @Override
-  public PageResponse<Message> findMessagesWithPaging(UUID channelId, Instant cursor,
+  @Transactional(readOnly = true)
+  public PageResponse<MessageDto> findMessagesWithPaging(UUID channelId, Instant cursor,
       Pageable pageable) {
 
     PageRequest pageRequest = getPageRequest(pageable);
 
-    Page<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
-        cursor, pageRequest);
+    if (cursor == null) {
+      return getPaging(channelId, pageable);
+    }
 
-    return pageResponseMapper.fromPage(pagedMessages);
+    return getCursorBasedPaging(channelId, cursor, pageable, pageRequest);
   }
 
   /**
@@ -128,12 +133,21 @@ public class BasicMessageService implements MessageService {
         .build();
   }
 
+  private PageImpl<MessageDto> convertToMessageDto(Pageable pageable, Page<Message> pagedMessages) {
+    List<MessageDto> messageDtos = pagedMessages.stream()
+        .map(MessageMapper::toDto)
+        .toList();
+
+    return new PageImpl<>(messageDtos, pageable,
+        pagedMessages.getTotalElements());
+  }
+
   /**
    * multifile을 binaryContent로
    */
   private static List<BinaryContent> convertToBinaryContent(List<MultipartFile> attachments) {
     List<BinaryContent> files = null;
-    if (attachments.isEmpty()) {
+    if (attachments == null) {
       files = new ArrayList<>();
     } else {
       files = attachments.stream()
@@ -162,15 +176,25 @@ public class BasicMessageService implements MessageService {
         .orElseThrow(ChannelNotFoundException::new);
   }
 
-  //  /**
-//   * 페이징해서 모든 메세지 가져오기
-//   */
-//  @Override
-//  public PageResponse<Message> findMessagesWithPaging(UUID channelId, Pageable pageable) {
-//    PageRequest pageRequest = getPageRequest(pageable);
-//
-//    Page<Message> messages = messageRepository.findAllByChannelId(channelId, pageRequest);
-//
-//    return pageResponseMapper.fromPage(messages);
-//  }
+  // 커서 기반 페이징
+  private PageResponse<MessageDto> getCursorBasedPaging(UUID channelId, Instant cursor,
+      Pageable pageable, PageRequest pageRequest) {
+    Page<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
+        cursor, pageRequest);
+
+    PageImpl<MessageDto> pages = convertToMessageDto(
+        pageable, pagedMessages);
+
+    return mapper.fromPage(pages);
+  }
+
+  // 일반 페이징
+  private PageResponse<MessageDto> getPaging(UUID channelId, Pageable pageable) {
+    Page<Message> messages = messageRepository.findByChannel_Id(channelId, pageable);
+
+    PageImpl<MessageDto> page = convertToMessageDto(pageable, messages);
+
+    return mapper.fromPage(page);
+  }
+
 }

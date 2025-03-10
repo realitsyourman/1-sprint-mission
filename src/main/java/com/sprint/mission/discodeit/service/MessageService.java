@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.service;
 
 import com.sprint.mission.discodeit.dto.response.MessageDto;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
-import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.message.MessageContentUpdateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import java.time.Instant;
@@ -20,45 +19,11 @@ public interface MessageService {
 
   //PageResponse<Message> findMessagesWithPaging(UUID channelId, Pageable pageable);
 
-  PageResponse<Message> findMessagesWithPaging(UUID channelId, Instant cursor, Pageable pageable);
+  PageResponse<MessageDto> findMessagesWithPaging(UUID channelId, Instant cursor,
+      Pageable pageable);
 
   void remove(UUID messageId);
 
   MessageDto update(UUID messageId, MessageContentUpdateRequest request);
-
-//  /**
-//   * 메시지를 생성하고, 선택적으로 첨부파일을 추가합니다.
-//   */
-//  MessageCreateResponse create(MessageCreateRequest createRequest,
-//      MessageSendFileRequest fileRequest) throws IOException;
-//
-//  /**
-//   * ID로 메시지를 조회합니다. 첨부파일 정보도 포함됩니다.
-//   */
-//  MessageResponse getMessageById(UUID messageId);
-//
-//  /**
-//   * 특정 채널의 모든 메시지를 조회합니다.
-//   */
-//  Map<UUID, MessageResponse> findAllMessageByChannelId(String channelId);
-//
-//  /**
-//   * 메시지를 업데이트합니다.
-//   */
-//  MessageResponse updateMessage(String messageId, MessageUpdateRequest updateRequest);
-//
-//  /**
-//   * 메시지와 관련된 첨부파일을 모두 삭제합니다.
-//   */
-//  UUID deleteMessage(String messageId);
-//
-//  MessageAndFileCreateResponse create(MessageAndFileCreateRequest request,
-//      List<MultipartFile> file);
-//
-//  List<MessageAndFileCreateResponse> findAllMessage(UUID channelId);
-//
-//  void remove(UUID messageId);
-//
-//  MessageUpdateResponse updateMessage(UUID messageId, MessageContentUpdateRequest request);
 
 }
