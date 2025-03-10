@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.springframework.data.annotation.LastModifiedDate;
 
 @Getter
+@MappedSuperclass
 public abstract class baseUpdatableEntity extends BaseEntity {
 
   @LastModifiedDate
