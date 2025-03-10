@@ -23,12 +23,13 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
-@Transactional
+@Transactional(readOnly = false)
 @RequiredArgsConstructor
 public class BasicUserService implements UserService {
 
@@ -71,7 +72,7 @@ public class BasicUserService implements UserService {
    * 모든 유저 찾기
    */
   @Override
-  @Transactional(readOnly = true)
+  @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
   public List<UserCreateResponse> findAll() {
     List<User> users = userRepository.findUsers();
 
@@ -183,12 +184,10 @@ public class BasicUserService implements UserService {
   /**
    * 실제로 프로필 이미지 저장
    */
-  private UUID saveProfileImg(MultipartFile file, User savedMember) throws IOException {
+  private void saveProfileImg(MultipartFile file, User savedMember) throws IOException {
     if (file != null && savedMember.getProfile() != null) {
-      return binaryContentStorage.put(savedMember.getProfile().getId(), file.getBytes());
+      binaryContentStorage.put(savedMember.getProfile().getId(), file.getBytes());
     }
-
-    return null;
   }
 
   /**

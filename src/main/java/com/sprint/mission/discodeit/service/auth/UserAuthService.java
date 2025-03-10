@@ -10,18 +10,18 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserAuthService implements AuthService {
 
   private final UserRepository userRepository;
 
-  /**
-   * 스프린트 미션 5, 로그인
-   */
   @Override
+  @Transactional(readOnly = true)
   public ResponseLogin login(RequestLogin request) {
     User findUser = userRepository.findUserByUsername(request.username());
 
@@ -31,7 +31,7 @@ public class UserAuthService implements AuthService {
 
     if (!findUser.getUsername().equals(request.username()) || !findUser.getPassword()
         .equals(request.password())) {
-      throw new IllegalUserException("아이디 또는 비밀버호가 잘못 되었습니다.");
+      throw new IllegalUserException("아이디 또는 비밀번호가 잘못 되었습니다.");
     }
 
     return ResponseLogin.builder()
