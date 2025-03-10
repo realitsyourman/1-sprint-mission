@@ -74,8 +74,8 @@ public class UserController {
   @Operation(summary = "유저 정보 수정")
   @PatchMapping("/{userId}")
   public UserUpdateResponse updateUser(@PathVariable("userId") UUID userId,
-      @RequestPart("userUpdateRequest") @Validated UserUpdateRequest userUpdateRequest,
-      @RequestPart(value = "profile", required = false) MultipartFile profile) {
+      @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
+      @RequestPart(value = "profile", required = false) MultipartFile profile) throws IOException {
 
     return userService.update(userId, userUpdateRequest, profile);
   }

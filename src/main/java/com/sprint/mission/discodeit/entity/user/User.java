@@ -34,7 +34,7 @@ public class User extends baseUpdatableEntity {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserStatus status;
 
-  public void changeUser(String username, String email, String password) {
+  public void changeUserInfo(String username, String email, String password) {
     this.username = username;
     this.email = email;
     this.password = password;
@@ -43,6 +43,10 @@ public class User extends baseUpdatableEntity {
   public void changeUserStatus(UserStatus userStatus) {
     this.status = userStatus;
     this.status.initUser(this);
+  }
+
+  public void changeProfile(BinaryContent profile) {
+    this.profile = profile;
   }
 
 }
