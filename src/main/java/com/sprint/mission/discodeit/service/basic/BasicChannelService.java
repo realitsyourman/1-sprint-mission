@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
 import com.sprint.mission.discodeit.mapper.ChannelMapper;
 import com.sprint.mission.discodeit.mapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -23,9 +24,11 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class BasicChannelService implements ChannelService {
 
@@ -86,6 +89,10 @@ public class BasicChannelService implements ChannelService {
     Channel channel = channelRepository.findById(channelId)
         .orElseThrow(ChannelNotFoundException::new);
 
+    if (channel.getType() == ChannelType.PRIVATE) {
+      throw new IllegalChannelException(channelId.toString());
+    }
+
     Channel modifiedChannel = channel.modifying(request.newName(), request.newDescription());
 
     return mapper.toDto(modifiedChannel);
@@ -95,6 +102,7 @@ public class BasicChannelService implements ChannelService {
    * 유저가 참여 중인 모든 채널 뽑기
    */
   @Override
+  @Transactional(readOnly = true)
   public List<ChannelDto> findAllChannelsByUserId(UUID userId) {
     List<ReadStatus> readStatusList = readStatusRepository.findAllChannelsInUser(userId);
 
@@ -134,7 +142,7 @@ public class BasicChannelService implements ChannelService {
   private List<ReadStatus> createParticipantsReadStatus(List<UUID> participantIds,
       Channel channel) {
 
-    List<User> users = userRepository.findAllById(participantIds);
+    List<User> users = userRepository.findByIdIn(participantIds);
     return getReadStatuses(users, channel);
   }
 
