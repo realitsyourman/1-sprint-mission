@@ -26,9 +26,6 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
     this.path = Paths.get(path);
   }
 
-  /**
-   * 디렉토리 초기화
-   */
   @PostConstruct
   public void init() {
     try {
@@ -38,18 +35,11 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
     }
   }
 
-  /**
-   * 파일의 실제 저장 위치에 대한 규칙을 정의합니다. 파일 저장 위치 규칙 예시: {root}/{UUID} put, get 메소드에서 호출해 일관된 파일 경로 규칙을
-   * 유지합니다.
-   */
   @Override
   public Path resolvePath(UUID id) {
     return path.resolve(id.toString());
   }
 
-  /**
-   * UUID 키 정보를 바탕으로 byte[] 데이터를 저장합니다. UUID는 BinaryContent의 Id 입니다.
-   */
   @Override
   public UUID put(UUID fileId, byte[] bytes) {
     Path filePath = resolvePath(fileId);
@@ -62,9 +52,6 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
     return fileId;
   }
 
-  /**
-   * 키 정보를 바탕으로 byte[] 데이터를 읽어 InputStream 타입으로 반환합니다. UUID는 BinaryContent의 Id 입니다.
-   */
   @Override
   public InputStream get(UUID fileId) {
     Path filePath = resolvePath(fileId);
@@ -77,9 +64,6 @@ public class LocalBinaryContentStorage implements BinaryContentStorage {
 
   }
 
-  /**
-   * HTTP API로 다운로드 기능을 제공합니다. BinaryContentDto 정보를 바탕으로 파일을 다운로드할 수 있는 응답을 반환합니다.
-   */
   @Override
   public ResponseEntity<?> download(BinaryContentDto file) {
     InputStream findFileStream = get(file.id());

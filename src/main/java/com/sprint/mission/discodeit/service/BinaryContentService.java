@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service;
 import com.sprint.mission.discodeit.entity.binarycontent.dto.BinaryContentResponse;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.http.ResponseEntity;
 
 public interface BinaryContentService {
 
@@ -10,7 +11,7 @@ public interface BinaryContentService {
 
   List<BinaryContentResponse> findAll(List<String> binaryContentIds);
 
-  void downloadBinaryContent(UUID binaryContentId);
+  ResponseEntity<?> downloadBinaryContent(UUID binaryContentId);
 
 //  List<UploadBinaryContent> create(BinaryContentRequest request) throws IOException;
 //

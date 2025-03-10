@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,11 +46,9 @@ public class BinaryContentsController {
    */
   @Operation(summary = "파일 다운로드")
   @GetMapping("/{binaryContentId}/download")
-  public String downloadFile(@PathVariable("binaryContentId") UUID binaryContentId) {
+  public ResponseEntity<?> downloadFile(@PathVariable("binaryContentId") UUID binaryContentId) {
 
-    binaryContentService.downloadBinaryContent(binaryContentId);
-
-    return "complete download";
+    return binaryContentService.downloadBinaryContent(binaryContentId);
   }
 
 }
