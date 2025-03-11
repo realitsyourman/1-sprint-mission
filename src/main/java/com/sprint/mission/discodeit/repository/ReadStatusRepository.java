@@ -12,18 +12,14 @@ import org.springframework.data.repository.query.Param;
 public interface ReadStatusRepository extends JpaRepository<ReadStatus, UUID> {
 
   @EntityGraph(attributePaths = {"user", "channel"})
-  ReadStatus findFirstByChannelOrderByLastReadAt(Channel channel);
+  ReadStatus findFirstByChannelOrderByLastReadAtDesc(Channel channel);
 
-  @EntityGraph(attributePaths = {"user.profile", "user.status", "channel"})
-  @Query("select r from ReadStatus r where r.user.id = :userId")
+  @EntityGraph(attributePaths = {"user", "user.profile", "user.status", "channel"})
+  @Query("select r from ReadStatus r join fetch r.channel where r.user.id = :userId")
   List<ReadStatus> findAllChannelsInUser(@Param("userId") UUID userId);
 
   @EntityGraph(attributePaths = {"user.profile", "user.status", "channel"})
   List<ReadStatus> findAllByChannel(Channel channel);
-
-
-  // test
-  List<ReadStatus> findByChannel_Id(UUID channelId);
 
   List<ReadStatus> findAllByUser_Id(UUID userId);
 }

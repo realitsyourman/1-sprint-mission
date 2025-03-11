@@ -31,7 +31,7 @@ public class ChannelMapper {
         .description(channel.getDescription())
         .participants(users)
         .lastMessageAt(
-            readStatusRepository.findFirstByChannelOrderByLastReadAt(channel).getLastReadAt())
+            readStatusRepository.findFirstByChannelOrderByLastReadAtDesc(channel).getLastReadAt())
         .build();
   }
 }

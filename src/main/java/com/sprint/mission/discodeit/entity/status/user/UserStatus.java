@@ -9,12 +9,14 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.Instant;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
+@Builder
 @Table(name = "user_statuses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserStatus extends baseUpdatableEntity {
