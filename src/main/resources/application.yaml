@@ -21,14 +21,20 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        format_sql: true
+        #format_sql: true
+        highlight_sql: true
         default_batch_fetch_size: 1000
         generate_statistics: true;
+        use_sql_comments: true;
     open-in-view: false
 logging:
   level:
     org.hibernate.SQL: debug
 
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
 
 
 discodeit:
