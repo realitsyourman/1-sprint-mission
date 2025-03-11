@@ -13,11 +13,13 @@ import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import com.sprint.mission.discodeit.mapper.BinaryContentMapper;
-import com.sprint.mission.discodeit.mapper.MessageMapper;
-import com.sprint.mission.discodeit.mapper.PageResponseMapper;
-import com.sprint.mission.discodeit.mapper.UserMapper;
-import com.sprint.mission.discodeit.repository.BinaryContentRepository;
+import com.sprint.mission.discodeit.mapper.MessageDtoMapper;
+import com.sprint.mission.discodeit.mapper.MessageDtoMapperImpl;
+import com.sprint.mission.discodeit.mapper.UserDtoMapper;
+import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
+import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
+import com.sprint.mission.discodeit.mapper.entitymapper.MessageMapper;
+import com.sprint.mission.discodeit.mapper.entitymapper.PageResponseMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -46,8 +48,9 @@ public class BasicMessageService implements MessageService {
   private final UserRepository userRepository;
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
-  private final BinaryContentRepository binaryContentRepository;
   private final PageResponseMapper<MessageDto> mapper = new PageResponseMapper<>();
+  private final UserDtoMapper userDtoMapper = new UserDtoMapperImpl();
+  private final MessageDtoMapper messageMapper = new MessageDtoMapperImpl();
 
   /**
    * 메세지 만들기
@@ -117,7 +120,7 @@ public class BasicMessageService implements MessageService {
   /**
    * DTO로 변환
    */
-  private static MessageCreateResponse convertMessageCreateResponse(List<BinaryContent> files,
+  private MessageCreateResponse convertMessageCreateResponse(List<BinaryContent> files,
       Message message) {
     List<BinaryContentDto> binaryContentDtos = files.stream()
         .map(BinaryContentMapper::toDto)
@@ -129,7 +132,7 @@ public class BasicMessageService implements MessageService {
         .updatedAt(Instant.now())
         .content(message.getContent())
         .channelId(message.getChannel().getId())
-        .author(UserMapper.toDto(message.getAuthor()))
+        .author(userDtoMapper.toDto(message.getAuthor()))
         .attachments(binaryContentDtos)
         .build();
   }

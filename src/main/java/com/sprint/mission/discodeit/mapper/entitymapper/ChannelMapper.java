@@ -1,9 +1,11 @@
-package com.sprint.mission.discodeit.mapper;
+package com.sprint.mission.discodeit.mapper.entitymapper;
 
 import com.sprint.mission.discodeit.dto.response.ChannelDto;
 import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.mapper.UserDtoMapper;
+import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class ChannelMapper {
 
   private final ReadStatusRepository readStatusRepository;
+  private final UserDtoMapper userDtoMapper = new UserDtoMapperImpl();
 
   public ChannelDto toDto(Channel channel) {
     if (channel == null) {
@@ -21,7 +24,7 @@ public class ChannelMapper {
     }
 
     List<UserDto> users = readStatusRepository.findAllByChannel(channel).stream()
-        .map(st -> UserMapper.toDto(st.getUser()))
+        .map(st -> userDtoMapper.toDto(st.getUser()))
         .toList();
 
     return ChannelDto.builder()

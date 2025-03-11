@@ -12,8 +12,9 @@ import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
-import com.sprint.mission.discodeit.mapper.ChannelMapper;
-import com.sprint.mission.discodeit.mapper.UserMapper;
+import com.sprint.mission.discodeit.mapper.UserDtoMapper;
+import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
+import com.sprint.mission.discodeit.mapper.entitymapper.ChannelMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -116,8 +117,11 @@ public class BasicChannelService implements ChannelService {
    * user -> userDto
    */
   private List<UserDto> getUsers(List<ReadStatus> readStatusList) {
+
+    UserDtoMapper userMapper = new UserDtoMapperImpl();
+
     return readStatusList.stream()
-        .map(read -> UserMapper.toDto(read.getUser()))
+        .map(read -> userMapper.toDto(read.getUser()))
         .toList();
   }
 
