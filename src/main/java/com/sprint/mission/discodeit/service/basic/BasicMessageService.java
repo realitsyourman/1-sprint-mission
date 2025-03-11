@@ -32,6 +32,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -133,13 +134,13 @@ public class BasicMessageService implements MessageService {
         .build();
   }
 
-  private PageImpl<MessageDto> convertToMessageDto(Pageable pageable, Page<Message> pagedMessages) {
+  private PageImpl<MessageDto> convertToMessageDto(Pageable pageable,
+      Slice<Message> pagedMessages) {
     List<MessageDto> messageDtos = pagedMessages.stream()
         .map(MessageMapper::toDto)
         .toList();
 
-    return new PageImpl<>(messageDtos, pageable,
-        pagedMessages.getTotalElements());
+    return new PageImpl<>(messageDtos, pageable, 0);
   }
 
   /**
@@ -179,13 +180,14 @@ public class BasicMessageService implements MessageService {
   // 커서 기반 페이징
   private PageResponse<MessageDto> getCursorBasedPaging(UUID channelId, Instant cursor,
       Pageable pageable, PageRequest pageRequest) {
-    Page<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
+
+    Slice<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
         cursor, pageRequest);
 
     PageImpl<MessageDto> pages = convertToMessageDto(
         pageable, pagedMessages);
 
-    return mapper.fromPage(pages);
+    return mapper.fromSlice(pages);
   }
 
   // 일반 페이징
