@@ -11,6 +11,7 @@ import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateResponse;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.message.ChannelAuthorNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
@@ -56,6 +57,10 @@ public class BasicMessageService implements MessageService {
   @Override
   public MessageDto create(MessageCreateRequest request,
       List<MultipartFile> attachments) {
+
+    if (request.authorId() == null) {
+      throw new ChannelAuthorNotFoundException(request.channelId().toString());
+    }
 
     Channel findChannel = getChannel(request);
     User findUser = getUser(request);
