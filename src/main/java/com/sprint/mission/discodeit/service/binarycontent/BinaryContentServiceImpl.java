@@ -27,6 +27,10 @@ public class BinaryContentServiceImpl implements BinaryContentService {
     BinaryContent binaryContent = binaryContentRepository.findById(binaryContentId)
         .orElseThrow(BinaryContentNotFoundException::new);
 
+    if (binaryContent == null) {
+      throw new BinaryContentNotFoundException(binaryContentId.toString());
+    }
+
     return new BinaryContentResponse(binaryContent.getId(), binaryContent.getFileName(),
         binaryContent.getSize(), binaryContent.getContentType());
   }
