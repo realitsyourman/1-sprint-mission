@@ -11,7 +11,7 @@ import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
-import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
+import com.sprint.mission.discodeit.exception.channel.PrivateChannelCanNotModifyException;
 import com.sprint.mission.discodeit.mapper.UserDtoMapper;
 import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
 import com.sprint.mission.discodeit.mapper.entitymapper.ChannelMapper;
@@ -91,7 +91,7 @@ public class BasicChannelService implements ChannelService {
         .orElseThrow(ChannelNotFoundException::new);
 
     if (channel.getType() == ChannelType.PRIVATE) {
-      throw new IllegalChannelException(channelId.toString());
+      throw new PrivateChannelCanNotModifyException(channelId.toString());
     }
 
     Channel modifiedChannel = channel.modifying(request.newName(), request.newDescription());
