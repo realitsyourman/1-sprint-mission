@@ -6,12 +6,14 @@ import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.exception.readstatus.ReadStatusExistsException;
 import com.sprint.mission.discodeit.exception.readstatus.ReadStatusNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,6 +35,8 @@ public class ReadStatusService {
     User user = userRepository.getReferenceById(request.userId());
     Channel channel = channelRepository.getReferenceById(request.channelId());
 
+    IsAlreadyReadStatus(request, user, channel);
+
     ReadStatus readStatus = new ReadStatus(user, channel, request.lastReadAt());
     readStatusRepository.save(readStatus);
 
@@ -44,6 +48,10 @@ public class ReadStatusService {
    */
   public List<ReadStatusDto> findByUserId(UUID userId) {
     List<ReadStatus> readStatuses = readStatusRepository.findAllByUser_Id(userId);
+
+    if (readStatuses.isEmpty()) {
+      throw new ReadStatusNotFoundException(userId);
+    }
 
     return readStatuses.stream()
         .map(ReadStatusMapper::toDto)
@@ -60,5 +68,15 @@ public class ReadStatusService {
     ReadStatus modifiedStat = readStatus.changeLastReadAt(request.newLastReadAt());
 
     return ReadStatusMapper.toDto(modifiedStat);
+  }
+
+  // read status가 이미 존재하는지 확인
+  private void IsAlreadyReadStatus(ReadStatusRequest request, User user, Channel channel) {
+    Optional<ReadStatus> findReadStatus = readStatusRepository.findReadStatusByUser_IdAndChannel_Id(
+        user.getId(), channel.getId());
+
+    if (findReadStatus.isPresent()) {
+      throw new ReadStatusExistsException(request.userId(), request.channelId());
+    }
   }
 }
