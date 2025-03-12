@@ -50,7 +50,7 @@ public class UserStateService {
    */
   private User getFindUser(UserStatus userStatus) {
     return userRepository.findById(userStatus.getUser().getId())
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(UserStatusNotFoundException::new);
   }
 
   /**

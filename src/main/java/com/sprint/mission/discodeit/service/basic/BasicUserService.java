@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
+import com.sprint.mission.discodeit.exception.user.UserExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -45,6 +46,11 @@ public class BasicUserService implements UserService {
    */
   @Override
   public UserCreateResponse join(UserCreateRequest request, MultipartFile file) throws IOException {
+    User isalreadyUser = userRepository.findUserByUsername(request.getUsername());
+    if (isalreadyUser != null) {
+      throw new UserExistsException(request.getUsername());
+    }
+
     BinaryContent profile = getProfile(file);
     User savedMember = saveUser(request, profile);
 

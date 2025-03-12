@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.service.auth;
 import com.sprint.mission.discodeit.entity.auth.RequestLogin;
 import com.sprint.mission.discodeit.entity.auth.ResponseLogin;
 import com.sprint.mission.discodeit.entity.user.User;
-import com.sprint.mission.discodeit.exception.user.IllegalUserException;
+import com.sprint.mission.discodeit.exception.user.UserAuthException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -31,7 +31,7 @@ public class UserAuthService implements AuthService {
 
     if (!findUser.getUsername().equals(request.username()) || !findUser.getPassword()
         .equals(request.password())) {
-      throw new IllegalUserException("아이디 또는 비밀번호가 잘못 되었습니다.");
+      throw new UserAuthException("아이디 또는 비밀번호가 잘못 되었습니다.");
     }
 
     return ResponseLogin.builder()
