@@ -9,6 +9,8 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import java.time.Duration;
+import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,6 +49,13 @@ public class User extends baseUpdatableEntity {
 
   public void changeProfile(BinaryContent profile) {
     this.profile = profile;
+  }
+
+  public boolean isThereHere() {
+    Instant now = Instant.now();
+    Duration between = Duration.between(status.getLastActiveAt(), now);
+
+    return !(between.toMinutes() >= 5);
   }
 
 }
