@@ -78,7 +78,7 @@ public class BasicUserService implements UserService {
 
     return users.stream()
         .map(user -> new UserCreateResponse(user.getId(), user.getUsername(), user.getEmail(),
-            BinaryContentMapper.toDto(user.getProfile()), true))
+            BinaryContentMapper.toDto(user.getProfile()), user.isThereHere()))
         .toList();
   }
 
