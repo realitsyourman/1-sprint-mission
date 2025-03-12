@@ -37,9 +37,11 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         .map(UUID::fromString)
         .toList();
 
-    return binaryContentRepository.findAllById(binaryContentsUUIDs).stream()
-        .map(bin -> new BinaryContentResponse(bin.getId(), bin.getFileName(), bin.getSize(),
-            bin.getContentType()))
+    // TODO : 여기 수정했음
+    // TODO : 원본은 findAllById
+    return binaryContentRepository.findAllByIdIn(binaryContentsUUIDs).stream()
+        .map(bin -> new BinaryContentResponse(bin.id(), bin.fileName(), bin.size(),
+            bin.contentType()))
         .toList();
   }
 
