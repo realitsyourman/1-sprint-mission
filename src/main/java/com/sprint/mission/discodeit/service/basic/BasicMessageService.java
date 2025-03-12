@@ -13,17 +13,16 @@ import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import com.sprint.mission.discodeit.mapper.MessageDtoMapper;
-import com.sprint.mission.discodeit.mapper.MessageDtoMapperImpl;
-import com.sprint.mission.discodeit.mapper.UserDtoMapper;
-import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.mapper.entitymapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.entitymapper.PageResponseMapper;
+import com.sprint.mission.discodeit.mapper.entitymapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.MessageService;
+import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +47,8 @@ public class BasicMessageService implements MessageService {
   private final UserRepository userRepository;
   private final MessageRepository messageRepository;
   private final ChannelRepository channelRepository;
+  private final BinaryContentStorage binaryContentStorage;
   private final PageResponseMapper<MessageDto> mapper = new PageResponseMapper<>();
-  private final UserDtoMapper userDtoMapper = new UserDtoMapperImpl();
-  private final MessageDtoMapper messageMapper = new MessageDtoMapperImpl();
 
   /**
    * 메세지 만들기
@@ -63,13 +61,15 @@ public class BasicMessageService implements MessageService {
     User findUser = getUser(request);
 
     List<BinaryContent> files = convertToBinaryContent(attachments);
-
     Message message = createMessage(request, findChannel, findUser);
     message.attachFiles(files);
     messageRepository.save(message);
 
+    uploadFiles(attachments, files);
+
     return MessageMapper.toDto(message);
   }
+
 
   /**
    * 커서 기반 페이징해서 메세지 가져오기
@@ -117,6 +117,21 @@ public class BasicMessageService implements MessageService {
         pageable.getSort());
   }
 
+  // 파일 업로드
+  private void uploadFiles(List<MultipartFile> attachments,
+      List<BinaryContent> files) {
+    if (attachments != null) {
+      attachments.forEach(file -> files.forEach(bin -> {
+            try {
+              binaryContentStorage.put(bin.getId(), file.getBytes());
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          })
+      );
+    }
+  }
+
   /**
    * DTO로 변환
    */
@@ -132,7 +147,7 @@ public class BasicMessageService implements MessageService {
         .updatedAt(Instant.now())
         .content(message.getContent())
         .channelId(message.getChannel().getId())
-        .author(userDtoMapper.toDto(message.getAuthor()))
+        .author(UserMapper.toDto(message.getAuthor()))
         .attachments(binaryContentDtos)
         .build();
   }
