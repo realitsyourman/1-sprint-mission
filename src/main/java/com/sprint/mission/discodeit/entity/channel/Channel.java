@@ -25,7 +25,7 @@ public class Channel extends baseUpdatableEntity {
   @Enumerated(EnumType.STRING)
   private ChannelType type;
 
-  public Channel modifying(String name, String description) {
+  public Channel modify(String name, String description) {
     this.name = name;
     this.description = description;
 

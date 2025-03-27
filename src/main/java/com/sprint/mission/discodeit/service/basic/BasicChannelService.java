@@ -10,17 +10,18 @@ import com.sprint.mission.discodeit.entity.channel.create.PublicChannelCreateReq
 import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelCanNotModifyException;
-import com.sprint.mission.discodeit.mapper.UserDtoMapper;
-import com.sprint.mission.discodeit.mapper.UserDtoMapperImpl;
 import com.sprint.mission.discodeit.mapper.entitymapper.ChannelMapper;
+import com.sprint.mission.discodeit.mapper.entitymapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +54,7 @@ public class BasicChannelService implements ChannelService {
     List<ReadStatus> readStatuses = createParticipantsReadStatus(participants, channel);
     List<UserDto> userDtoList = getParticipants(readStatuses);
 
+    log.info("Public Channel 생성: {}", channel.getId());
     return convertToChannelDto(channel, userDtoList);
   }
 
@@ -69,6 +71,7 @@ public class BasicChannelService implements ChannelService {
     List<ReadStatus> readStatuses = createParticipantsReadStatus(request.participantIds(), channel);
     List<UserDto> participants = getParticipants(readStatuses);
 
+    log.info("Private Channel 생성: {}", channel.getId());
     return convertToChannelDto(channel, participants);
   }
 
@@ -80,6 +83,8 @@ public class BasicChannelService implements ChannelService {
   @Override
   public void remove(UUID channelId) {
     channelRepository.deleteById(channelId);
+
+    log.info("채널 삭제: {}", channelId);
   }
 
   /**
@@ -88,13 +93,19 @@ public class BasicChannelService implements ChannelService {
   @Override
   public ChannelDto update(UUID channelId, ChannelModifyRequest request) {
     Channel channel = channelRepository.findById(channelId)
-        .orElseThrow(ChannelNotFoundException::new);
+        .orElseThrow(() -> new ChannelNotFoundException(Instant.now(), ErrorCode.CHANNEL_NOT_FOUND,
+            Map.of(channelId.toString(), ErrorCode.CHANNEL_NOT_FOUND.getMessage())
+        ));
 
     if (channel.getType() == ChannelType.PRIVATE) {
-      throw new PrivateChannelCanNotModifyException(channelId.toString());
+      log.error("Private 채널 수정 시도");
+      throw new PrivateChannelCanNotModifyException(Instant.now(), ErrorCode.MODIFY_PRIVATE_CHANNEL,
+          Map.of(channelId.toString(), ErrorCode.MODIFY_PRIVATE_CHANNEL.getMessage())
+      );
     }
 
-    Channel modifiedChannel = channel.modifying(request.newName(), request.newDescription());
+    Channel modifiedChannel = channel.modify(request.newName(), request.newDescription());
+    log.info("채널 수정: {}", channel.getId());
 
     return mapper.toDto(modifiedChannel);
   }
@@ -118,10 +129,8 @@ public class BasicChannelService implements ChannelService {
    */
   private List<UserDto> getUsers(List<ReadStatus> readStatusList) {
 
-    UserDtoMapper userMapper = new UserDtoMapperImpl();
-
     return readStatusList.stream()
-        .map(read -> userMapper.toDto(read.getUser()))
+        .map(read -> UserMapper.toDto(read.getUser()))
         .toList();
   }
 
@@ -153,7 +162,10 @@ public class BasicChannelService implements ChannelService {
   // 유저 정보로 readStatus 생성
   private List<ReadStatus> getReadStatuses(List<User> users, Channel channel) {
     return users.stream()
-        .map(user -> ReadStatus.create(user, channel))
+        .map(user -> {
+          log.info("read status 생성: {}", user.getId());
+          return ReadStatus.create(user, channel);
+        })
         .toList();
   }
 

@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.exception.message;
 
-public class ChannelAuthorNotFoundException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public ChannelAuthorNotFoundException() {
-    super();
-  }
+public class ChannelAuthorNotFoundException extends MessageException {
 
-  public ChannelAuthorNotFoundException(String authorId) {
-    super(String.format("Author with is id %s not found", authorId));
+  public ChannelAuthorNotFoundException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

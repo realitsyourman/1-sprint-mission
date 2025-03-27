@@ -63,10 +63,9 @@ public class ChannelController {
   @Operation(summary = "채널 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{channelId}")
-  public String deleteChannel(@PathVariable("channelId") UUID channelId) {
-    channelService.remove(channelId);
+  public void deleteChannel(@PathVariable("channelId") UUID channelId) {
 
-    return "";
+    channelService.remove(channelId);
   }
 
   /**
