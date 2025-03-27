@@ -24,39 +24,4 @@ public interface ChannelService {
   // 유저가 참여 중인 모든 채널 뽑기
   List<ChannelDto> findAllChannelsByUserId(UUID userId);
 
-//  ChannelResponse createChannel(ChannelCreateRequest request);
-//
-//  ChannelResponse createPublicChannel(ChannelCreateRequest request, Map<UUID, User> userList);
-//
-//  PublicChannelCreateResponse createPublicChannel(PublicChannelCreateRequest request);
-//
-//  ChannelResponse createPrivateChannel(ChannelCreateRequest request, Map<UUID, User> userList);
-//
-//  PrivateChannelCreateResponse createPrivateChannel(PrivateChannelCreateRequest request);
-//
-//  Map<UUID, Channel> getChannelByName(String channelName);
-//
-//  ChannelFindResponse findChannelById(UUID channelId);
-//
-//  Map<UUID, ChannelFindResponse> getAllChannels(UUID userId);
-//
-//  default Map<UUID, ChannelListResponse> getAllChannelsOfUser(String userName) {
-//    return null;
-//  }
-//
-//  List<ChannelFindOfUserResponse> findAllChannelsFindByUserId(UUID userId);
-//
-//  ChannelUpdateResponse updateChannel(String channelName, ChannelUpdateRequest request);
-//
-//  ChannelModifyResponse modifyChannel(UUID channelId, ChannelModifyRequest request);
-//
-//  UUID removeChannelById(UUID channelUUID);
-//
-//  default UUID removeChannelByName(String channelName) {
-//    return null;
-//  }
-//
-//  ChannelAddUserResponse addUserChannel(UUID channelUUID, String username);
-//
-//  void sendMessage(ChannelAddMessageRequest request);
 }
