@@ -1,11 +1,14 @@
 package com.sprint.mission.discodeit.exception.message;
 
-public class NullMessageTitleException extends RuntimeException {
-    public NullMessageTitleException() {
-        super("메시지 제목이 비어있습니다.");
-    }
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-    public NullMessageTitleException(String message) {
-        super(message);
-    }
+public class NullMessageTitleException extends MessageException {
+
+  public NullMessageTitleException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
+  }
 }

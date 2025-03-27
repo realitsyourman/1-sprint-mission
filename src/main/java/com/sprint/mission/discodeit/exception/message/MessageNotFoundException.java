@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.exception.message;
 
-public class MessageNotFoundException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public MessageNotFoundException() {
-    super();
-  }
+public class MessageNotFoundException extends MessageException {
 
-  public MessageNotFoundException(String messageId) {
-    super(String.format("Message with id %s not found", messageId));
+  public MessageNotFoundException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

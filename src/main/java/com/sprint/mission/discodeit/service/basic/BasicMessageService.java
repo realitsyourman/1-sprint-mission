@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.entity.message.MessageContentUpdateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateResponse;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.ChannelAuthorNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +61,10 @@ public class BasicMessageService implements MessageService {
       List<MultipartFile> attachments) {
 
     if (request.authorId() == null) {
-      throw new ChannelAuthorNotFoundException(request.channelId().toString());
+      log.error("잘못된 유저 접근");
+      throw new ChannelAuthorNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+          Map.of(request.channelId().toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+      );
     }
 
     Channel findChannel = getChannel(request);
@@ -72,6 +77,7 @@ public class BasicMessageService implements MessageService {
 
     uploadFiles(attachments, files);
 
+    log.info("메세지 전송: {}", message.getId());
     return MessageMapper.toDto(message);
   }
 
@@ -99,6 +105,8 @@ public class BasicMessageService implements MessageService {
   @Override
   public void remove(UUID messageId) {
     messageRepository.deleteById(messageId);
+
+    log.info("메세지 삭제: {}", messageId);
   }
 
   /**
@@ -107,9 +115,15 @@ public class BasicMessageService implements MessageService {
   @Override
   public MessageDto update(UUID messageId, MessageContentUpdateRequest request) {
     Message message = messageRepository.findById(messageId)
-        .orElseThrow(MessageNotFoundException::new);
+        .orElseThrow(() -> {
+          log.error("존재하지 않은 메세지 삭제");
+          return new MessageNotFoundException(Instant.now(), ErrorCode.MESSAGE_NOT_FOUND,
+              Map.of(messageId.toString(), ErrorCode.MESSAGE_NOT_FOUND.getMessage())
+          );
+        });
 
     message.updateContent(request.newContent());
+    log.info("메세지 수정: {}", message.getId());
 
     return MessageMapper.toDto(message);
   }
@@ -129,7 +143,9 @@ public class BasicMessageService implements MessageService {
       attachments.forEach(file -> files.forEach(bin -> {
             try {
               binaryContentStorage.put(bin.getId(), file.getBytes());
+              log.info("파일 업로드: {}", bin.getFileName());
             } catch (IOException e) {
+              log.error("업로드 실패: {}", bin.getFileName());
               throw new RuntimeException(e);
             }
           })
@@ -192,12 +208,20 @@ public class BasicMessageService implements MessageService {
 
   private User getUser(MessageCreateRequest request) {
     return userRepository.findById(request.authorId())
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+            Map.of(request.authorId().toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+        ));
   }
 
   private Channel getChannel(MessageCreateRequest request) {
     return channelRepository.findById(request.channelId())
-        .orElseThrow(ChannelNotFoundException::new);
+        .orElseThrow(() -> {
+          log.error("존재하지 않는 채널: {}", request.channelId());
+
+          return new ChannelNotFoundException(Instant.now(), ErrorCode.CHANNEL_NOT_FOUND,
+              Map.of(request.channelId().toString(), ErrorCode.CHANNEL_NOT_FOUND.getMessage())
+          );
+        });
   }
 
   // 커서 기반 페이징
