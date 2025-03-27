@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.exception.binary;
 
-public class BinaryContentNotFoundException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public BinaryContentNotFoundException() {
-    super();
-  }
+public class BinaryContentNotFoundException extends BinaryException {
 
-  public BinaryContentNotFoundException(String binaryContentId) {
-    super(String.format("BinaryContent with id %s not found", binaryContentId));
+  public BinaryContentNotFoundException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

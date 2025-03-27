@@ -2,18 +2,23 @@ package com.sprint.mission.discodeit.service.binarycontent;
 
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.binarycontent.dto.BinaryContentResponse;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.binary.BinaryContentNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.BinaryContentRepository;
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 @Service("binaryContentService")
@@ -25,10 +30,16 @@ public class BinaryContentServiceImpl implements BinaryContentService {
   @Override
   public BinaryContentResponse find(UUID binaryContentId) {
     BinaryContent binaryContent = binaryContentRepository.findById(binaryContentId)
-        .orElseThrow(BinaryContentNotFoundException::new);
+        .orElseThrow(() -> new BinaryContentNotFoundException(Instant.now(),
+            ErrorCode.BINARY_CONTENT_NOT_FOUND,
+            Map.of(binaryContentId.toString(), ErrorCode.BINARY_CONTENT_NOT_FOUND.getMessage())
+        ));
 
     if (binaryContent == null) {
-      throw new BinaryContentNotFoundException(binaryContentId.toString());
+      log.warn("존재하지 않는 파일: {}", binaryContentId);
+      throw new BinaryContentNotFoundException(Instant.now(), ErrorCode.BINARY_CONTENT_NOT_FOUND,
+          Map.of(binaryContentId.toString(), ErrorCode.BINARY_CONTENT_NOT_FOUND.getMessage())
+      );
     }
 
     return new BinaryContentResponse(binaryContent.getId(), binaryContent.getFileName(),
@@ -41,8 +52,6 @@ public class BinaryContentServiceImpl implements BinaryContentService {
         .map(UUID::fromString)
         .toList();
 
-    // TODO : 여기 수정했음
-    // TODO : 원본은 findAllById
     return binaryContentRepository.findAllByIdIn(binaryContentsUUIDs).stream()
         .map(bin -> new BinaryContentResponse(bin.id(), bin.fileName(), bin.size(),
             bin.contentType()))
@@ -52,8 +61,15 @@ public class BinaryContentServiceImpl implements BinaryContentService {
   @Override
   public ResponseEntity<?> downloadBinaryContent(UUID binaryContentId) {
     BinaryContent file = binaryContentRepository.findById(binaryContentId)
-        .orElseThrow(BinaryContentNotFoundException::new);
+        .orElseThrow(() -> {
+          log.error("존재하지 않은 파일 다운로드: {}", binaryContentId);
+          return new BinaryContentNotFoundException(Instant.now(),
+              ErrorCode.BINARY_CONTENT_NOT_FOUND,
+              Map.of(binaryContentId.toString(), ErrorCode.BINARY_CONTENT_NOT_FOUND.getMessage())
+          );
+        });
 
+    log.info("파일 다운로드: {}", file.getFileName());
     return binaryContentStorage.download(BinaryContentMapper.toDto(file));
   }
 }
