@@ -23,7 +23,7 @@ spring:
     open-in-view: false
 logging:
   level:
-    root: info
+    com.sprint.mission.discodeit: info
     org.hibernate.SQL: debug
 
 decorator:
@@ -33,9 +33,6 @@ decorator:
 
 
 discodeit:
-  repository:
-    type: file  # jcf or file
-    file-directory: .discodeit
   storage:
     type: local
     local:
@@ -44,8 +41,3 @@ discodeit:
 file:
   #dir: C:/Users/leeco/Desktop/codeit_sprint/mission/1-sprint-mission/data_storage/
   dir: ${user.home}/app_uploads/
-
-server:
-  address: 0.0.0.0
-  port: 8080
-

@@ -44,22 +44,34 @@ dependencies {
 
     // MapStruct
     implementation 'org.mapstruct:mapstruct:1.5.3.Final'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
+    annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.3.Final'
 }
 
 tasks.withType(JavaCompile) {
     options.annotationProcessorPath = configurations.annotationProcessor
+    options.compilerArgs = [
+            '-Amapstruct.defaultComponentModel=spring',
+            '-Amapstruct.suppressGeneratorTimestamp=true',
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+    ]
 }
 
+// 생성 소스 디렉토리를 명시적으로 지정
 sourceSets {
     main {
         java {
-            srcDirs += ['src/main/generated']
+            srcDirs = ['src/main/java']
         }
     }
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+// 생성 소스가 저장되는 디렉토리를 clean 태스크에 포함
+clean {
+    delete "build", "src/main/generated"
 }
