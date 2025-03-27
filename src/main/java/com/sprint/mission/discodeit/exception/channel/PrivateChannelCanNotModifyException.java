@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.exception.channel;
 
-public class PrivateChannelCanNotModifyException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public PrivateChannelCanNotModifyException() {
-    super("Private channel cannot be updated");
-  }
+public class PrivateChannelCanNotModifyException extends ChannelException {
 
-  public PrivateChannelCanNotModifyException(String message) {
-    super(message);
+  public PrivateChannelCanNotModifyException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

@@ -1,14 +1,14 @@
 package com.sprint.mission.discodeit.exception.readstatus;
 
-import java.util.UUID;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-public class ReadStatusNotFoundException extends RuntimeException {
+public class ReadStatusNotFoundException extends ReadStatusException {
 
-  public ReadStatusNotFoundException() {
-    super();
-  }
-
-  public ReadStatusNotFoundException(UUID readStatusId) {
-    super(String.format("ReadStatus with id %s not found", readStatusId));
+  public ReadStatusNotFoundException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

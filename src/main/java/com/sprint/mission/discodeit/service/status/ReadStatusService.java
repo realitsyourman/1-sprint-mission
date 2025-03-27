@@ -6,19 +6,24 @@ import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusRequest;
 import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.readstatus.ReadStatusExistsException;
 import com.sprint.mission.discodeit.exception.readstatus.ReadStatusNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.ReadStatusMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -39,6 +44,7 @@ public class ReadStatusService {
 
     ReadStatus readStatus = new ReadStatus(user, channel, request.lastReadAt());
     readStatusRepository.save(readStatus);
+    log.info("read status 생성: {}", readStatus.getId());
 
     return ReadStatusMapper.toDto(readStatus);
   }
@@ -50,7 +56,9 @@ public class ReadStatusService {
     List<ReadStatus> readStatuses = readStatusRepository.findAllByUser_Id(userId);
 
     if (readStatuses.isEmpty()) {
-      throw new ReadStatusNotFoundException(userId);
+      throw new ReadStatusNotFoundException(Instant.now(), ErrorCode.READ_STATUS_NOT_FOUND,
+          Map.of(userId.toString(), ErrorCode.READ_STATUS_NOT_FOUND.getMessage())
+      );
     }
 
     return readStatuses.stream()
@@ -63,9 +71,13 @@ public class ReadStatusService {
    */
   public ReadStatusDto update(UUID readStatusId, ReadStatusUpdateRequest request) {
     ReadStatus readStatus = readStatusRepository.findById(readStatusId)
-        .orElseThrow(ReadStatusNotFoundException::new);
+        .orElseThrow(
+            () -> new ReadStatusNotFoundException(Instant.now(), ErrorCode.READ_STATUS_NOT_FOUND,
+                Map.of(readStatusId.toString(), ErrorCode.READ_STATUS_NOT_FOUND.getMessage())
+            ));
 
     ReadStatus modifiedStat = readStatus.changeLastReadAt(request.newLastReadAt());
+    log.info("Read Status 수정: {}", readStatusId);
 
     return ReadStatusMapper.toDto(modifiedStat);
   }
@@ -76,7 +88,9 @@ public class ReadStatusService {
         user.getId(), channel.getId());
 
     if (findReadStatus.isPresent()) {
-      throw new ReadStatusExistsException(request.userId(), request.channelId());
+      throw new ReadStatusExistsException(Instant.now(), ErrorCode.EXIST_READ_STATUS,
+          Map.of(user.getStatus().getId().toString(), ErrorCode.EXIST_READ_STATUS.getMessage())
+      );
     }
   }
 }
