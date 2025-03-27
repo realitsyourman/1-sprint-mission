@@ -1,12 +1,12 @@
 package com.sprint.mission.discodeit.exception.user;
 
-public class UserExistsException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public UserExistsException() {
-    super();
-  }
+public class UserExistsException extends UserException {
 
-  public UserExistsException(String email) {
-    super(String.format("User with name or email %s already exists", email));
+  public UserExistsException(Instant timestamp, ErrorCode errorCode, Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

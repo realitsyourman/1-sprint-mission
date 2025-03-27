@@ -1,12 +1,12 @@
 package com.sprint.mission.discodeit.exception.user;
 
-public class UserAuthException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-    public UserAuthException() {
-        super();
-    }
+public class UserAuthException extends UserException {
 
-    public UserAuthException(String message) {
-        super(message);
-    }
+  public UserAuthException(Instant timestamp, ErrorCode errorCode, Map<String, Object> details) {
+    super(timestamp, errorCode, details);
+  }
 }

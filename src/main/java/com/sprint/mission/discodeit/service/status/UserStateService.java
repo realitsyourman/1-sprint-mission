@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.service.status;
 import com.sprint.mission.discodeit.dto.response.UserStatusDto;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.exception.userstatus.UserStatusNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.UserStatusMapper;
@@ -10,10 +11,13 @@ import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.repository.UserStatusRepository;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserStateService {
@@ -29,6 +33,7 @@ public class UserStateService {
 
     UserStatus status = isExistsUserStatus(findUser);
 
+    log.info("user status 생성: {}", userStatus.getUser().getId());
     return userStatusRepository.save(status);
   }
 
@@ -42,7 +47,11 @@ public class UserStateService {
     }
 
     return userStatusRepository.findById(findUser.getStatus().getId())
-        .orElseThrow(UserStatusNotFoundException::new);
+        .orElseThrow(
+            () -> new UserStatusNotFoundException(Instant.now(), ErrorCode.READ_STATUS_NOT_FOUND,
+                Map.of(findUser.getStatus().getId().toString(),
+                    ErrorCode.READ_STATUS_NOT_FOUND.getMessage())
+            ));
   }
 
   /**
@@ -50,7 +59,12 @@ public class UserStateService {
    */
   private User getFindUser(UserStatus userStatus) {
     return userRepository.findById(userStatus.getUser().getId())
-        .orElseThrow(UserStatusNotFoundException::new);
+        .orElseThrow(() -> {
+          log.error("존재하지 않는 유저: {}", userStatus.getUser().getId());
+          return new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+              Map.of(userStatus.getUser().getId().toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+          );
+        });
   }
 
   /**
@@ -62,7 +76,10 @@ public class UserStateService {
     }
 
     UserStatus findUserstatus = userStatusRepository.findById(id)
-        .orElseThrow(UserStatusNotFoundException::new);
+        .orElseThrow(
+            () -> new UserStatusNotFoundException(Instant.now(), ErrorCode.READ_STATUS_NOT_FOUND,
+                Map.of(id.toString(), ErrorCode.READ_STATUS_NOT_FOUND.getMessage())
+            ));
 
     return UserStatusMapper.toDto(findUserstatus);
   }
@@ -83,7 +100,9 @@ public class UserStateService {
    */
   public UserStatusDto update(UserStatusDto userStatusDto) {
     User findUser = userRepository.findById(userStatusDto.userId())
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+            Map.of(userStatusDto.userId().toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+        ));
 
     findUser.getStatus().setLastActiveAt(userStatusDto.lastActiveAt());
 
@@ -95,7 +114,8 @@ public class UserStateService {
    */
   public void updateByUserId(UUID userId) {
     User findUser = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+            Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));
 
     findUser.getStatus().setLastActiveAt(Instant.now());
   }

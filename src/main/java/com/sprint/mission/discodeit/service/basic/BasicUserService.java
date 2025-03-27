@@ -9,6 +9,7 @@ import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
+import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.user.UserExistsException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
@@ -19,7 +20,9 @@ import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +51,9 @@ public class BasicUserService implements UserService {
   public UserCreateResponse join(UserCreateRequest request, MultipartFile file) throws IOException {
     User isalreadyUser = userRepository.findUserByUsername(request.getUsername());
     if (isalreadyUser != null) {
-      throw new UserExistsException(request.getUsername());
+      log.error("중복 이름 '{}' 저장 시도", request.getUsername());
+      throw new UserExistsException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
     }
 
     BinaryContent profile = getProfile(file);
@@ -68,7 +73,8 @@ public class BasicUserService implements UserService {
   @Override
   public UserCreateResponse findById(UUID userId) {
     User findUser = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+            Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));
 
     return new UserCreateResponse(findUser.getId(), findUser.getUsername(), findUser.getEmail(),
         BinaryContentMapper.toDto(findUser.getProfile()), true);
@@ -95,6 +101,7 @@ public class BasicUserService implements UserService {
   public UUID delete(UUID userId) {
     userRepository.removeUserById(userId);
 
+    log.info("유저 삭제: {}", userId);
     return userId;
   }
 
@@ -106,10 +113,16 @@ public class BasicUserService implements UserService {
       MultipartFile profile) throws IOException {
 
     User findUser = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> {
+          log.error("유저 찾기 실패: {}", userId);
+          return new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+              Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+          );
+        });
 
     changeUser(findUser, request, profile);
 
+    log.info("유저 수정: {}", userId);
     return new UserUpdateResponse(userId, findUser.getUsername(), findUser.getEmail(),
         BinaryContentMapper.toDto(findUser.getProfile()), true);
   }
@@ -120,7 +133,8 @@ public class BasicUserService implements UserService {
   @Override
   public UserStatusUpdateResponse updateOnlineStatus(UUID userId, UserStatusUpdateRequest request) {
     User findUser = userRepository.findById(userId)
-        .orElseThrow(UserNotFoundException::new);
+        .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+            Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));
 
     findUser.getStatus().setLastActiveAt(request.newLastActiveAt());
 
@@ -168,6 +182,7 @@ public class BasicUserService implements UserService {
         .profile(bin)
         .build();
 
+    log.info("유저 저장: {}", user.getUsername());
     return userRepository.save(user);
   }
 
@@ -193,6 +208,7 @@ public class BasicUserService implements UserService {
   private void saveProfileImg(MultipartFile file, User savedMember) throws IOException {
     if (file != null && savedMember.getProfile() != null) {
       binaryContentStorage.put(savedMember.getProfile().getId(), file.getBytes());
+      log.info("profile image 저장: {}", file.getOriginalFilename());
     }
   }
 

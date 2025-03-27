@@ -1,14 +1,14 @@
 package com.sprint.mission.discodeit.exception.userstatus;
 
-import java.util.UUID;
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-public class UserStatusNotFoundException extends RuntimeException {
-
-  public UserStatusNotFoundException() {
-    super();
-  }
-
-  public UserStatusNotFoundException(UUID userId) {
-    super(String.format("UserStatus with userId %s not found", userId));
+public class UserStatusNotFoundException extends UserStatusException {
+  
+  public UserStatusNotFoundException(Instant timestamp,
+      ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }

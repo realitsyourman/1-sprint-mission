@@ -1,12 +1,14 @@
 package com.sprint.mission.discodeit.exception.user;
 
-public class UserNotFoundException extends RuntimeException {
+import com.sprint.mission.discodeit.exception.ErrorCode;
+import java.time.Instant;
+import java.util.Map;
 
-  public UserNotFoundException() {
-    super();
-  }
+public class UserNotFoundException extends UserException {
 
-  public UserNotFoundException(String username) {
-    super(String.format("User with id %s not found", username));
+
+  public UserNotFoundException(Instant timestamp, ErrorCode errorCode,
+      Map<String, Object> details) {
+    super(timestamp, errorCode, details);
   }
 }
