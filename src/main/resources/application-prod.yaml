@@ -1,6 +1,6 @@
 spring:
   application:
-    name: discodeit
+    name: Discodeit
   servlet:
     multipart:
       max-file-size: 100MB
@@ -41,3 +41,34 @@ discodeit:
 file:
   #dir: C:/Users/leeco/Desktop/codeit_sprint/mission/1-sprint-mission/data_storage/
   dir: ${user.home}/app_uploads/
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info, health, metrics, loggers
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: ${spring.application.name}
+    version: 1.7.0
+  java:
+    version: 17
+  spring-boot:
+    version: 3.4.2
+  config:
+    datasource:
+      url: ${spring.datasource.url}
+      driver-class-name: org.postgresql.Driver
+    jpa:
+      ddl-auto: ${spring.jpa.hibernate.ddl-auto}
+    storage:
+      type: ${discodeit.storage.type}
+      path: ${discodeit.storage.local.root-path}
+    multipart:
+      max-file-size: ${spring.servlet.multipart.max-file-size}
+      max-request-size: ${spring.servlet.multipart.max-request-size}
