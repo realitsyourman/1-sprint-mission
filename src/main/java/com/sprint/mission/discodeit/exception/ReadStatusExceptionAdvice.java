@@ -16,7 +16,15 @@ public class ReadStatusExceptionAdvice {
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(ReadStatusExistsException.class)
   public ErrorResponse existsReadStatus(ReadStatusExistsException e) {
-    return new ErrorResponse(e.getMessage());
+
+    return ErrorResponse.builder()
+        .timestamp(e.getTimestamp())
+        .code(e.getErrorCode().getCode())
+        .message(e.getMessage())
+        .details(e.getDetails())
+        .exceptionType(e.getClass().getSimpleName())
+        .status(HttpStatus.BAD_REQUEST.value())
+        .build();
   }
 
   /**
@@ -25,6 +33,14 @@ public class ReadStatusExceptionAdvice {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(ReadStatusNotFoundException.class)
   public ErrorResponse notFoundReadStatus(ReadStatusNotFoundException e) {
-    return new ErrorResponse(e.getMessage());
+
+    return ErrorResponse.builder()
+        .timestamp(e.getTimestamp())
+        .code(e.getErrorCode().getCode())
+        .message(e.getMessage())
+        .details(e.getDetails())
+        .exceptionType(e.getClass().getSimpleName())
+        .status(HttpStatus.NOT_FOUND.value())
+        .build();
   }
 }
