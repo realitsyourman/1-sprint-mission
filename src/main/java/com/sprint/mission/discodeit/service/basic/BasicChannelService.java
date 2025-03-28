@@ -12,7 +12,9 @@ import com.sprint.mission.discodeit.entity.status.read.ReadStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
+import com.sprint.mission.discodeit.exception.channel.IllegalChannelException;
 import com.sprint.mission.discodeit.exception.channel.PrivateChannelCanNotModifyException;
+import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.ChannelMapper;
 import com.sprint.mission.discodeit.mapper.entitymapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
@@ -44,6 +46,12 @@ public class BasicChannelService implements ChannelService {
    */
   @Override
   public ChannelDto createPublic(PublicChannelCreateRequest request) {
+    if (request.name() == null || request.description() == null) {
+      throw new IllegalChannelException(Instant.now(), ErrorCode.ILLEGAL_CHANNEL,
+          Map.of(ErrorCode.ILLEGAL_CHANNEL.getCode(), ErrorCode.ILLEGAL_CHANNEL.getMessage())
+      );
+    }
+
     Channel channel = createChannel(request);
     channelRepository.save(channel);
 
@@ -63,6 +71,12 @@ public class BasicChannelService implements ChannelService {
    */
   @Override
   public ChannelDto createPrivate(PrivateChannelCreateRequest request) {
+    if (request.participantIds() == null || request.participantIds().isEmpty()) {
+      throw new IllegalChannelException(Instant.now(), ErrorCode.ILLEGAL_CHANNEL,
+          Map.of(ErrorCode.ILLEGAL_CHANNEL.getCode(), ErrorCode.ILLEGAL_CHANNEL.getMessage())
+      );
+    }
+
     Channel channel = Channel.builder()
         .type(ChannelType.PRIVATE)
         .build();
@@ -116,6 +130,11 @@ public class BasicChannelService implements ChannelService {
   @Override
   @Transactional(readOnly = true)
   public List<ChannelDto> findAllChannelsByUserId(UUID userId) {
+    if (!userRepository.existsById(userId)) {
+      throw new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+          Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+      );
+    }
     List<ReadStatus> readStatusList = readStatusRepository.findAllChannelsInUser(userId);
 
     return readStatusList.stream()

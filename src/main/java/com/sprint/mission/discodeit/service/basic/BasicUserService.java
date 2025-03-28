@@ -106,6 +106,11 @@ public class BasicUserService implements UserService {
    */
   @Override
   public UUID delete(UUID userId) {
+    if (!userRepository.existsById(userId)) {
+      throw new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+          Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())
+      );
+    }
     userRepository.removeUserById(userId);
 
     log.info("유저 삭제: {}", userId);
@@ -139,7 +144,7 @@ public class BasicUserService implements UserService {
    */
   @Override
   public UserStatusUpdateResponse updateOnlineStatus(UUID userId, UserStatusUpdateRequest request) {
-    
+
     User findUser = userRepository.findById(userId)
         .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
             Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));

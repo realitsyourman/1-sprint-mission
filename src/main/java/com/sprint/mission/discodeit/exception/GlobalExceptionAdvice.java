@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.exception;
 
-import com.sprint.mission.discodeit.exception.binary.BinaryContentNotFoundException;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
+import java.util.Map;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -9,22 +9,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@Slf4j
 @RestControllerAdvice
-@Order(Ordered.HIGHEST_PRECEDENCE)
-public class BinaryContentExceptionAdvice {
+@Order(Ordered.LOWEST_PRECEDENCE)
+public class GlobalExceptionAdvice {
 
-  @ResponseStatus(HttpStatus.NOT_FOUND)
-  @ExceptionHandler(BinaryContentNotFoundException.class)
-  public ErrorResponse notFoundFile(BinaryContentNotFoundException e) {
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(Exception.class)
+  public ErrorResponse exception(Exception e) {
 
     return ErrorResponse.builder()
-        .timestamp(e.getTimestamp())
-        .code(e.getErrorCode().getCode())
+        .timestamp(Instant.now())
+        .code(ErrorCode.INTERNAL_SERVER_ERROR.getCode())
         .message(e.getMessage())
-        .details(e.getDetails())
+        .details(Map.of(e.getClass().getSimpleName(), "알 수 없는 서버 오류가 발생했습니다."))
         .exceptionType(e.getClass().getSimpleName())
-        .status(HttpStatus.BAD_REQUEST.value())
+        .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
         .build();
   }
 }
