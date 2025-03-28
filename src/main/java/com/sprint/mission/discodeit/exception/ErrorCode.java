@@ -15,6 +15,7 @@ public enum ErrorCode {
   READ_STATUS_NOT_FOUND("NOT_FOUND", "User ReadStatus를 찾을 수 없습니다."),
   EXIST_READ_STATUS("BAD_REQUEST", "User ReadStatus가 이미 존재합니다."),
   USER_STATUS_NOT_FOUND("NOT_FOUND", "User ReadStatus를 찾을 수 없습니다."),
+  USER_STATUS_NOT_NULL("BAD_REQUEST", "시간 정보를 확인해주세요."),
   USER_AUTH_FAIL("BAD_REQUEST", "아이디 또는 비밀번호가 잘못되었습니다."),
   EXIST_USER("BAD_REQUEST", "존재하는 유저입니다."),
   MESSAGE_NULL_CONTENT("BAD_REQUEST", "메세지 내용이 비어있습니다."),

@@ -16,6 +16,8 @@ import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateResponse;
+import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateRequest;
+import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
 import com.sprint.mission.discodeit.exception.user.DuplicateEmailException;
@@ -228,10 +230,7 @@ class BasicUserServiceTest {
     UserUpdateRequest request = new UserUpdateRequest("newName", "newmail@mail.com",
         "newpassowrd");
     User oldUser = new User("oldName", "oldmail@mail.com", "oldpassword", null, null);
-
-    Field idField = ReflectionUtils.findField(User.class, "id");
-    ReflectionUtils.makeAccessible(idField);
-    ReflectionUtils.setField(idField, oldUser, userId);
+    setUserId(oldUser, userId);
 
     when(userRepository.findById(oldUser.getId())).thenReturn(Optional.of(oldUser));
     doThrow(new ConstraintViolationException("duplicate name", new SQLException("name"), "name"))
@@ -242,5 +241,39 @@ class BasicUserServiceTest {
     });
 
     verify(entityManager).flush();
+  }
+
+  @Test
+  @DisplayName("유저 상태 업데이트")
+  void updateUserStatus() throws Exception {
+    User user = createUserWithUSerStatus();
+
+    Instant now = Instant.now();
+    UserStatusUpdateRequest request = new UserStatusUpdateRequest(now);
+
+    when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+    UserStatusUpdateResponse response = userService.updateOnlineStatus(user.getId(),
+        request);
+
+    assertNotNull(response);
+    assertEquals(now, user.getStatus().getLastActiveAt());
+
+    verify(userRepository).findById(user.getId());
+  }
+
+  private User createUserWithUSerStatus() {
+    User user = new User("user", "user@mail.com", "password1234", null, null);
+    user.changeUserStatus(new UserStatus(user, null));
+    UUID userId = UUID.randomUUID();
+    setUserId(user, userId);
+
+    return user;
+  }
+
+  private void setUserId(User user, UUID userId) {
+    Field idField = ReflectionUtils.findField(User.class, "id");
+    ReflectionUtils.makeAccessible(idField);
+    ReflectionUtils.setField(idField, user, userId);
   }
 }

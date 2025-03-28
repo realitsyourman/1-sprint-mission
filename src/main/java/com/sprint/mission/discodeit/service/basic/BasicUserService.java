@@ -139,6 +139,7 @@ public class BasicUserService implements UserService {
    */
   @Override
   public UserStatusUpdateResponse updateOnlineStatus(UUID userId, UserStatusUpdateRequest request) {
+    
     User findUser = userRepository.findById(userId)
         .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
             Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));
