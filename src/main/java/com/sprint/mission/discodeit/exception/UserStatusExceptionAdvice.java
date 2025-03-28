@@ -15,6 +15,13 @@ public class UserStatusExceptionAdvice {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   @ExceptionHandler(UserStatusNotFoundException.class)
   public ErrorResponse notfoundUserStatus(UserStatusNotFoundException e) {
-    return new ErrorResponse(e.getMessage());
+    return ErrorResponse.builder()
+        .timestamp(e.getTimestamp())
+        .code(e.getErrorCode().getCode())
+        .message(e.getMessage())
+        .details(e.getDetails())
+        .exceptionType(e.getClass().getSimpleName())
+        .status(HttpStatus.NOT_FOUND.value())
+        .build();
   }
 }

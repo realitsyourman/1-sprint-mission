@@ -1,7 +1,8 @@
 package com.sprint.mission.discodeit.entity.user.dto;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,14 +14,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserCreateRequest {
 
-  @NotEmpty
+  @NotBlank
   private String username;
 
-  @NotEmpty
   @Email
+  @NotBlank
   private String email;
 
-  @NotEmpty
+  @Size(min = 6, max = 32)
+  @NotBlank
   private String password;
 
 }

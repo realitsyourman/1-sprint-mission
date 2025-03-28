@@ -10,7 +10,8 @@ import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
 import com.sprint.mission.discodeit.exception.ErrorCode;
-import com.sprint.mission.discodeit.exception.user.UserExistsException;
+import com.sprint.mission.discodeit.exception.user.DuplicateEmailException;
+import com.sprint.mission.discodeit.exception.user.DuplicateUsernameException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -48,11 +50,17 @@ public class BasicUserService implements UserService {
    * 유저 생성
    */
   @Override
-  public UserCreateResponse join(UserCreateRequest request, MultipartFile file) throws IOException {
-    User isalreadyUser = userRepository.findUserByUsername(request.getUsername());
-    if (isalreadyUser != null) {
+  public UserCreateResponse join(@Validated UserCreateRequest request, MultipartFile file)
+      throws IOException {
+    User findUser = userRepository.findUserByUsername(request.getUsername());
+    User findEmail = userRepository.findUserByEmail(request.getEmail());
+    if (findUser != null) {
       log.error("중복 이름 '{}' 저장 시도", request.getUsername());
-      throw new UserExistsException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+      throw new DuplicateUsernameException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
+    } else if (findEmail != null) {
+      log.error("중복 이메일 '{}' 저장 시도", request.getEmail());
+      throw new DuplicateEmailException(Instant.now(), ErrorCode.USER_NOT_FOUND,
           Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
     }
 

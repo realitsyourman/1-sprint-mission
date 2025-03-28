@@ -30,4 +30,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
   @EntityGraph(attributePaths = {"status", "profile"})
   User findUserByUsername(String username);
+
+  @EntityGraph(attributePaths = {"status", "profile"})
+  User findUserByEmail(String email);
 }
