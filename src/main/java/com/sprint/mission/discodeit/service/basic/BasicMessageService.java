@@ -1,6 +1,5 @@
 package com.sprint.mission.discodeit.service.basic;
 
-import com.sprint.mission.discodeit.dto.response.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.MessageDto;
 import com.sprint.mission.discodeit.dto.response.PageResponse;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
@@ -8,17 +7,14 @@ import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.message.Message;
 import com.sprint.mission.discodeit.entity.message.MessageContentUpdateRequest;
 import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
-import com.sprint.mission.discodeit.entity.message.MessageCreateResponse;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.channel.ChannelNotFoundException;
 import com.sprint.mission.discodeit.exception.message.ChannelAuthorNotFoundException;
 import com.sprint.mission.discodeit.exception.message.MessageNotFoundException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
-import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.mapper.entitymapper.MessageMapper;
 import com.sprint.mission.discodeit.mapper.entitymapper.PageResponseMapper;
-import com.sprint.mission.discodeit.mapper.entitymapper.UserMapper;
 import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
@@ -151,26 +147,6 @@ public class BasicMessageService implements MessageService {
           })
       );
     }
-  }
-
-  /**
-   * DTO로 변환
-   */
-  private MessageCreateResponse convertMessageCreateResponse(List<BinaryContent> files,
-      Message message) {
-    List<BinaryContentDto> binaryContentDtos = files.stream()
-        .map(BinaryContentMapper::toDto)
-        .toList();
-
-    return MessageCreateResponse.builder()
-        .id(message.getId())
-        .createdAt(Instant.now())
-        .updatedAt(Instant.now())
-        .content(message.getContent())
-        .channelId(message.getChannel().getId())
-        .author(UserMapper.toDto(message.getAuthor()))
-        .attachments(binaryContentDtos)
-        .build();
   }
 
   private PageImpl<MessageDto> convertToMessageDto(Pageable pageable,

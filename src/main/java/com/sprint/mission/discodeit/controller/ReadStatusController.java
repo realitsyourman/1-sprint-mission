@@ -6,10 +6,13 @@ import com.sprint.mission.discodeit.entity.status.read.ReadStatusUpdateRequest;
 import com.sprint.mission.discodeit.service.status.ReadStatusService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,7 +37,7 @@ public class ReadStatusController {
   @Operation(summary = "읽음 상태 생성")
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
-  public ReadStatusDto createReadStatus(@RequestBody ReadStatusRequest request) {
+  public ReadStatusDto createReadStatus(@Validated @RequestBody ReadStatusRequest request) {
     return readStatusService.create(request);
   }
 
@@ -43,7 +46,7 @@ public class ReadStatusController {
    */
   @Operation(summary = "유저의 메세지 읽은 상태 목록 조회")
   @GetMapping
-  public List<ReadStatusDto> findAllUserReadStatus(@RequestParam("userId") UUID userId) {
+  public List<ReadStatusDto> findAllUserReadStatus(@NotBlank @RequestParam("userId") UUID userId) {
     return readStatusService.findByUserId(userId);
   }
 
@@ -52,8 +55,8 @@ public class ReadStatusController {
    */
   @Operation(summary = "읽음 상태 수정")
   @PatchMapping("/{readStatusId}")
-  public ReadStatusDto updateReadStatus(@PathVariable("readStatusId") UUID readStatusId,
-      @RequestBody ReadStatusUpdateRequest request) {
+  public ReadStatusDto updateReadStatus(@NotNull @PathVariable("readStatusId") UUID readStatusId,
+      @Validated @RequestBody ReadStatusUpdateRequest request) {
 
     return readStatusService.update(readStatusId, request);
   }

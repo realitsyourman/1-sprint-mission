@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.service.ChannelService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -38,7 +39,7 @@ public class ChannelController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/public")
   public ChannelDto createPublicChannel(
-      @RequestBody @Validated PublicChannelCreateRequest request) {
+      @Validated @RequestBody PublicChannelCreateRequest request) {
 
     return channelService.createPublic(request);
   }
@@ -52,7 +53,7 @@ public class ChannelController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("/private")
   public ChannelDto createPrivateChannel(
-      @RequestBody @Validated PrivateChannelCreateRequest request) {
+      @Validated @RequestBody PrivateChannelCreateRequest request) {
 
     return channelService.createPrivate(request);
   }
@@ -63,7 +64,7 @@ public class ChannelController {
   @Operation(summary = "채널 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{channelId}")
-  public void deleteChannel(@PathVariable("channelId") UUID channelId) {
+  public void deleteChannel(@NotNull @PathVariable("channelId") UUID channelId) {
 
     channelService.remove(channelId);
   }
@@ -73,7 +74,7 @@ public class ChannelController {
    */
   @Operation(summary = "채널 정보 수정")
   @PatchMapping("/{channelId}")
-  public ChannelDto updateChannel(@PathVariable("channelId") UUID channelId,
+  public ChannelDto updateChannel(@NotNull @PathVariable("channelId") UUID channelId,
       @Validated @RequestBody ChannelModifyRequest request) {
 
     return channelService.update(channelId, request);
@@ -85,9 +86,8 @@ public class ChannelController {
   @Operation(summary = "유저가 참여 중인 채널 목록 조회")
   @GetMapping
   public List<ChannelDto> findAllChannelsByUser(
-      @RequestParam("userId") UUID userId) {
+      @NotNull @RequestParam("userId") UUID userId) {
+    
     return channelService.findAllChannelsByUserId(userId);
   }
-
-
 }

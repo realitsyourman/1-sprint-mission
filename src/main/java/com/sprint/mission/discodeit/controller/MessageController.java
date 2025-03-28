@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.entity.message.MessageCreateRequest;
 import com.sprint.mission.discodeit.service.MessageService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -42,7 +43,7 @@ public class MessageController {
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping
   public MessageDto sendMessage(
-      @RequestPart("messageCreateRequest") MessageCreateRequest request,
+      @Validated @RequestPart("messageCreateRequest") MessageCreateRequest request,
       @RequestPart(value = "attachments", required = false) List<MultipartFile> attachments) {
 
     return messageService.create(request, attachments);
@@ -55,7 +56,7 @@ public class MessageController {
    */
   @Operation(summary = "채널 메세지 목록 조회")
   @GetMapping
-  public PageResponse<MessageDto> findAll(@RequestParam(name = "channelId") UUID channelId,
+  public PageResponse<MessageDto> findAll(@NotNull @RequestParam(name = "channelId") UUID channelId,
       @RequestParam(name = "cursor", required = false) Instant cursor,
       Pageable pageable) {
 
@@ -68,7 +69,7 @@ public class MessageController {
   @Operation(summary = "메세지 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{messageId}")
-  public String deleteMessage(@PathVariable("messageId") UUID messageId) {
+  public String deleteMessage(@NotNull @PathVariable("messageId") UUID messageId) {
 
     messageService.remove(messageId);
 
@@ -80,8 +81,8 @@ public class MessageController {
    */
   @Operation(summary = "메세지 수정")
   @PatchMapping("/{messageId}")
-  public MessageDto updateMessage(@PathVariable("messageId") UUID messageId,
-      @RequestBody @Validated MessageContentUpdateRequest request) {
+  public MessageDto updateMessage(@NotNull @PathVariable("messageId") UUID messageId,
+      @Validated @RequestBody MessageContentUpdateRequest request) {
 
     return messageService.update(messageId, request);
   }

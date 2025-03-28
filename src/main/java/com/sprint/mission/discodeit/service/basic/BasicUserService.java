@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
@@ -50,7 +49,7 @@ public class BasicUserService implements UserService {
    * 유저 생성
    */
   @Override
-  public UserCreateResponse join(@Validated UserCreateRequest request, MultipartFile file)
+  public UserCreateResponse join(UserCreateRequest request, MultipartFile file)
       throws IOException {
     User findUser = userRepository.findUserByUsername(request.getUsername());
     User findEmail = userRepository.findUserByEmail(request.getEmail());

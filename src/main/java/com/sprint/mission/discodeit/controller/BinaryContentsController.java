@@ -4,6 +4,7 @@ import com.sprint.mission.discodeit.entity.binarycontent.dto.BinaryContentRespon
 import com.sprint.mission.discodeit.service.BinaryContentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +28,9 @@ public class BinaryContentsController {
    */
   @Operation(summary = "첨부 파일 단건 조회")
   @GetMapping("/{binaryContentId}")
-  public BinaryContentResponse findFile(@PathVariable("binaryContentId") UUID binaryContentId) {
+  public BinaryContentResponse findFile(
+      @NotNull @PathVariable("binaryContentId") UUID binaryContentId) {
+
     return binaryContentService.find(binaryContentId);
   }
 
@@ -38,6 +41,7 @@ public class BinaryContentsController {
   @GetMapping
   public List<BinaryContentResponse> findAllFiles(
       @RequestParam("binaryContentIds") List<String> binaryContentIds) {
+
     return binaryContentService.findAll(binaryContentIds);
   }
 
@@ -46,7 +50,8 @@ public class BinaryContentsController {
    */
   @Operation(summary = "파일 다운로드")
   @GetMapping("/{binaryContentId}/download")
-  public ResponseEntity<?> downloadFile(@PathVariable("binaryContentId") UUID binaryContentId) {
+  public ResponseEntity<?> downloadFile(
+      @NotNull @PathVariable("binaryContentId") UUID binaryContentId) {
 
     return binaryContentService.downloadBinaryContent(binaryContentId);
   }

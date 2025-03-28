@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
 import com.sprint.mission.discodeit.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class UserController {
   @Operation(summary = "유저 삭제")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{userId}")
-  public UUID userDelete(@PathVariable("userId") UUID userId) {
+  public UUID userDelete(@NotNull @PathVariable("userId") UUID userId) {
     return userService.delete(userId);
   }
 
@@ -85,8 +86,8 @@ public class UserController {
    */
   @Operation(summary = "유저 온라인 상태 업데이트")
   @PatchMapping("/{userId}/userStatus")
-  public UserStatusUpdateResponse updateUserStatus(@PathVariable("userId") UUID userId,
-      @RequestBody UserStatusUpdateRequest request) {
+  public UserStatusUpdateResponse updateUserStatus(@NotNull @PathVariable("userId") UUID userId,
+      @Validated @RequestBody UserStatusUpdateRequest request) {
     return userService.updateOnlineStatus(userId, request);
   }
 }
