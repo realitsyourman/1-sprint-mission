@@ -111,7 +111,7 @@ public class BasicUserService implements UserService {
           Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())
       );
     }
-    userRepository.removeUserById(userId);
+    userRepository.deleteById(userId);
 
     log.info("유저 삭제: {}", userId);
     return userId;

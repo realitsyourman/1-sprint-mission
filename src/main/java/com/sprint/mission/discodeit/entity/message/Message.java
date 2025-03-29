@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.entity.message;
 
-import com.sprint.mission.discodeit.entity.base.baseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.user.User;
@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "messages")
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Message extends baseUpdatableEntity {
+public class Message extends BaseUpdatableEntity {
 
   private String content;
 

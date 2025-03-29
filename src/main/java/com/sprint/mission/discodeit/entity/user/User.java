@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.entity.user;
 
-import com.sprint.mission.discodeit.entity.base.baseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import jakarta.persistence.CascadeType;
@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class User extends baseUpdatableEntity {
+public class User extends BaseUpdatableEntity {
 
   private String username;
   private String email;

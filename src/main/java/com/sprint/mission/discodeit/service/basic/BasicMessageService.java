@@ -100,8 +100,14 @@ public class BasicMessageService implements MessageService {
    */
   @Override
   public void remove(UUID messageId) {
-    messageRepository.deleteById(messageId);
+    if (!messageRepository.existsById(messageId)) {
+      log.error("메세지 삭제 실패: {}", messageId);
+      throw new MessageNotFoundException(Instant.now(), ErrorCode.MESSAGE_NOT_FOUND,
+          Map.of(messageId.toString(), ErrorCode.MESSAGE_NOT_FOUND.getMessage())
+      );
+    }
 
+    messageRepository.deleteById(messageId);
     log.info("메세지 삭제: {}", messageId);
   }
 

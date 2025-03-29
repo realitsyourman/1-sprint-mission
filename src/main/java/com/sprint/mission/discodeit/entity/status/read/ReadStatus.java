@@ -1,7 +1,7 @@
 package com.sprint.mission.discodeit.entity.status.read;
 
 
-import com.sprint.mission.discodeit.entity.base.baseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.channel.Channel;
 import com.sprint.mission.discodeit.entity.user.User;
 import jakarta.persistence.Entity;
@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "read_statuses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class ReadStatus extends baseUpdatableEntity {
+public class ReadStatus extends BaseUpdatableEntity {
 
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")

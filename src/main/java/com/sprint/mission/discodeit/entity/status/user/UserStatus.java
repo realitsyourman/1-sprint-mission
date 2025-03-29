@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.entity.status.user;
 
-import com.sprint.mission.discodeit.entity.base.baseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.user.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,7 +19,7 @@ import lombok.Setter;
 @Builder
 @Table(name = "user_statuses")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserStatus extends baseUpdatableEntity {
+public class UserStatus extends BaseUpdatableEntity {
 
   @OneToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")

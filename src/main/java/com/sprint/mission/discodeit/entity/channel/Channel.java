@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.entity.channel;
 
-import com.sprint.mission.discodeit.entity.base.baseUpdatableEntity;
+import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "channels")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Channel extends baseUpdatableEntity {
+public class Channel extends BaseUpdatableEntity {
 
   private String name;
   private String description;
