@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface MessageRepository extends JpaRepository<Message, UUID> {
+public interface MessageRepository extends JpaRepository<Message, UUID>, MessageQuerydslRepository {
 
   Page<Message> findByChannel_Id(UUID channelId, Pageable pageable);
 
@@ -30,7 +30,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID> {
       + " join fetch a.status st"
       + " left join fetch m.attachments at"
       + " where m.channel.id = :channelId"
-      + " and m.createdAt > :cursor order by m.createdAt desc")
+      + " and m.createdAt > :cursor")
   Slice<Message> findAllByChannelIdWithCursor(@Param("channelId") UUID ChannelId,
       @Param("cursor") Instant cursor, Pageable slice);
 

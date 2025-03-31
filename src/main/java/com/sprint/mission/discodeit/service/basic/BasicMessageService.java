@@ -210,13 +210,49 @@ public class BasicMessageService implements MessageService {
   private PageResponse<MessageDto> getCursorBasedPaging(UUID channelId, Instant cursor,
       Pageable pageable, PageRequest pageRequest) {
 
-    Slice<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
-        cursor, pageRequest);
+    Slice<Message> messages = messageRepository.cursorBasedPaging(channelId, cursor, pageable);
+    Long totalCount = messageRepository.totalCount(channelId, cursor, pageable);
+    List<Message> content = messages.getContent();
 
-    PageImpl<MessageDto> pages = convertToMessageDto(
-        pageable, pagedMessages);
+    List<MessageDto> messageDtos = content.stream()
+        .map(MessageMapper::toDto)
+        .toList();
 
-    return mapper.fromSlice(pages);
+    Instant nextCursor = null;
+    boolean hasNext = messages.hasNext();
+    if (hasNext && !content.isEmpty()) {
+      Message message = content.get(content.size() - 1);
+
+      nextCursor = message.getCreatedAt();
+    }
+
+    return PageResponse.<MessageDto>builder()
+        .content(messageDtos)
+        .nextCursor(nextCursor)
+        .size(pageRequest.getPageSize())
+        .hasNext(hasNext)
+        .totalElements(totalCount)
+        .build();
+
+//    Slice<Message> pagedMessages = messageRepository.findAllByChannelIdWithCursor(channelId,
+//        cursor, pageRequest);
+//
+//    PageImpl<MessageDto> pages = convertToMessageDto(
+//        pageable, pagedMessages);
+//
+//    Instant nextCursor = null;
+//    if (!pages.isEmpty()) {
+//      MessageDto lastMessage = pages.getContent().get(pages.getNumberOfElements() - 1);
+//      nextCursor = lastMessage.createdAt();
+//    }
+//
+//    return PageResponse.<MessageDto>builder()
+//        .content(pages.getContent())
+//        .nextCursor(nextCursor)
+//        .size(pages.getSize())
+//        .hasNext(pages.hasNext())
+//        .totalElements(null)
+//        .build();
   }
 
   // 일반 페이징

@@ -7,9 +7,9 @@ import org.springframework.data.domain.Slice;
 public class PageResponseMapper<T> {
 
   public PageResponse<T> fromSlice(Slice<T> slice) {
+
     return PageResponse.<T>builder()
         .content(slice.getContent())
-        .nextCursor(slice.getNumber())
         .size(slice.getSize())
         .hasNext(slice.hasNext())
         .totalElements(null)

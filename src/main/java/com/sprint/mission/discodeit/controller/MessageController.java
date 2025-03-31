@@ -51,7 +51,7 @@ public class MessageController {
 
   /**
    * 채널의 메세지 목록 조회
-   * <p>
+   * <p>1
    * 커서 기반 페이징
    */
   @Operation(summary = "채널 메세지 목록 조회")
