@@ -37,15 +37,15 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
         .from(message)
         .join(message.channel, channel).fetchJoin()
         .join(message.author, user).fetchJoin()
-        .leftJoin(user.profile, binaryContent).fetchJoin()
         .join(user.status, userStatus).fetchJoin()
-        .leftJoin(message.attachments, attachmentContent).fetchJoin()
-        .where(
-            message.channel.id.eq(UUID.fromString(channelId.toString())),
-            cursor(cursor, slice)
-        )
+        .leftJoin(user.profile, binaryContent).fetchJoin()
+        .leftJoin(message.attachments, attachmentContent)
         .orderBy(
             orderByField(slice)
+        )
+        .where(
+            channelIdEq(channelId),
+            cursor(cursor, slice)
         )
         .limit(slice.getPageSize() + 1)
         .fetch();
@@ -71,6 +71,10 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
         .fetchOne();
   }
 
+  private BooleanExpression channelIdEq(UUID channelId) {
+    return channelId != null ? message.channel.id.eq(channelId) : null;
+  }
+
   private int getSize(Pageable slice) {
     return slice.getPageSize() == 0 ? 10 : slice.getPageSize();
   }
@@ -80,22 +84,30 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
       return null;
     }
 
-    Sort sort = slice.getSort();
-    for (Order order : sort) {
-      Direction direction = order.getDirection();
+    boolean isDesc = true;
 
-      if (direction.isDescending()) {
-        return message.createdAt.lt(cursor);
-      } else {
-        return message.createdAt.gt(cursor);
+    Sort sort = slice.getSort();
+    if (sort.isSorted()) {
+      for (Order order : sort) {
+        if ("createdAt".equals(order.getProperty())) {
+          isDesc = order.getDirection().isDescending();
+          break;
+        }
       }
     }
 
-    return null;
+    return isDesc
+        ? message.createdAt.loe(cursor)
+        : message.createdAt.goe(cursor);
   }
+
 
   private OrderSpecifier<?> orderByField(Pageable slice) {
     Sort sort = slice.getSort();
+
+    if (sort.isEmpty()) {
+      return message.createdAt.desc();
+    }
 
     for (Order order : sort) {
       String property = order.getProperty();
@@ -104,13 +116,11 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
       if (property.equals("createdAt")) {
         if (direction.isDescending()) {
           return message.createdAt.desc();
-        } else {
-          return message.createdAt.asc();
         }
       }
     }
 
-    return null;
+    return message.createdAt.asc();
   }
 
 }
