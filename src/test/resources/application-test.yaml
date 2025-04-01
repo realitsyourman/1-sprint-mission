@@ -19,23 +19,21 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 1000
+      type_descriptor:
+        sql_uuid: true
     open-in-view: false
 
   h2:
     console:
       enabled: true
       path: /h2-console
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:schema.sql
-      data-locations: classpath:data.sql
 
 logging:
   level:
     root: info
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql: trace
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
     com.discodeit: debug
 
 decorator:
