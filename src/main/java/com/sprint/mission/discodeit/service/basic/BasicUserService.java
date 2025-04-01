@@ -55,11 +55,11 @@ public class BasicUserService implements UserService {
     User findEmail = userRepository.findUserByEmail(request.getEmail());
     if (findUser != null) {
       log.error("중복 이름 '{}' 저장 시도", request.getUsername());
-      throw new DuplicateUsernameException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+      throw new DuplicateUsernameException(Instant.now(), ErrorCode.EXIST_USER,
           Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
     } else if (findEmail != null) {
       log.error("중복 이메일 '{}' 저장 시도", request.getEmail());
-      throw new DuplicateEmailException(Instant.now(), ErrorCode.USER_NOT_FOUND,
+      throw new DuplicateEmailException(Instant.now(), ErrorCode.EXIST_USER,
           Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
     }
 
