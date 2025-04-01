@@ -24,4 +24,8 @@ public abstract class BaseEntity {
   @CreatedDate
   private Instant createdAt;
 
+  public void changeCreateAt(Instant createdAt) {
+    this.createdAt = createdAt;
+  }
+
 }

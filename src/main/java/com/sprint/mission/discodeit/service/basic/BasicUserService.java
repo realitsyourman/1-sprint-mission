@@ -210,6 +210,8 @@ public class BasicUserService implements UserService {
           .size(file.getSize())
           .contentType(file.getContentType())
           .build();
+
+      bin.changeCreateAt(Instant.now());
     }
 
     return bin;
