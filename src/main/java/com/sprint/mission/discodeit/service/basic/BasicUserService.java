@@ -69,8 +69,13 @@ public class BasicUserService implements UserService {
     saveUserStatus(savedMember);
     saveProfileImg(file, savedMember);
 
-    return new UserCreateResponse(savedMember.getId(), savedMember.getUsername(),
-        savedMember.getEmail(), BinaryContentMapper.toDto(savedMember.getProfile()), true);
+    return new UserCreateResponse(
+        savedMember.getId(),
+        savedMember.getUsername(),
+        savedMember.getEmail(),
+        savedMember.getProfile() != null ? BinaryContentMapper.toDto(savedMember.getProfile())
+            : null,
+        true);
   }
 
   /**
@@ -194,7 +199,7 @@ public class BasicUserService implements UserService {
         .password(request.getPassword())
         .profile(bin)
         .build();
-
+    
     log.info("유저 저장: {}", user.getUsername());
     return userRepository.save(user);
   }

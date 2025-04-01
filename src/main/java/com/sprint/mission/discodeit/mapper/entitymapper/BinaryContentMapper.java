@@ -10,7 +10,9 @@ public class BinaryContentMapper {
       return null;
     }
 
-    return new BinaryContentDto(binaryContent.getId(), binaryContent.getFileName(),
+    return new BinaryContentDto(
+        binaryContent.getId(),
+        binaryContent.getFileName(),
         binaryContent.getSize(),
         binaryContent.getContentType());
   }
