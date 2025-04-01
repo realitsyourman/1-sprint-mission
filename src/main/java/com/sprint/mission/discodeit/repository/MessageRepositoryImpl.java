@@ -72,6 +72,7 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
   }
 
   private BooleanExpression channelIdEq(UUID channelId) {
+    System.out.println("channelId = " + channelId);
     return channelId != null ? message.channel.id.eq(channelId) : null;
   }
 
