@@ -23,6 +23,11 @@ VALUES ('1f17a8d1-77d7-437d-811e-d98db3bd30bc', CURRENT_TIMESTAMP, CURRENT_TIMES
         'ch2',
         'channel 2', 'PUBLIC');
 
+INSERT INTO channels (id, created_at, updated_at, name, description, type)
+VALUES ('0017a8d1-77d7-437d-811e-d98db3bd30bc', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP,
+        null,
+        null, 'PRIVATE');
+
 
 -- 유저의 read status 초기화
 INSERT INTO read_statuses (id, created_at, updated_at, last_read_at, user_id, channel_id)

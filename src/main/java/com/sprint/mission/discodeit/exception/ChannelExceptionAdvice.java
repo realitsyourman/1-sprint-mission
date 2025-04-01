@@ -33,7 +33,7 @@ public class ChannelExceptionAdvice {
   /**
    * 비공개 채널은 수정할 수 없음
    */
-  @ResponseStatus(HttpStatus.NOT_FOUND)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
   @ExceptionHandler(PrivateChannelCanNotModifyException.class)
   public ErrorResponse channelIllegal(PrivateChannelCanNotModifyException e) {
     log.error("Channel exception: {}", e.getMessage());
