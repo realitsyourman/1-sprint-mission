@@ -37,7 +37,7 @@ public class MessageRepositoryImpl implements MessageQuerydslRepository {
         .from(message)
         .join(message.channel, channel).fetchJoin()
         .join(message.author, user).fetchJoin()
-        .join(user.status, userStatus).fetchJoin()
+        .leftJoin(user.status, userStatus).fetchJoin()
         .leftJoin(user.profile, binaryContent).fetchJoin()
         .leftJoin(message.attachments, attachmentContent)
         .orderBy(

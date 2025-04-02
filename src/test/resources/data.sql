@@ -191,9 +191,34 @@ VALUES ('cfd66e29-0cdf-4363-a44b-cd1692424dff',
         '3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0');
 
 INSERT INTO messages (id, created_at, updated_at, content, channel_id, author_id)
-VALUES ('ee9a1d76-c2c1-4ca4-8c1f-b1216b69ef07',
+VALUES ('1e9a1d76-c2c1-4ca4-8c1f-b1216b69ef07',
         '2025-03-31 02:43:52.107272 +00:00',
         '2025-03-31 02:43:52.107272 +00:00',
+        '테스트16',
+        '6f17a8d1-77d7-437d-811e-d98db3bd30bc',
+        '3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0');
+
+INSERT INTO messages (id, created_at, updated_at, content, channel_id, author_id)
+VALUES ('2e9a1d76-c2c1-4ca4-8c1f-b1216b69ef07',
+        '2025-03-30 02:43:52.107272 +00:00',
+        '2025-03-30 02:43:52.107272 +00:00',
+        '테스트16',
+        '6f17a8d1-77d7-437d-811e-d98db3bd30bc',
+        '3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0');
+
+
+INSERT INTO messages (id, created_at, updated_at, content, channel_id, author_id)
+VALUES ('3e9a1d76-c2c1-4ca4-8c1f-b1216b69ef07',
+        '2025-03-29 02:43:52.107272 +00:00',
+        '2025-03-29 02:43:52.107272 +00:00',
+        '테스트16',
+        '6f17a8d1-77d7-437d-811e-d98db3bd30bc',
+        '3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0');
+
+INSERT INTO messages (id, created_at, updated_at, content, channel_id, author_id)
+VALUES ('4e9a1d76-c2c1-4ca4-8c1f-b1216b69ef07',
+        '2025-03-28 02:43:52.107272 +00:00',
+        '2025-03-28 02:43:52.107272 +00:00',
         '테스트16',
         '6f17a8d1-77d7-437d-811e-d98db3bd30bc',
         '3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0');

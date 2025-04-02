@@ -19,6 +19,8 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 1000
+        jdbc:
+          time_zone: UTC
       type_descriptor:
         sql_uuid: true
     open-in-view: false

@@ -1,10 +1,9 @@
 package com.sprint.mission.discodeit.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.sprint.mission.discodeit.config.QuerydslConfig;
-import com.sprint.mission.discodeit.entity.channel.Channel;
-import com.sprint.mission.discodeit.entity.channel.ChannelType;
 import com.sprint.mission.discodeit.entity.message.Message;
-import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.logging.LogConfiguration;
 import java.time.Instant;
 import java.util.List;
@@ -41,26 +40,41 @@ class MessageRepositoryTest {
   @Autowired
   TestEntityManager em;
 
-
   @Test
-  @DisplayName("페이징")
-  void paging() throws Exception {
+  @DisplayName("메세지 5개 조회")
+  void searchMessage() throws Exception {
+    UUID channelId = UUID.fromString("6f17a8d1-77d7-437d-811e-d98db3bd30bc");
+
     PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Direction.DESC, "createdAt"));
 
-    User user = userRepository.findById(UUID.fromString("3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0"))
-        .orElse(null);
-
-    Channel channel = channelRepository.save(new Channel("ch99", "channel 99", ChannelType.PUBLIC));
-    messageRepository.save(new Message("hi", channel, user, null));
-
-    em.flush();
-    em.clear();
-
-    Slice<Message> messages = messageRepository.cursorBasedPaging(channel.getId(), Instant.now(),
+    Slice<Message> messages = messageRepository.cursorBasedPaging(channelId, Instant.now(),
         pageRequest);
-
     List<Message> content = messages.getContent();
 
-    System.out.println("content = " + content);
+    assertThat(content).isNotEmpty();
+    assertThat(content.size()).isEqualTo(6); // 커서 페이징을 위해 repository 단에서는 1개 더 쿼리함
+  }
+
+  @Test
+  @DisplayName("메세지 커서 페이징")
+  void cursorBasedPagination() throws Exception {
+    UUID channelId = UUID.fromString("6f17a8d1-77d7-437d-811e-d98db3bd30bc");
+
+    PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Direction.DESC, "createdAt"));
+
+    Slice<Message> messages1 = messageRepository.cursorBasedPaging(channelId,
+        Instant.now(),
+        pageRequest);
+    List<Message> content1 = messages1.getContent();
+
+    assertThat(content1).isNotEmpty();
+    assertThat(content1.size()).isEqualTo(6); // 커서 페이징을 위해 repository 단에서는 1개 더 쿼리함
+
+    Instant cursor = content1.get(content1.size() - 1).getCreatedAt();
+    Slice<Message> messages2 = messageRepository.cursorBasedPaging(channelId, cursor, pageRequest);
+    List<Message> content2 = messages2.getContent();
+
+    assertThat(content2).isNotEmpty();
+    assertThat(cursor).isEqualTo(content2.get(0).getCreatedAt());
   }
 }
