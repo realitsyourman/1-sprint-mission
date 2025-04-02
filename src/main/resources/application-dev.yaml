@@ -1,9 +1,13 @@
 server:
-  port: 9090
+  port: 7070
 
 spring:
   application:
-    name: Discodeit
+    name: discodeit
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
   servlet:
     multipart:
       max-file-size: 100MB

@@ -1,6 +1,14 @@
 spring:
   application:
-    name: Discodeit
+    name: discodeit
+  profiles:
+    active: default
+  boot:
+    admin:
+      client:
+        url: http://localhost:9090
+        instance:
+          name: discodeit
   servlet:
     multipart:
       max-file-size: 100MB

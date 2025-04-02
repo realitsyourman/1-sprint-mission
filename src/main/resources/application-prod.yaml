@@ -1,6 +1,10 @@
 spring:
   application:
-    name: Discodeit
+    name: discodeit
+  boot:
+    admin:
+      client:
+        url: ${SPRING_BOOT_ADMIN_CLIENT_URL}
   servlet:
     multipart:
       max-file-size: 100MB
