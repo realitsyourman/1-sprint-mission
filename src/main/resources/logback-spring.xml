@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
   <!-- .logs 로그 파일 -->
   <property name="LOG_DIR" value="${user.dir}/.logs"/>
