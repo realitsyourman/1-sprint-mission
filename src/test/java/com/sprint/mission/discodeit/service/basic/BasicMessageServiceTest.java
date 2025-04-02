@@ -121,11 +121,14 @@ class BasicMessageServiceTest {
   void deleteMessage() throws Exception {
     UUID messageId = UUID.randomUUID();
 
+    when(messageRepository.existsById(messageId)).thenReturn(true);
+
     doNothing().when(messageRepository).deleteById(messageId);
 
     messageService.remove(messageId);
 
-    verify(messageRepository).deleteById(any(UUID.class));
+    verify(messageRepository).existsById(messageId);
+    verify(messageRepository).deleteById(messageId);
   }
 
   @Test
@@ -167,7 +170,7 @@ class BasicMessageServiceTest {
 
     assertThrows(MessageNotFoundException.class, () -> messageService.update(messageId, request));
   }
-  
+
   private void setAuthorId(User author) {
     UUID authorId = UUID.randomUUID();
     Field idField = ReflectionUtils.findField(Message.class, "id");

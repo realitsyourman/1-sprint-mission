@@ -178,13 +178,18 @@ class BasicUserServiceTest {
   @Test
   @DisplayName("유저 삭제 성공")
   void removeUser() throws Exception {
+    UUID userId = UUID.randomUUID();
     User savedUser1 = new User("user1", "user1@mail.com", "1234", null, null);
+    setUserId(savedUser1, userId);
 
-    doNothing().when(userRepository).removeUserById(savedUser1.getId());
+    when(userRepository.existsById(userId)).thenReturn(true);
 
-    userService.delete(savedUser1.getId());
+    doNothing().when(userRepository).deleteById(userId);
 
-    verify(userRepository).removeUserById(savedUser1.getId());
+    userService.delete(userId);
+
+    verify(userRepository).existsById(userId);
+    verify(userRepository).deleteById(userId);
   }
 
   @Test
@@ -192,12 +197,12 @@ class BasicUserServiceTest {
   void removeUserFail() throws Exception {
     UUID notExistsUserID = UUID.randomUUID();
 
-    doThrow(new UserNotFoundException(null, null, null))
-        .when(userRepository).removeUserById(notExistsUserID);
+    when(userRepository.existsById(notExistsUserID)).thenReturn(false);
 
     assertThrows(UserNotFoundException.class, () -> userService.delete(notExistsUserID));
 
-    verify(userRepository).removeUserById(notExistsUserID);
+    verify(userRepository).existsById(notExistsUserID);
+    verify(userRepository, never()).removeUserById(any(UUID.class));
   }
 
   @Test

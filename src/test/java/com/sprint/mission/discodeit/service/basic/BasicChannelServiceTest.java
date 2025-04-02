@@ -178,6 +178,8 @@ class BasicChannelServiceTest {
   @DisplayName("유저가 참여중인 채널 목록 조회")
   void findAllChannelByUser() throws Exception {
     User user = new User("user1", "user1@mailcom", "password123", null, null);
+    UUID userId = UUID.randomUUID();
+    setUserId(user, userId);
     Channel channel1 = new Channel("ch1", "1st", ChannelType.PUBLIC);
     Channel channel2 = new Channel("ch2", "2nd", ChannelType.PUBLIC);
     Channel channel3 = new Channel("ch3", "3rd", ChannelType.PRIVATE);
@@ -186,6 +188,7 @@ class BasicChannelServiceTest {
     ReadStatus readStatus3 = new ReadStatus(user, channel3, Instant.now());
     List<ReadStatus> readStatuses = List.of(readStatus1, readStatus2, readStatus3);
 
+    when(userRepository.existsById(userId)).thenReturn(true);
     when(readStatusRepository.findAllChannelsInUser(user.getId())).thenReturn(readStatuses);
 
     List<ChannelDto> channels = channelService.findAllChannelsByUserId(user.getId());
@@ -214,5 +217,11 @@ class BasicChannelServiceTest {
     ReflectionUtils.setField(idField, channel, channelId);
 
     return channel;
+  }
+
+  private void setUserId(User user, UUID userId) {
+    Field idField = ReflectionUtils.findField(User.class, "id");
+    ReflectionUtils.makeAccessible(idField);
+    ReflectionUtils.setField(idField, user, userId);
   }
 }
