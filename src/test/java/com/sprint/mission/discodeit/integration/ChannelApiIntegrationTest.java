@@ -10,6 +10,7 @@ import com.sprint.mission.discodeit.entity.channel.create.PrivateChannelCreateRe
 import com.sprint.mission.discodeit.entity.channel.create.PublicChannelCreateRequest;
 import com.sprint.mission.discodeit.entity.channel.update.ChannelModifyRequest;
 import com.sprint.mission.discodeit.entity.user.User;
+import com.sprint.mission.discodeit.repository.ChannelRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.ChannelService;
 import java.util.List;
@@ -35,6 +36,9 @@ public class ChannelApiIntegrationTest {
 
   @Autowired
   private ChannelService channelService;
+
+  @Autowired
+  private ChannelRepository channelRepository;
 
   @Autowired
   private TestRestTemplate restTemplate;
@@ -172,7 +176,8 @@ public class ChannelApiIntegrationTest {
   @Test
   @DisplayName("비공개 채널은 수정 못함")
   void doNotModifyPrivateChannel() throws Exception {
-    UUID channelId = UUID.fromString("0017a8d1-77d7-437d-811e-d98db3bd30bc");
+    UUID channelId = UUID.fromString("3417a8d1-77d7-437d-811e-d98db3bd30bc");
+
     ChannelModifyRequest request = new ChannelModifyRequest("newCh", "new channel");
     HttpEntity<String> jsonEntity = getJsonEntity(request);
 

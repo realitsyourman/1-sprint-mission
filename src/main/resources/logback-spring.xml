@@ -6,8 +6,7 @@
   <!-- 출력 포맷 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>
-        %d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{requestId} |
+      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{requestId} |
         %X{requestMethod} | %X{requestUrl}] - %msg%n
       </pattern>
     </encoder>
@@ -22,8 +21,7 @@
       <maxHistory>30</maxHistory>
     </rollingPolicy>
     <encoder>
-      <pattern>
-        %d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{requestId} |
+      <pattern>%d{yy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %-36logger{36} [%X{requestId} |
         %X{requestMethod} | %X{requestUrl}] - %msg%n
       </pattern>
     </encoder>

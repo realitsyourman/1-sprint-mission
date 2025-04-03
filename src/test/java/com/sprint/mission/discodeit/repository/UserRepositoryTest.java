@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.sprint.mission.discodeit.config.QuerydslConfig;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.logging.LogConfiguration;
 import java.util.List;
@@ -20,7 +21,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@Import(LogConfiguration.class)
+@Import({LogConfiguration.class, QuerydslConfig.class})
 @ExtendWith(SpringExtension.class)
 class UserRepositoryTest {
 

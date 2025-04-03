@@ -127,7 +127,7 @@ public class UserApiIntegrationTest {
   @Test
   @DisplayName("유저 수정")
   void modifyUser() throws Exception {
-    UserUpdateRequest request = new UserUpdateRequest("newUser", "new@mail.com", "newPassword");
+    UserUpdateRequest request = new UserUpdateRequest("newUser3", "new3@mail.com", "newPassword");
     UUID userId = UUID.fromString("5c4e3f2d-8d1b-6a0c-c9e7-f6d4e2c0b9a8");
 
     String requestJson = objectMapper.writeValueAsString(request);
@@ -152,8 +152,8 @@ public class UserApiIntegrationTest {
     );
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-    assertThat("newUser").isEqualTo(response.getBody().username());
-    assertThat("new@mail.com").isEqualTo(response.getBody().email());
+    assertThat("newUser3").isEqualTo(response.getBody().username());
+    assertThat("new3@mail.com").isEqualTo(response.getBody().email());
   }
 
   @Test
