@@ -21,6 +21,16 @@ ext {
     springBootAdminVersion = "3.4.5"
 }
 
+bootJar {
+    archiveFileName = 'app.jar'
+}
+
+tasks.register('copyJarToDockerContext', Copy) {
+    dependsOn bootJar
+    from layout.buildDirectory.file("libs/app.jar")
+    into "."
+}
+
 group = 'com.sprint.mission'
 version = '0.0.2'
 
