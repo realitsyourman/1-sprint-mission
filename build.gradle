@@ -82,6 +82,10 @@ dependencies {
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
     annotationProcessor "jakarta.annotation:jakarta.annotation-api"
     annotationProcessor "jakarta.persistence:jakarta.persistence-api"
+
+    // aws s3
+    implementation("software.amazon.awssdk:s3:2.31.14")
+    implementation("software.amazon.awssdk:protocol-core:2.31.14")
 }
 
 tasks.withType(JavaCompile) {
