@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
-import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateResponse;
@@ -17,6 +16,8 @@ import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.status.UserStateService;
+import com.sprint.mission.discodeit.service.util.BinaryContentUtils;
+import com.sprint.mission.discodeit.service.util.UserStatusContextUtils;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -63,11 +64,11 @@ public class BasicUserService implements UserService {
           Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
     }
 
-    BinaryContent profile = getProfile(file);
+    BinaryContent profile = BinaryContentUtils.getProfile(file);
     User savedMember = saveUser(request, profile);
 
-    saveUserStatus(savedMember);
-    saveProfileImg(file, savedMember);
+    UserStatusContextUtils.saveUserStatus(savedMember);
+    BinaryContentUtils.saveProfileImg(file, savedMember);
 
     return new UserCreateResponse(
         savedMember.getId(),
@@ -176,17 +177,19 @@ public class BasicUserService implements UserService {
     if (newPassword == null) {
       newPassword = findUser.getPassword();
     }
+
     findUser.changeUserInfo(newName, newEmail,
         newPassword);
 
-    BinaryContent profile = getProfile(file);
-    findUser.changeProfile(profile);
+    BinaryContent profile = BinaryContentUtils.getProfile(file);
+    if (profile != null) {
+      findUser.changeProfile(profile);
+    }
 
     em.flush();
     em.clear();
 
-    saveProfileImg(file, findUser);
-
+    BinaryContentUtils.saveProfileImg(file, findUser);
   }
 
   /**
@@ -199,45 +202,9 @@ public class BasicUserService implements UserService {
         .password(request.getPassword())
         .profile(bin)
         .build();
-    
+
     log.info("유저 저장: {}", user.getUsername());
     return userRepository.save(user);
-  }
-
-  /**
-   * 프로필 객체 생성
-   */
-  private static BinaryContent getProfile(MultipartFile file) {
-    BinaryContent bin = null;
-    if (file != null) {
-      bin = BinaryContent.builder()
-          .fileName(file.getOriginalFilename())
-          .size(file.getSize())
-          .contentType(file.getContentType())
-          .build();
-
-      bin.changeCreateAt(Instant.now());
-    }
-
-    return bin;
-  }
-
-  /**
-   * 실제로 프로필 이미지 저장
-   */
-  private void saveProfileImg(MultipartFile file, User savedMember) throws IOException {
-    if (file != null && savedMember.getProfile() != null) {
-      binaryContentStorage.put(savedMember.getProfile().getId(), file.getBytes());
-      log.info("profile image 저장: {}", file.getOriginalFilename());
-    }
-  }
-
-  /**
-   * 유저 상태 저장
-   */
-  private void saveUserStatus(User savedMember) {
-    UserStatus userStatus = userStateService.create(new UserStatus(savedMember));
-    savedMember.changeUserStatus(userStatus);
   }
 
 }
