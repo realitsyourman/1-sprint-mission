@@ -108,7 +108,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         id: render-task-def
         with:
-          task-definition: ecs/task-definition.json
+          task-definition: 1-sprint-mission/ecs/task-definition.json
           container-name: ${{ vars.CONTAINER_NAME }}
           image: ${{ vars.ECR_REPOSITORY_URI }}:${{ github.sha }}
 
