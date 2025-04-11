@@ -26,12 +26,14 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 @Transactional
+@Rollback
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class MessageApiIntegrationTest {
@@ -47,8 +49,9 @@ public class MessageApiIntegrationTest {
 
   @Test
   @DisplayName("메세지 생성")
+  @Rollback
   void createMessage() throws Exception {
-    UUID channelId = UUID.fromString("6f17a8d1-77d7-437d-811e-d98db3bd30bc");
+    UUID channelId = UUID.fromString("2c17a8d1-77d7-437d-811e-d98db3bd30bc");
     UUID userId = UUID.fromString("3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0");
     MessageCreateRequest request = new MessageCreateRequest("content", channelId, userId);
     HttpEntity<String> jsonEntity = getJsonEntity(request);
@@ -71,9 +74,10 @@ public class MessageApiIntegrationTest {
   }
 
   @Test
+  @Rollback
   @DisplayName("메세지 생성 - 파일 첨부")
   void createMessageWithFile() throws Exception {
-    UUID channelId = UUID.fromString("6f17a8d1-77d7-437d-811e-d98db3bd30bc");
+    UUID channelId = UUID.fromString("2c17a8d1-77d7-437d-811e-d98db3bd30bc");
     UUID userId = UUID.fromString("3a2c1f0d-6b9e-4e8a-a7c5-d4f2e9b8c1a0");
     MessageCreateRequest request = new MessageCreateRequest("content", channelId, userId);
 
@@ -122,9 +126,10 @@ public class MessageApiIntegrationTest {
   }
 
   @Test
+  @Rollback
   @DisplayName("메세지 수정")
   void updateMessage() throws Exception {
-    UUID messageId = UUID.fromString("39358af2-7bf8-4b1a-ac79-32f417ce391c");
+    UUID messageId = UUID.fromString("40658af2-7bf8-4b1a-ac79-32f417ce391c");
     MessageContentUpdateRequest request = new MessageContentUpdateRequest("newContent");
 
     String requestJson = objectMapper.writeValueAsString(request);
@@ -167,9 +172,10 @@ public class MessageApiIntegrationTest {
   }
 
   @Test
+  @Rollback
   @DisplayName("메세지 삭제")
   void deleteMessage() throws Exception {
-    UUID messageId = UUID.fromString("39358af2-7bf8-4b1a-ac79-32f417ce391c");
+    UUID messageId = UUID.fromString("40658af2-7bf8-4b1a-ac79-32f417ce391c");
 
     ResponseEntity<String> response = restTemplate.exchange(
         "/api/messages/{messageId}",

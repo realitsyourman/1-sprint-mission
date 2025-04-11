@@ -6,14 +6,14 @@ DROP TABLE IF EXISTS user_statuses;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS binary_contents;
 
-create table binary_contents
+create table if not exists binary_contents
 (
     id           uuid primary key,
     created_at   timestamp with time zone not null,
     file_name    varchar(255)             not null,
     size         bigint                   not null,
     content_type varchar(100)             not null
-    --bytes        bytea        not null
+--     bytes        bytea        not null
 );
 
 create table users
