@@ -15,7 +15,7 @@ jacocoTestReport {
         xml.required = true
         html.required = true
     }
-    
+
     dependsOn test
 }
 
@@ -101,6 +101,10 @@ sourceSets {
             srcDirs = ['src/main/java']
         }
     }
+}
+
+springBoot {
+    mainClass = 'com.sprint.mission.discodeit.DiscodeitApplication'
 }
 
 tasks.named('test') {
