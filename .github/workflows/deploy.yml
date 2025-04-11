@@ -104,7 +104,7 @@ jobs:
           aws-region: ${{ vars.AWS_REGION }}
 
       # ECS Task Definition 업데이트
-      - name: ECS Task Definition 렌더링
+      - name: ECS Task Definition 실행
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         id: render-task-def
         with:
