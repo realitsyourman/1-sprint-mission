@@ -30,4 +30,4 @@ jobs:
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          slug: realitsyourman/sprint_mission_team6
+          slug: realitsyourman/1-sprint-mission
