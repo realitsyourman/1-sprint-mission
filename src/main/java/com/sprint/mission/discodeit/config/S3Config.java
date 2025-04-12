@@ -1,7 +1,6 @@
 package com.sprint.mission.discodeit.config;
 
 import com.sprint.mission.discodeit.storage.s3.S3Properties;
-import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -22,7 +21,7 @@ public class S3Config {
   private static final long MB = 1024 * 1024;
 
   @Bean
-  public S3AsyncClient s3AsyncClient() throws IOException {
+  public S3AsyncClient s3AsyncClient() {
 
     AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(
         properties.getAccessKey(),
