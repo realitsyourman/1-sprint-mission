@@ -1,5 +1,5 @@
 server:
-  port: 7070
+  port: 8080
 
 spring:
   application:
@@ -49,10 +49,10 @@ discodeit:
     local:
       root-path: ${STORAGE_LOCAL_ROOT_PATH:.discodeit/storage}
     s3:
-      access-key: ${AWS_ACCESS_KEY_ID}
-      secret-key: ${AWS_SECRET_ACCESS_KEY}
-      region: ${AWS_REGION}
-      bucket: ${AWS_S3_BUCKET}
+      access-key: ${AWS_ACCESS_KEY_ID:}
+      secret-key: ${AWS_SECRET_ACCESS_KEY:}
+      region: ${AWS_REGION:}
+      bucket: ${AWS_S3_BUCKET:}
       presigned-url-expiration: ${AWS_S3_PRESIGNED_URL_EXPIRATION:600} # (기본값: 10분)
 
 file:
