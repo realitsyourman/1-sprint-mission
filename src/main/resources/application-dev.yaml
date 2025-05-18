@@ -33,6 +33,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     com.sprint.mission.discodeit: debug
+    org.springframework.security: trace
 
 decorator:
   datasource:
