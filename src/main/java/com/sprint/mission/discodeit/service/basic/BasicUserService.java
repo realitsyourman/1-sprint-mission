@@ -15,6 +15,8 @@ import com.sprint.mission.discodeit.exception.user.DuplicateEmailException;
 import com.sprint.mission.discodeit.exception.user.DuplicateUsernameException;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.mapper.entitymapper.BinaryContentMapper;
+import com.sprint.mission.discodeit.repository.MessageRepository;
+import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.status.UserStateService;
@@ -44,6 +46,8 @@ public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
   private final UserStateService userStateService;
+  private final ReadStatusRepository readStatusRepository;
+  private final MessageRepository messageRepository;
   private final BinaryContentStorage binaryContentStorage;
   private final PasswordEncoder passwordEncoder;
 
@@ -142,6 +146,10 @@ public class BasicUserService implements UserService {
           Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())
       );
     }
+
+    readStatusRepository.deleteAllByuser_id(userId);
+    messageRepository.deleteAllByauthor_id(userId);
+
     userRepository.deleteById(userId);
 
     log.info("유저 삭제: {}", userId);

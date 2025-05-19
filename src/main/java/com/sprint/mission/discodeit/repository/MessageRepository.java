@@ -22,4 +22,6 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, Message
   @EntityGraph(attributePaths = {"attachments"})
   @Override
   void deleteById(@NonNull UUID messageId);
+
+  void deleteAllByauthor_id(UUID authorId);
 }
