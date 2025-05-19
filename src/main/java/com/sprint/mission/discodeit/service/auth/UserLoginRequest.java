@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.service.auth;
 
-import com.sprint.mission.discodeit.entity.auth.RequestLogin;
+import com.sprint.mission.discodeit.entity.auth.LoginRequest;
 import com.sprint.mission.discodeit.entity.auth.ResponseLogin;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
@@ -19,13 +19,13 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class UserAuthService implements AuthService {
+public class UserLoginRequest implements com.sprint.mission.discodeit.service.auth.LoginRequest {
 
   private final UserRepository userRepository;
 
   @Override
   @Transactional(readOnly = true)
-  public ResponseLogin login(RequestLogin request) {
+  public ResponseLogin login(LoginRequest request) {
     User findUser = userRepository.findUserByUsername(request.username());
 
     if (findUser == null) {

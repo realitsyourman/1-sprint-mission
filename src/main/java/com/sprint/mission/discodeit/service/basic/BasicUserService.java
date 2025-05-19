@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,6 +43,7 @@ public class BasicUserService implements UserService {
   private final UserRepository userRepository;
   private final UserStateService userStateService;
   private final BinaryContentStorage binaryContentStorage;
+  private final PasswordEncoder passwordEncoder;
 
   @PersistenceContext
   EntityManager em;
@@ -54,15 +56,7 @@ public class BasicUserService implements UserService {
       throws IOException {
     User findUser = userRepository.findUserByUsername(request.getUsername());
     User findEmail = userRepository.findUserByEmail(request.getEmail());
-    if (findUser != null) {
-      log.error("중복 이름 '{}' 저장 시도", request.getUsername());
-      throw new DuplicateUsernameException(Instant.now(), ErrorCode.EXIST_USER,
-          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
-    } else if (findEmail != null) {
-      log.error("중복 이메일 '{}' 저장 시도", request.getEmail());
-      throw new DuplicateEmailException(Instant.now(), ErrorCode.EXIST_USER,
-          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
-    }
+    checkDuplicated(request, findUser, findEmail);
 
     BinaryContent profile = BinaryContentUtils.getProfile(file);
     User savedMember = saveUser(request, profile);
@@ -77,6 +71,18 @@ public class BasicUserService implements UserService {
         savedMember.getProfile() != null ? BinaryContentMapper.toDto(savedMember.getProfile())
             : null,
         true);
+  }
+
+  private void checkDuplicated(UserCreateRequest request, User findUser, User findEmail) {
+    if (findUser != null) {
+      log.error("중복 이름 '{}' 저장 시도", request.getUsername());
+      throw new DuplicateUsernameException(Instant.now(), ErrorCode.EXIST_USER,
+          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
+    } else if (findEmail != null) {
+      log.error("중복 이메일 '{}' 저장 시도", request.getEmail());
+      throw new DuplicateEmailException(Instant.now(), ErrorCode.EXIST_USER,
+          Map.of(request.getUsername(), ErrorCode.EXIST_USER.getMessage()));
+    }
   }
 
   /**
@@ -196,10 +202,13 @@ public class BasicUserService implements UserService {
    * 유저 저장 메서드
    */
   private User saveUser(UserCreateRequest request, BinaryContent bin) {
+
+    String encodedPassword = passwordEncoder.encode(request.getPassword());
+
     User user = User.builder()
         .username(request.getUsername())
         .email(request.getEmail())
-        .password(request.getPassword())
+        .password(encodedPassword)
         .profile(bin)
         .build();
 

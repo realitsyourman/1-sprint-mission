@@ -5,7 +5,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sprint.mission.discodeit.entity.auth.RequestLogin;
+import com.sprint.mission.discodeit.entity.auth.LoginRequest;
 import com.sprint.mission.discodeit.entity.auth.ResponseLogin;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.user.UserAuthException;
@@ -20,24 +20,24 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class UserAuthServiceTest {
+class UserLoginRequestTest {
 
   @Mock
   private UserRepository userRepository;
 
   @InjectMocks
-  private UserAuthService userAuthService;
+  private UserLoginRequest userAuthService;
 
   @Test
   @DisplayName("로그인 시도 - 성공")
   void login() {
-    RequestLogin requestLogin = new RequestLogin("userA", "password123");
+    LoginRequest loginRequest = new LoginRequest("userA", "password123");
     User user = new User("userA", "usera@mail.com", "password123", null, null);
 
     when(userRepository.findUserByUsername(any(String.class)))
         .thenReturn(user);
 
-    ResponseLogin login = userAuthService.login(requestLogin);
+    ResponseLogin login = userAuthService.login(loginRequest);
 
     assertThat(login).isNotNull();
     assertThat(login.username()).isEqualTo("userA");
@@ -49,22 +49,22 @@ class UserAuthServiceTest {
   @Test
   @DisplayName("로그인 시도 - 유저 아이디 검증 실패")
   void loginFail() throws Exception {
-    RequestLogin wrongRequestLogin = new RequestLogin("userAA", "password");
+    LoginRequest wrongLoginRequest = new LoginRequest("userAA", "password");
 
     Assertions.assertThrows(UserNotFoundException.class,
-        () -> userAuthService.login(wrongRequestLogin));
+        () -> userAuthService.login(wrongLoginRequest));
   }
 
   @Test
   @DisplayName("로그인 시도 - 유저 비밀번호 검증 실패")
   void loginFailPassword() throws Exception {
-    RequestLogin wrongRequestLogin = new RequestLogin("userA", "wrongpassword");
+    LoginRequest wrongLoginRequest = new LoginRequest("userA", "wrongpassword");
     User user = new User("userA", "usera@mail.com", "password", null, null);
 
     when(userRepository.findUserByUsername(any(String.class)))
         .thenReturn(user);
 
     Assertions.assertThrows(UserAuthException.class,
-        () -> userAuthService.login(wrongRequestLogin));
+        () -> userAuthService.login(wrongLoginRequest));
   }
 }
