@@ -2,6 +2,8 @@ package com.sprint.mission.discodeit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.filter.LoginFilter;
+import com.sprint.mission.discodeit.filter.LogoutFilter;
+import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +20,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -33,6 +36,7 @@ public class SecurityConfig {
 
   private final UserDetailsService userDetailsService;
   private final ObjectMapper objectMapper;
+  private final UserRepository userRepository;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -44,6 +48,7 @@ public class SecurityConfig {
     return http
         .addFilterBefore(loginFilter(securityContextRepository()),
             UsernamePasswordAuthenticationFilter.class)
+        .addFilterBefore(new LogoutFilter(), BasicAuthenticationFilter.class)
         .sessionManagement(session ->
             session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -79,7 +84,7 @@ public class SecurityConfig {
 
   @Bean
   LoginFilter loginFilter(SecurityContextRepository contextRepository) {
-    LoginFilter loginFilter = new LoginFilter(objectMapper);
+    LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository);
     loginFilter.setAuthenticationManager(new ProviderManager(List.of(daoAuthenticationProvider())));
     loginFilter.setFilterProcessesUrl(AUTH_PATH);
     loginFilter.setSecurityContextRepository(contextRepository);
