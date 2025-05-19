@@ -11,6 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.SessionFixationConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -42,6 +44,10 @@ public class SecurityConfig {
     return http
         .addFilterBefore(loginFilter(securityContextRepository()),
             UsernamePasswordAuthenticationFilter.class)
+        .sessionManagement(session ->
+            session
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation(SessionFixationConfigurer::changeSessionId))
         .csrf(csrf ->
             csrf
                 .csrfTokenRequestHandler(handler)

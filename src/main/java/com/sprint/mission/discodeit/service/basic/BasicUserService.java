@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service.basic;
 
+import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
@@ -97,6 +98,23 @@ public class BasicUserService implements UserService {
 
     return new UserCreateResponse(findUser.getId(), findUser.getUsername(), findUser.getEmail(),
         BinaryContentMapper.toDto(findUser.getProfile()), true);
+  }
+
+  /**
+   * @methodName : findByUsername
+   * @date : 2025. 5. 19. 13:44
+   * @author : wongil
+   * @Description: username으로 찾기
+   **/
+  @Override
+  public UserDto findByUsername(String username) {
+    User user = userRepository.findUserByUsername(username);
+
+    return UserDto.builder()
+        .username(user.getUsername())
+        .id(user.getId())
+        .email(user.getEmail())
+        .build();
   }
 
   /**

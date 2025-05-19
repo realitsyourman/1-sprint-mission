@@ -1,5 +1,6 @@
 package com.sprint.mission.discodeit.service;
 
+import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateRequest;
@@ -16,6 +17,8 @@ public interface UserService {
   UserCreateResponse join(UserCreateRequest request, MultipartFile file) throws IOException;
 
   UserCreateResponse findById(UUID userId);
+
+  UserDto findByUsername(String username);
 
   List<UserCreateResponse> findAll();
 
