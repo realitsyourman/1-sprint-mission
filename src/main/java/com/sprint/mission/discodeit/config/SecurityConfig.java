@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -51,8 +53,12 @@ public class SecurityConfig {
         .addFilterBefore(new LogoutFilter(), BasicAuthenticationFilter.class)
         .sessionManagement(session ->
             session
+
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .sessionFixation(SessionFixationConfigurer::changeSessionId))
+                .sessionFixation(SessionFixationConfigurer::changeSessionId)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)
+        )
         .csrf(csrf ->
             csrf
                 .csrfTokenRequestHandler(handler)
@@ -121,6 +127,14 @@ public class SecurityConfig {
   @Bean
   SecurityContextRepository securityContextRepository() {
     return new HttpSessionSecurityContextRepository();
+  }
+
+  @Bean
+  RoleHierarchy roleHierarchy() {
+    return RoleHierarchyImpl.fromHierarchy(
+        "ROLE_ADMIN > ROLE_CHANNEL_MANAGER\n" +
+            "ROLE_CHANNEL_MANAGER > ROLE_USER"
+    );
   }
 
 }

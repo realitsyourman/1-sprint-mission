@@ -2,9 +2,12 @@ package com.sprint.mission.discodeit.entity.user;
 
 import com.sprint.mission.discodeit.entity.base.BaseUpdatableEntity;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.role.Role;
 import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
@@ -36,6 +39,9 @@ public class User extends BaseUpdatableEntity {
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
   private UserStatus status;
 
+  @Enumerated(EnumType.STRING)
+  private Role role;
+
   public void changeUserInfo(String username, String email, String password) {
     this.username = username;
     this.email = email;
@@ -45,6 +51,12 @@ public class User extends BaseUpdatableEntity {
   public void changeUserStatus(UserStatus userStatus) {
     this.status = userStatus;
     this.status.initUser(this);
+  }
+
+  public void changeRole(Role role) {
+    if (role != null) {
+      this.role = role;
+    }
   }
 
   public void changeProfile(BinaryContent profile) {

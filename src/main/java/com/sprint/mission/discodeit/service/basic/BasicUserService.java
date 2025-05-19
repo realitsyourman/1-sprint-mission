@@ -2,6 +2,7 @@ package com.sprint.mission.discodeit.service.basic;
 
 import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
+import com.sprint.mission.discodeit.entity.role.Role;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateResponse;
@@ -228,6 +229,7 @@ public class BasicUserService implements UserService {
         .email(request.getEmail())
         .password(encodedPassword)
         .profile(bin)
+        .role(Role.ROLE_USER)
         .build();
 
     log.info("유저 저장: {}", user.getUsername());

@@ -1,8 +1,9 @@
 package com.sprint.mission.discodeit.service.auth;
 
-import com.sprint.mission.discodeit.entity.auth.ResponseLogin;
+import com.sprint.mission.discodeit.entity.role.RoleUpdateRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface LoginRequest {
 
-  ResponseLogin login(com.sprint.mission.discodeit.entity.auth.LoginRequest request);
+  void updateRole(RoleUpdateRequest request, HttpServletRequest httpRequest);
 }
