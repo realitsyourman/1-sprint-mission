@@ -14,6 +14,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.SessionFixationConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -31,6 +32,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Slf4j
 @Configuration
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
@@ -53,7 +55,6 @@ public class SecurityConfig {
         .addFilterBefore(new LogoutFilter(), BasicAuthenticationFilter.class)
         .sessionManagement(session ->
             session
-
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(SessionFixationConfigurer::changeSessionId)
                 .maximumSessions(1)
@@ -80,7 +81,8 @@ public class SecurityConfig {
                     "/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/csrf-token", "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
-                .anyRequest().authenticated())
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .anyRequest().hasRole("USER"))
         .authenticationProvider(daoAuthenticationProvider())
         .logout(logout -> logout.disable())
         .httpBasic(basic -> basic.disable())

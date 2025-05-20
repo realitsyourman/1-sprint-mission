@@ -4,9 +4,11 @@ import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +32,10 @@ public class DiscodeitUserDetailsService implements UserDetailsService {
           Map.of(username, ErrorCode.USER_NOT_FOUND.getMessage()));
     }
 
-    return new User(findUser.getUsername(), findUser.getPassword(), new ArrayList<>());
+    List<GrantedAuthority> authorities = List.of(
+        new SimpleGrantedAuthority(findUser.getRole().toString()));
+
+    return new User(findUser.getUsername(), findUser.getPassword(), authorities);
   }
+
 }

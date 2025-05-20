@@ -60,6 +60,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         .id(user.getId())
         .username(user.getUsername())
         .email(user.getEmail())
+        .online(user.isThereHere())
+        .Role(user.getRole())
         .build();
 
     response.setStatus(HttpServletResponse.SC_OK);

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -44,6 +45,7 @@ public class UserAuthController {
     return userAuthService.sessionMe(session);
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @ResponseStatus(HttpStatus.OK)
   @PutMapping("/role")
   public void updateRole(@Valid @RequestBody RoleUpdateRequest roleUpdateRequest,
