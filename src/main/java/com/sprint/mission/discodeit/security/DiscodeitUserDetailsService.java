@@ -4,12 +4,8 @@ import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,11 +27,8 @@ public class DiscodeitUserDetailsService implements UserDetailsService {
       throw new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
           Map.of(username, ErrorCode.USER_NOT_FOUND.getMessage()));
     }
-
-    List<GrantedAuthority> authorities = List.of(
-        new SimpleGrantedAuthority(findUser.getRole().toString()));
-
-    return new User(findUser.getUsername(), findUser.getPassword(), authorities);
+    
+    return new DiscodeitUserDetails(findUser);
   }
 
 }

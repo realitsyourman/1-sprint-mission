@@ -3,8 +3,6 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserCreateResponse;
-import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateRequest;
-import com.sprint.mission.discodeit.entity.user.dto.UserStatusUpdateResponse;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.dto.UserUpdateResponse;
 import com.sprint.mission.discodeit.service.UserService;
@@ -16,13 +14,14 @@ import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -63,9 +62,11 @@ public class UserController {
    * 유저 삭제
    */
   @Operation(summary = "유저 삭제")
+  @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping("/{userId}")
-  public UUID userDelete(@NotNull @PathVariable("userId") UUID userId) {
+  public UUID userDelete(@NotNull @P("userId") @PathVariable("userId") UUID userId) {
+
     return userService.delete(userId);
   }
 
@@ -73,21 +74,19 @@ public class UserController {
    * 유저 정보 수정
    */
   @Operation(summary = "유저 정보 수정")
+  @PreAuthorize("hasRole('ADMIN') or #userId == authentication.principal.id")
   @PatchMapping("/{userId}")
-  public UserUpdateResponse updateUser(@PathVariable("userId") UUID userId,
+  public UserUpdateResponse updateUser(@P("userId") @PathVariable("userId") UUID userId,
       @RequestPart("userUpdateRequest") UserUpdateRequest userUpdateRequest,
       @RequestPart(value = "profile", required = false) MultipartFile profile) throws IOException {
 
     return userService.update(userId, userUpdateRequest, profile);
   }
-
-  /**
-   * user 온라인 상태 업데이트
-   */
-  @Operation(summary = "유저 온라인 상태 업데이트")
-  @PatchMapping("/{userId}/userStatus")
-  public UserStatusUpdateResponse updateUserStatus(@NotNull @PathVariable("userId") UUID userId,
-      @Validated @RequestBody UserStatusUpdateRequest request) {
-    return userService.updateOnlineStatus(userId, request);
-  }
+  
+//  @Operation(summary = "유저 온라인 상태 업데이트")
+//  @PatchMapping("/{userId}/userStatus")
+//  public UserStatusUpdateResponse updateUserStatus(@NotNull @PathVariable("userId") UUID userId,
+//      @Validated @RequestBody UserStatusUpdateRequest request) {
+//    return userService.updateOnlineStatus(userId, request);
+//  }
 }
