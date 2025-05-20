@@ -3,6 +3,7 @@ package com.sprint.mission.discodeit.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sprint.mission.discodeit.filter.LoginFilter;
 import com.sprint.mission.discodeit.filter.LogoutFilter;
+import com.sprint.mission.discodeit.redis.RedisTokenRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.PersistentTokenBasedRememberMeServices;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -41,6 +43,7 @@ public class SecurityConfig {
   private final UserDetailsService userDetailsService;
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
+  private final RedisTokenRepository redisTokenRepository;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -50,15 +53,23 @@ public class SecurityConfig {
     handler.setCsrfRequestAttributeName("_csrf");
 
     return http
-        .addFilterBefore(loginFilter(securityContextRepository()),
+        .addFilterBefore(loginFilter(securityContextRepository(), rememberMeServices()),
             UsernamePasswordAuthenticationFilter.class)
-        .addFilterBefore(new LogoutFilter(), BasicAuthenticationFilter.class)
+        .addFilterBefore(new LogoutFilter(redisTokenRepository, rememberMeServices()),
+            BasicAuthenticationFilter.class)
         .sessionManagement(session ->
             session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .sessionFixation(SessionFixationConfigurer::changeSessionId)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
+        )
+        .rememberMe(rememberMe -> rememberMe
+            .rememberMeCookieName("remember-me")
+            .rememberMeParameter("remember-me")
+            .tokenRepository(redisTokenRepository)
+            .userDetailsService(userDetailsService)
+            .tokenValiditySeconds(60 * 60 * 24 * 21)
         )
         .csrf(csrf ->
             csrf
@@ -91,13 +102,29 @@ public class SecurityConfig {
   }
 
   @Bean
-  LoginFilter loginFilter(SecurityContextRepository contextRepository) {
+  LoginFilter loginFilter(SecurityContextRepository contextRepository,
+      PersistentTokenBasedRememberMeServices rememberMeServices) {
+
     LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository);
+    loginFilter.setRememberMeServices(rememberMeServices);
     loginFilter.setAuthenticationManager(new ProviderManager(List.of(daoAuthenticationProvider())));
     loginFilter.setFilterProcessesUrl(AUTH_PATH);
     loginFilter.setSecurityContextRepository(contextRepository);
 
     return loginFilter;
+  }
+
+  @Bean
+  PersistentTokenBasedRememberMeServices rememberMeServices() {
+
+    PersistentTokenBasedRememberMeServices rememberMe = new PersistentTokenBasedRememberMeServices(
+        "remember-me", userDetailsService,
+        redisTokenRepository);
+
+    rememberMe.setParameter("remember-me");
+    rememberMe.setTokenValiditySeconds(60 * 60 * 24 * 21);
+
+    return rememberMe;
   }
 
   @Bean

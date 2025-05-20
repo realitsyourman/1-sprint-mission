@@ -42,7 +42,7 @@ spring:
       host: localhost
       port: 6379
       password: qwerqwer
-
+      
 logging:
   level:
     org.hibernate.SQL: debug

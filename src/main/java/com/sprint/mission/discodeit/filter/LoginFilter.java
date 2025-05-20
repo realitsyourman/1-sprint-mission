@@ -56,6 +56,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     UserDetails principal = (UserDetails) authResult.getPrincipal();
     User user = userRepository.findUserByUsername(principal.getUsername());
 
+    getRememberMeServices().loginSuccess(request, response, authResult);
+
     UserDto userDto = UserDto.builder()
         .id(user.getId())
         .username(user.getUsername())
