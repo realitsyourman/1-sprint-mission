@@ -19,9 +19,8 @@ import com.sprint.mission.discodeit.repository.MessageRepository;
 import com.sprint.mission.discodeit.repository.ReadStatusRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
-import com.sprint.mission.discodeit.service.status.UserStateService;
+import com.sprint.mission.discodeit.service.status.UserSessionService;
 import com.sprint.mission.discodeit.service.util.BinaryContentUtils;
-import com.sprint.mission.discodeit.service.util.UserStatusContextUtils;
 import com.sprint.mission.discodeit.storage.BinaryContentStorage;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,11 +44,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class BasicUserService implements UserService {
 
   private final UserRepository userRepository;
-  private final UserStateService userStateService;
   private final ReadStatusRepository readStatusRepository;
   private final MessageRepository messageRepository;
   private final BinaryContentStorage binaryContentStorage;
   private final PasswordEncoder passwordEncoder;
+  private final UserSessionService userSessionService;
 
   @PersistenceContext
   EntityManager em;
@@ -67,7 +66,6 @@ public class BasicUserService implements UserService {
     BinaryContent profile = BinaryContentUtils.getProfile(file);
     User savedMember = saveUser(request, profile);
 
-    UserStatusContextUtils.saveUserStatus(savedMember, userStateService);
     BinaryContentUtils.saveProfileImg(file, savedMember, binaryContentStorage);
 
     return new UserCreateResponse(
@@ -132,7 +130,8 @@ public class BasicUserService implements UserService {
 
     return users.stream()
         .map(user -> new UserCreateResponse(user.getId(), user.getUsername(), user.getEmail(),
-            BinaryContentMapper.toDto(user.getProfile()), user.isThereHere()))
+            BinaryContentMapper.toDto(user.getProfile()),
+            userSessionService.isOnline(user.getUsername()))) // TODO: 세션으로 구현후 바꾸기
         .toList();
   }
 
@@ -188,7 +187,7 @@ public class BasicUserService implements UserService {
         .orElseThrow(() -> new UserNotFoundException(Instant.now(), ErrorCode.USER_NOT_FOUND,
             Map.of(userId.toString(), ErrorCode.USER_NOT_FOUND.getMessage())));
 
-    findUser.getStatus().setLastActiveAt(request.newLastActiveAt());
+//    findUser.getStatus().setLastActiveAt(request.newLastActiveAt());
 
     return new UserStatusUpdateResponse(userId, findUser.getId(), request.newLastActiveAt());
   }

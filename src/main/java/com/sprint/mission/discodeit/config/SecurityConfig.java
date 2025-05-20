@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.filter.LoginFilter;
 import com.sprint.mission.discodeit.filter.LogoutFilter;
 import com.sprint.mission.discodeit.redis.RedisTokenRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.status.UserSessionService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,7 @@ public class SecurityConfig {
   private final UserRepository userRepository;
   private final RedisTokenRepository redisTokenRepository;
   private final FindByIndexNameSessionRepository<? extends Session> findByIndexNameSessionRepository;
+  private final UserSessionService userSessionService;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -118,7 +120,7 @@ public class SecurityConfig {
       PersistentTokenBasedRememberMeServices rememberMeServices) {
 
     LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository,
-        findByIndexNameSessionRepository);
+        findByIndexNameSessionRepository, userSessionService);
     loginFilter.setRememberMeServices(rememberMeServices);
     loginFilter.setAuthenticationManager(new ProviderManager(List.of(daoAuthenticationProvider())));
     loginFilter.setFilterProcessesUrl(AUTH_PATH);

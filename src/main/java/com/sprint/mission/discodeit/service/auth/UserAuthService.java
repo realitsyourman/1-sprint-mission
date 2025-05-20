@@ -7,6 +7,7 @@ import com.sprint.mission.discodeit.exception.ErrorCode;
 import com.sprint.mission.discodeit.exception.user.UserNotFoundException;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.UserService;
+import com.sprint.mission.discodeit.service.status.UserSessionService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.time.Instant;
@@ -30,6 +31,7 @@ public class UserAuthService implements com.sprint.mission.discodeit.service.aut
   private final UserService userService;
   private final UserRepository userRepository;
   private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+  private final UserSessionService userSessionService;
 
 
   /**
@@ -48,7 +50,7 @@ public class UserAuthService implements com.sprint.mission.discodeit.service.aut
 
     user.changeRole(request.newRole());
 
-    if (user.isThereHere()) {
+    if (userSessionService.isOnline(user.getUsername())) { // TODO: 세션 기반으로 바꾸고 코드 변경
       Map<String, ? extends Session> sessions = sessionRepository.findByIndexNameAndIndexValue(
           FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME,
           user.getUsername()

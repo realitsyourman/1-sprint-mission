@@ -1,10 +1,8 @@
 package com.sprint.mission.discodeit.config;
 
 import com.sprint.mission.discodeit.entity.role.Role;
-import com.sprint.mission.discodeit.entity.status.user.UserStatus;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
-import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -33,9 +31,6 @@ public class AdminInitializer implements ApplicationRunner {
         .password(passwordEncoder.encode("qwerqwer"))
         .build();
 
-    UserStatus userStatus = new UserStatus(admin, Instant.now());
-    admin.changeUserStatus(userStatus);
-    
     userRepository.save(admin);
   }
 }

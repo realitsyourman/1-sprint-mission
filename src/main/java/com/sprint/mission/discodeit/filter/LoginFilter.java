@@ -5,6 +5,7 @@ import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.auth.LoginRequest;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.repository.UserRepository;
+import com.sprint.mission.discodeit.service.status.UserSessionService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +30,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
   private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
+  private final UserSessionService userSessionService;
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
@@ -81,15 +83,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         .id(user.getId())
         .username(user.getUsername())
         .email(user.getEmail())
-        .online(user.isThereHere())
+        .online(userSessionService.isOnline(user.getUsername())) // TODO: 세션으로 바꾼 후 수정해야함
         .Role(user.getRole())
         .build();
   }
 
   private User getPrincipal(Authentication authResult) {
     UserDetails principal = (UserDetails) authResult.getPrincipal();
-    User user = userRepository.findUserByUsername(principal.getUsername());
-    return user;
+    return userRepository.findUserByUsername(principal.getUsername());
   }
 
   private void saveContext(HttpServletRequest request, HttpServletResponse response,

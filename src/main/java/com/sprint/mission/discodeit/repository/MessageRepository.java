@@ -15,8 +15,7 @@ public interface MessageRepository extends JpaRepository<Message, UUID>, Message
 
   @Override
   @NonNull
-  @EntityGraph(attributePaths = {"channel", "author", "author.profile", "attachments",
-      "author.status"})
+  @EntityGraph(attributePaths = {"channel", "author", "author.profile", "attachments"})
   Optional<Message> findById(@NonNull UUID uuid);
 
   @EntityGraph(attributePaths = {"attachments"})

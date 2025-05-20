@@ -3,6 +3,8 @@ server:
   servlet:
     session:
       timeout: 15m
+      cookie:
+        max-age: 900
 
 spring:
   application:
@@ -42,7 +44,7 @@ spring:
       host: localhost
       port: 6379
       password: qwerqwer
-      
+
 logging:
   level:
     org.hibernate.SQL: debug
