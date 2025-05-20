@@ -31,6 +31,9 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
+import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 @Slf4j
 @Configuration
@@ -44,6 +47,7 @@ public class SecurityConfig {
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
   private final RedisTokenRepository redisTokenRepository;
+  private final FindByIndexNameSessionRepository<? extends Session> findByIndexNameSessionRepository;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -63,6 +67,7 @@ public class SecurityConfig {
                 .sessionFixation(SessionFixationConfigurer::changeSessionId)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
+                .sessionRegistry(sessionRegistry(findByIndexNameSessionRepository))
         )
         .rememberMe(rememberMe -> rememberMe
             .rememberMeCookieName("remember-me")
@@ -102,10 +107,18 @@ public class SecurityConfig {
   }
 
   @Bean
+  SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry(
+      FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
+
+    return new SpringSessionBackedSessionRegistry<>(sessionRepository);
+  }
+
+  @Bean
   LoginFilter loginFilter(SecurityContextRepository contextRepository,
       PersistentTokenBasedRememberMeServices rememberMeServices) {
 
-    LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository);
+    LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository,
+        findByIndexNameSessionRepository);
     loginFilter.setRememberMeServices(rememberMeServices);
     loginFilter.setAuthenticationManager(new ProviderManager(List.of(daoAuthenticationProvider())));
     loginFilter.setFilterProcessesUrl(AUTH_PATH);
@@ -113,6 +126,7 @@ public class SecurityConfig {
 
     return loginFilter;
   }
+
 
   @Bean
   PersistentTokenBasedRememberMeServices rememberMeServices() {

@@ -20,12 +20,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.session.FindByIndexNameSessionRepository;
+import org.springframework.session.Session;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
+  private final FindByIndexNameSessionRepository<? extends Session> sessionRepository;
 
   @Override
   public Authentication attemptAuthentication(HttpServletRequest request,
@@ -49,26 +52,51 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
   protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
       FilterChain chain, Authentication authResult) throws IOException, ServletException {
 
-    SecurityContextHolder.getContext().setAuthentication(authResult);
-    HttpSessionSecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
-    contextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
+    removeAlreadySession(authResult);
 
-    UserDetails principal = (UserDetails) authResult.getPrincipal();
-    User user = userRepository.findUserByUsername(principal.getUsername());
+    saveContext(request, response, authResult);
+
+    User user = getPrincipal(authResult);
 
     getRememberMeServices().loginSuccess(request, response, authResult);
 
-    UserDto userDto = UserDto.builder()
+    UserDto userDto = getUserDto(user);
+
+    response.setStatus(HttpServletResponse.SC_OK);
+    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+    objectMapper.writeValue(response.getWriter(), userDto);
+
+    super.successfulAuthentication(request, response, chain, authResult);
+  }
+
+  private void removeAlreadySession(Authentication authResult) {
+    sessionRepository.findByIndexNameAndIndexValue(
+            FindByIndexNameSessionRepository.PRINCIPAL_NAME_INDEX_NAME, authResult.getName()).keySet()
+        .forEach(session -> sessionRepository.deleteById(session));
+  }
+
+
+  private UserDto getUserDto(User user) {
+    return UserDto.builder()
         .id(user.getId())
         .username(user.getUsername())
         .email(user.getEmail())
         .online(user.isThereHere())
         .Role(user.getRole())
         .build();
+  }
 
-    response.setStatus(HttpServletResponse.SC_OK);
-    response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-    objectMapper.writeValue(response.getWriter(), userDto);
+  private User getPrincipal(Authentication authResult) {
+    UserDetails principal = (UserDetails) authResult.getPrincipal();
+    User user = userRepository.findUserByUsername(principal.getUsername());
+    return user;
+  }
+
+  private void saveContext(HttpServletRequest request, HttpServletResponse response,
+      Authentication authResult) {
+    SecurityContextHolder.getContext().setAuthentication(authResult);
+    HttpSessionSecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
+    contextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
   }
 
   @Override
