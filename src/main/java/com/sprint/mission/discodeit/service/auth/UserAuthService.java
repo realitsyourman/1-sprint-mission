@@ -1,6 +1,8 @@
 package com.sprint.mission.discodeit.service.auth;
 
+import com.sprint.mission.discodeit.dto.response.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.UserDto;
+import com.sprint.mission.discodeit.entity.binarycontent.BinaryContent;
 import com.sprint.mission.discodeit.entity.role.RoleUpdateRequest;
 import com.sprint.mission.discodeit.entity.user.User;
 import com.sprint.mission.discodeit.exception.ErrorCode;
@@ -14,8 +16,8 @@ import java.time.Instant;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
@@ -70,7 +72,18 @@ public class UserAuthService implements com.sprint.mission.discodeit.service.aut
       return null;
     }
 
-    Authentication authentication = context.getAuthentication();
-    return userService.findByUsername(authentication.getName());
+    UserDetails principal = (UserDetails) context.getAuthentication().getPrincipal();
+    User user = userRepository.findUserByUsername(principal.getUsername());
+    BinaryContent profile = user.getProfile();
+
+    return UserDto.builder()
+        .id(user.getId())
+        .username(user.getUsername())
+        .email(user.getEmail())
+        .profile(new BinaryContentDto(profile.getId(), profile.getFileName(), profile.getSize(),
+            profile.getContentType()))
+        .Role(user.getRole())
+        .online(userSessionService.isOnline(user.getUsername()))
+        .build();
   }
 }

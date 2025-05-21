@@ -1,6 +1,7 @@
 package com.sprint.mission.discodeit.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.dto.response.BinaryContentDto;
 import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.auth.LoginRequest;
 import com.sprint.mission.discodeit.entity.user.User;
@@ -69,8 +70,6 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     response.setStatus(HttpServletResponse.SC_OK);
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
     objectMapper.writeValue(response.getWriter(), userDto);
-
-    super.successfulAuthentication(request, response, chain, authResult);
   }
 
   private void removeAlreadySession(Authentication authResult) {
@@ -86,6 +85,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         .username(user.getUsername())
         .email(user.getEmail())
         .online(userSessionService.isOnline(user.getUsername())) // TODO: 세션으로 바꾼 후 수정해야함
+        .profile(new BinaryContentDto(user.getProfile().getId(), user.getProfile().getFileName(),
+            user.getProfile().getSize(), user.getProfile().getContentType()))
         .Role(user.getRole())
         .build();
   }
@@ -100,12 +101,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     SecurityContextHolder.getContext().setAuthentication(authResult);
     HttpSessionSecurityContextRepository contextRepository = new HttpSessionSecurityContextRepository();
     contextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
-  }
-
-  @Override
-  protected void unsuccessfulAuthentication(HttpServletRequest request,
-      HttpServletResponse response, AuthenticationException failed)
-      throws IOException, ServletException {
-    super.unsuccessfulAuthentication(request, response, failed);
   }
 }

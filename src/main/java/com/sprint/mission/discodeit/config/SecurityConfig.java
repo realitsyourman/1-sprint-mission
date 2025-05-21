@@ -88,19 +88,22 @@ public class SecurityConfig {
         .authorizeHttpRequests(request ->
             request
                 .requestMatchers(
-                    "/static/**",
                     "/",
+                    "/index.html",
+                    "/static/**",
                     "/error",
                     "/swagger-ui/**",
                     "/v3/api-docs/**",
                     "/actuator/**",
                     "/assets/**",
-                    "/index.html",
-                    "/favicon.ico").permitAll()
+                    "/static/index.html",
+                    "/static/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/csrf-token", "/api/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                .anyRequest().hasRole("USER"))
+                .requestMatchers(HttpMethod.GET, "/api/binaryContents/**").permitAll()
+                .anyRequest().hasRole("USER")
+        )
         .authenticationProvider(daoAuthenticationProvider())
         .logout(logout -> logout.disable())
         .httpBasic(basic -> basic.disable())

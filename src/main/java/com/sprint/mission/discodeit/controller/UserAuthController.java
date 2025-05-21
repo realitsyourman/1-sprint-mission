@@ -2,7 +2,6 @@ package com.sprint.mission.discodeit.controller;
 
 import com.sprint.mission.discodeit.dto.response.UserDto;
 import com.sprint.mission.discodeit.entity.role.RoleUpdateRequest;
-import com.sprint.mission.discodeit.service.UserService;
 import com.sprint.mission.discodeit.service.auth.UserAuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserAuthController {
 
   private final UserAuthService userAuthService;
-  private final UserService userService;
 
   @GetMapping("/csrf-token")
   public CsrfToken publishCsrfToken(CsrfToken csrfToken) {
