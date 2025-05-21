@@ -1,19 +1,22 @@
 package com.sprint.mission.discodeit.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sprint.mission.discodeit.exception.DiscodeitAccessDeniedHandler;
+import com.sprint.mission.discodeit.exception.DiscodeitAuthenticationEntryPoint;
 import com.sprint.mission.discodeit.filter.LoginFilter;
 import com.sprint.mission.discodeit.filter.LogoutFilter;
 import com.sprint.mission.discodeit.redis.RedisTokenRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.status.UserSessionService;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -50,6 +53,7 @@ public class SecurityConfig {
   private final RedisTokenRepository redisTokenRepository;
   private final FindByIndexNameSessionRepository<? extends Session> findByIndexNameSessionRepository;
   private final UserSessionService userSessionService;
+  private final ApplicationEventPublisher eventPublisher;
 
   @Bean
   SecurityFilterChain securityFilterChain(HttpSecurity http,
@@ -104,10 +108,15 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/binaryContents/**").permitAll()
                 .anyRequest().hasRole("USER")
         )
+        .httpBasic(basic ->
+            basic
+                .authenticationEntryPoint(new DiscodeitAuthenticationEntryPoint(objectMapper)))
         .authenticationProvider(daoAuthenticationProvider())
         .logout(logout -> logout.disable())
-        .httpBasic(basic -> basic.disable())
         .formLogin(form -> form.disable())
+        .exceptionHandling(exception ->
+            exception
+                .accessDeniedHandler(new DiscodeitAccessDeniedHandler(objectMapper)))
         .build();
   }
 
@@ -119,20 +128,24 @@ public class SecurityConfig {
   }
 
   @Bean
-  LoginFilter loginFilter(SecurityContextRepository contextRepository,
+  LoginFilter loginFilter(
+      SecurityContextRepository contextRepository,
       PersistentTokenBasedRememberMeServices rememberMeServices) {
+
+    ProviderManager providerManager = new ProviderManager(daoAuthenticationProvider());
+    providerManager.setAuthenticationEventPublisher(
+        new DefaultAuthenticationEventPublisher(eventPublisher));
 
     LoginFilter loginFilter = new LoginFilter(objectMapper, userRepository,
         findByIndexNameSessionRepository, userSessionService);
     loginFilter.setRememberMeServices(rememberMeServices);
-    loginFilter.setAuthenticationManager(new ProviderManager(List.of(daoAuthenticationProvider())));
+    loginFilter.setAuthenticationManager(providerManager);
     loginFilter.setFilterProcessesUrl(AUTH_PATH);
     loginFilter.setSecurityContextRepository(contextRepository);
 
     return loginFilter;
   }
-
-
+  
   @Bean
   PersistentTokenBasedRememberMeServices rememberMeServices() {
 
