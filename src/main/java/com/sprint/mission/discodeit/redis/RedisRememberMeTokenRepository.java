@@ -9,7 +9,7 @@ import org.springframework.security.web.authentication.rememberme.PersistentReme
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
 
 @RequiredArgsConstructor
-public class RedisTokenRepository implements PersistentTokenRepository {
+public class RedisRememberMeTokenRepository implements PersistentTokenRepository {
 
   private final RedisTemplate<String, PersistentRememberMeToken> redis;
   private final RedisTemplate<String, String> userRedis;

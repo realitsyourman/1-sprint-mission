@@ -3,7 +3,7 @@ package com.sprint.mission.discodeit.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.sprint.mission.discodeit.redis.RedisRememberMeTokenMixin;
-import com.sprint.mission.discodeit.redis.RedisTokenRepository;
+import com.sprint.mission.discodeit.redis.RedisRememberMeTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -24,12 +24,6 @@ import org.springframework.session.data.redis.config.annotation.web.http.EnableR
 @EnableRedisIndexedHttpSession(maxInactiveIntervalInSeconds = 900)
 @EnableRedisRepositories(enableKeyspaceEvents = EnableKeyspaceEvents.ON_STARTUP)
 public class RedisConfig {
-
-  @Value("${spring.data.redis.host}")
-  private String host;
-
-  @Value("${spring.data.redis.port}")
-  private int port;
 
   @Value("${spring.data.redis.password}")
   private String password;
@@ -60,12 +54,12 @@ public class RedisConfig {
   }
 
   @Bean
-  RedisTokenRepository redisTokenRepository(
+  RedisRememberMeTokenRepository redisTokenRepository(
       RedisTemplate<String, PersistentRememberMeToken> redisTemplate,
       RedisTemplate<String, String> redisUserTemplate
   ) {
 
-    return new RedisTokenRepository(redisTemplate, redisUserTemplate);
+    return new RedisRememberMeTokenRepository(redisTemplate, redisUserTemplate);
   }
 
   @Bean

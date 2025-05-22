@@ -5,7 +5,7 @@ import com.sprint.mission.discodeit.exception.DiscodeitAccessDeniedHandler;
 import com.sprint.mission.discodeit.exception.DiscodeitAuthenticationEntryPoint;
 import com.sprint.mission.discodeit.filter.LoginFilter;
 import com.sprint.mission.discodeit.filter.LogoutFilter;
-import com.sprint.mission.discodeit.redis.RedisTokenRepository;
+import com.sprint.mission.discodeit.redis.RedisRememberMeTokenRepository;
 import com.sprint.mission.discodeit.repository.UserRepository;
 import com.sprint.mission.discodeit.service.status.UserSessionService;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +50,7 @@ public class SecurityConfig {
   private final UserDetailsService userDetailsService;
   private final ObjectMapper objectMapper;
   private final UserRepository userRepository;
-  private final RedisTokenRepository redisTokenRepository;
+  private final RedisRememberMeTokenRepository redisRememberMeTokenRepository;
   private final FindByIndexNameSessionRepository<? extends Session> findByIndexNameSessionRepository;
   private final UserSessionService userSessionService;
   private final ApplicationEventPublisher eventPublisher;
@@ -63,10 +63,14 @@ public class SecurityConfig {
     handler.setCsrfRequestAttributeName("_csrf");
 
     return http
-        .addFilterBefore(loginFilter(securityContextRepository(), rememberMeServices()),
-            UsernamePasswordAuthenticationFilter.class)
-        .addFilterBefore(new LogoutFilter(redisTokenRepository, rememberMeServices()),
-            BasicAuthenticationFilter.class)
+        .addFilterBefore(
+            loginFilter(securityContextRepository(), rememberMeServices()),
+            UsernamePasswordAuthenticationFilter.class
+        )
+        .addFilterBefore(
+            new LogoutFilter(redisRememberMeTokenRepository, rememberMeServices()),
+            BasicAuthenticationFilter.class
+        )
         .sessionManagement(session ->
             session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
@@ -75,12 +79,13 @@ public class SecurityConfig {
                 .maxSessionsPreventsLogin(false)
                 .sessionRegistry(sessionRegistry(findByIndexNameSessionRepository))
         )
-        .rememberMe(rememberMe -> rememberMe
-            .rememberMeCookieName("remember-me")
-            .rememberMeParameter("remember-me")
-            .tokenRepository(redisTokenRepository)
-            .userDetailsService(userDetailsService)
-            .tokenValiditySeconds(60 * 60 * 24 * 21)
+        .rememberMe(rememberMe ->
+            rememberMe
+                .rememberMeCookieName("remember-me")
+                .rememberMeParameter("remember-me")
+                .tokenRepository(redisRememberMeTokenRepository)
+                .userDetailsService(userDetailsService)
+                .tokenValiditySeconds(60 * 60 * 24 * 21)
         )
         .csrf(csrf ->
             csrf
@@ -110,13 +115,15 @@ public class SecurityConfig {
         )
         .httpBasic(basic ->
             basic
-                .authenticationEntryPoint(new DiscodeitAuthenticationEntryPoint(objectMapper)))
+                .authenticationEntryPoint(new DiscodeitAuthenticationEntryPoint(objectMapper))
+        )
         .authenticationProvider(daoAuthenticationProvider())
         .logout(logout -> logout.disable())
         .formLogin(form -> form.disable())
         .exceptionHandling(exception ->
             exception
-                .accessDeniedHandler(new DiscodeitAccessDeniedHandler(objectMapper)))
+                .accessDeniedHandler(new DiscodeitAccessDeniedHandler(objectMapper))
+        )
         .build();
   }
 
@@ -145,13 +152,13 @@ public class SecurityConfig {
 
     return loginFilter;
   }
-  
+
   @Bean
   PersistentTokenBasedRememberMeServices rememberMeServices() {
 
     PersistentTokenBasedRememberMeServices rememberMe = new PersistentTokenBasedRememberMeServices(
         "remember-me", userDetailsService,
-        redisTokenRepository);
+        redisRememberMeTokenRepository);
 
     rememberMe.setParameter("remember-me");
     rememberMe.setTokenValiditySeconds(60 * 60 * 24 * 21);

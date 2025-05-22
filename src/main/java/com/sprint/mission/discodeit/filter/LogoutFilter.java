@@ -1,6 +1,6 @@
 package com.sprint.mission.discodeit.filter;
 
-import com.sprint.mission.discodeit.redis.RedisTokenRepository;
+import com.sprint.mission.discodeit.redis.RedisRememberMeTokenRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ public class LogoutFilter extends OncePerRequestFilter {
   private static final String LOGOUT_URI = "/api/auth/logout";
   private static final String LOGOUT_HTTP_METHOD = "POST";
 
-  private final RedisTokenRepository redisTokenRepository;
+  private final RedisRememberMeTokenRepository redisRememberMeTokenRepository;
   private final PersistentTokenBasedRememberMeServices rememberMeServices;
 
   @Override
@@ -30,7 +30,7 @@ public class LogoutFilter extends OncePerRequestFilter {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
     if (authentication != null && authentication.getPrincipal() instanceof UserDetails principal) {
 
-      redisTokenRepository.removeUserTokens(principal.getUsername());
+      redisRememberMeTokenRepository.removeUserTokens(principal.getUsername());
       rememberMeServices.logout(request, response, authentication);
 
       HttpSession session = request.getSession(false);
