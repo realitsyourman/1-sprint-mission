@@ -1,8 +1,5 @@
 package com.sprint.mission.discodeit.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
-import com.sprint.mission.discodeit.redis.RedisRememberMeTokenMixin;
 import com.sprint.mission.discodeit.redis.RedisRememberMeTokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,9 +10,8 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisKeyValueAdapter.EnableKeyspaceEvents;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.web.authentication.rememberme.PersistentRememberMeToken;
 import org.springframework.session.data.redis.config.annotation.web.http.EnableRedisIndexedHttpSession;
 
@@ -39,15 +35,13 @@ public class RedisConfig {
 
   @Bean
   RedisTemplate<String, PersistentRememberMeToken> redisTemplate(
-      LettuceConnectionFactory lettuceConnectionFactory,
-      Jackson2JsonRedisSerializer<PersistentRememberMeToken> redisSerializer
-  ) {
+      LettuceConnectionFactory lettuceConnectionFactory) {
 
     RedisTemplate<String, PersistentRememberMeToken> redisTemplate = new RedisTemplate<>();
 
     redisTemplate.setConnectionFactory(lettuceConnectionFactory);
     redisTemplate.setKeySerializer(new StringRedisSerializer());
-    redisTemplate.setValueSerializer(redisSerializer);
+    redisTemplate.setValueSerializer(new GenericJackson2JsonRedisSerializer());
     redisTemplate.afterPropertiesSet();
 
     return redisTemplate;
@@ -55,24 +49,11 @@ public class RedisConfig {
 
   @Bean
   RedisRememberMeTokenRepository redisTokenRepository(
-      RedisTemplate<String, PersistentRememberMeToken> redisTemplate,
+      RedisTemplate<String, String> redisTemplate,
       RedisTemplate<String, String> redisUserTemplate
   ) {
 
     return new RedisRememberMeTokenRepository(redisTemplate, redisUserTemplate);
   }
 
-  @Bean
-  Jackson2JsonRedisSerializer<PersistentRememberMeToken> rememberMeSerializer() {
-    ObjectMapper redisMapper = new ObjectMapper()
-        .activateDefaultTyping(
-            BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class).build(),
-            ObjectMapper.DefaultTyping.NON_FINAL)
-        .registerModules(SecurityJackson2Modules.getModules(getClass().getClassLoader()))
-        .addMixIn(PersistentRememberMeToken.class, RedisRememberMeTokenMixin.class);
-
-    return new Jackson2JsonRedisSerializer<>(redisMapper,
-        PersistentRememberMeToken.class);
-  }
 }
