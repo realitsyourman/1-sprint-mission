@@ -21,8 +21,6 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer.SessionFixationConfigurer;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,7 +35,6 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
-import org.springframework.session.security.SpringSessionBackedSessionRegistry;
 
 @Slf4j
 @Configuration
@@ -70,14 +67,6 @@ public class SecurityConfig {
         .addFilterBefore(
             new LogoutFilter(redisRememberMeTokenRepository, rememberMeServices()),
             BasicAuthenticationFilter.class
-        )
-        .sessionManagement(session ->
-            session
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                .sessionFixation(SessionFixationConfigurer::changeSessionId)
-                .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)
-                .sessionRegistry(sessionRegistry(findByIndexNameSessionRepository))
         )
         .rememberMe(rememberMe ->
             rememberMe
@@ -125,13 +114,6 @@ public class SecurityConfig {
                 .accessDeniedHandler(new DiscodeitAccessDeniedHandler(objectMapper))
         )
         .build();
-  }
-
-  @Bean
-  SpringSessionBackedSessionRegistry<? extends Session> sessionRegistry(
-      FindByIndexNameSessionRepository<? extends Session> sessionRepository) {
-
-    return new SpringSessionBackedSessionRegistry<>(sessionRepository);
   }
 
   @Bean
